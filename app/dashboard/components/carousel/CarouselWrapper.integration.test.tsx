@@ -460,6 +460,8 @@ describe('대시보드 초대장', () => {
     expect(groupSwitch('가족용')).toBeChecked();
     expect(groupSwitch('기본 초대장')).not.toBeChecked();
     expect(groupSwitch('직장용')).not.toBeChecked();
+    expect(groupSwitch('가족용').nextElementSibling).toHaveTextContent(/^공개$/);
+    expect(groupSwitch('직장용').nextElementSibling).toHaveTextContent(/^비공개$/);
     await user.click(master);
     for (const group of groups) {
       expect(groupSwitch(group.name)).not.toBeChecked();
@@ -468,7 +470,8 @@ describe('대시보드 초대장', () => {
     await user.click(master);
     expect(groupSwitch('가족용')).toBeChecked();
     expect(groupSwitch('직장용')).not.toBeChecked();
-    await user.click(groupSwitch('직장용'));
+    await user.click(screen.getByText('직장용', { exact: true }));
+    expect(groupSwitch('직장용')).toBeChecked();
     await user.click(screen.getByRole('button', { name: '취소' }));
     expect(writes).toEqual([]);
     expect(trigger).toHaveFocus();
@@ -476,7 +479,9 @@ describe('대시보드 초대장', () => {
     await screen.findByRole('switch', { name: '가족용 공개' });
     expect(groupSwitch('직장용')).not.toBeChecked();
     await user.click(groupSwitch('직장용'));
-    await user.click(groupSwitch('기본 초대장'));
+    groupSwitch('기본 초대장').focus();
+    await user.keyboard(' ');
+    expect(groupSwitch('기본 초대장')).toBeChecked();
     await user.click(screen.getByRole('button', { name: '적용' }));
     expect(writes).toEqual([
       {
