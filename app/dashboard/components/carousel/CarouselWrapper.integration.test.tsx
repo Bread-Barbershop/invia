@@ -676,7 +676,10 @@ describe('대시보드 초대장', () => {
         const user = userEvent.setup();
         const copy = jest.spyOn(navigator.clipboard, 'writeText');
         mockFetch.mockResolvedValue(
-          shareAudienceResponse([baseGroup, familyGroup, workGroup])
+          shareAudienceResponse([baseGroup, familyGroup, workGroup], {
+            '': 'private',
+            work: 'private',
+          })
         );
         showCard();
         const trigger = await screen.findByRole('button', {
@@ -687,7 +690,12 @@ describe('대시보드 초대장', () => {
           name: '누구에게 보낼 초대장인가요?',
         });
         expect(picker).toHaveAccessibleDescription('민서·지훈 결혼식');
-        expect(screen.getByRole('button', { name: '가족용' })).toBeVisible();
+        expect(
+          screen.getByRole('button', { name: '가족용' })
+        ).toHaveAccessibleDescription('공개');
+        expect(
+          screen.getByRole('button', { name: '직장용' })
+        ).toHaveAccessibleDescription('비공개');
         fireEvent(picker, new Event('cancel', { cancelable: true }));
         expect(trigger).toHaveFocus();
         expect(copy).not.toHaveBeenCalled();
@@ -705,6 +713,9 @@ describe('대시보드 초대장', () => {
           await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
         ).toBeVisible();
         expect(toDataURL).toHaveBeenCalledWith(url, expect.any(Object));
+        expect(
+          screen.getByRole('link', { name: 'QR 저장하기' })
+        ).toHaveAttribute('download');
         await user.click(screen.getByRole('button', { name: '닫기' }));
         expect(trigger).toHaveFocus();
       }
@@ -800,7 +811,7 @@ describe('대시보드 초대장', () => {
       await user.keyboard('{Enter}');
       await user.click(screen.getByRole('button', { name: '직장용' }));
       expect(mockFetch).toHaveBeenLastCalledWith(
-        '/api/drive/shareUrl?invitationFolderId=work-folder',
+        '/api/drive/shareUrl?invitationFolderId=work-folder&intent=share',
         expect.anything()
       );
       const link = {
@@ -835,7 +846,7 @@ describe('대시보드 초대장', () => {
       await user.click(await readyKakaoButton());
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(mockFetch).toHaveBeenLastCalledWith(
-        '/api/drive/shareUrl?invitationFolderId=private-folder',
+        '/api/drive/shareUrl?invitationFolderId=private-folder&intent=share',
         expect.anything()
       );
       expect(sendDefault).toHaveBeenCalledWith(
@@ -875,10 +886,66 @@ describe('대시보드 초대장', () => {
       await user.click(screen.getByRole('button', { name: '기본 초대장' }));
       expect(sendDefault).toHaveBeenCalledTimes(1);
       expect(mockFetch).toHaveBeenLastCalledWith(
-        '/api/drive/shareUrl?invitationFolderId=private-folder',
+        '/api/drive/shareUrl?invitationFolderId=private-folder&intent=share',
         expect.anything()
       );
     });
+
+    it.each(['private', 'pending', 'changed'] as const)(
+      '선택 그룹이 %s이면 카카오 대신 공개 범위를 확인하고 직접 설정할 수 있다',
+      async state => {
+        const user = userEvent.setup();
+        mockFetch.mockResolvedValueOnce(
+          shareAudienceResponse([baseGroup, familyGroup, workGroup], {
+            work: state === 'changed' ? 'public' : state,
+          })
+        );
+        if (state === 'changed')
+          mockFetch.mockResolvedValueOnce({
+            ok: false,
+            status: 409,
+            json: async () => ({ ok: false, visibility: 'private' }),
+          });
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            groups: [familyGroup, workGroup],
+            visibility: {
+              published: true,
+              publicSlugs: ['family'],
+              revision: 'r1',
+              pending: false,
+            },
+          }),
+        });
+        showKakaoCard(true);
+        await user.click(await readyKakaoButton());
+        await user.click(screen.getByRole('button', { name: '직장용' }));
+        expect(
+          await screen.findByRole('dialog', {
+            name:
+              state === 'pending'
+                ? '공개 범위를 확인해 주세요'
+                : '지금 보내면 하객이 열 수 없어요',
+          })
+        ).toHaveAccessibleDescription(expect.stringContaining('직장용'));
+        await user.click(
+          screen.getByRole('button', { name: '공개 범위 설정' })
+        );
+        expect(
+          await screen.findByRole('switch', { name: '가족용 공개' })
+        ).toBeChecked();
+        expect(
+          screen.getByRole('switch', { name: '직장용 공개' })
+        ).not.toBeChecked();
+        expect(
+          mockFetch.mock.calls.every(
+            ([, init]) => !init?.method || init.method === 'GET'
+          )
+        ).toBe(true);
+        expect(sendDefault).not.toHaveBeenCalled();
+      }
+    );
 
     it('카카오톡 선택을 취소하고 링크 공유로 바꾸면 같은 그룹의 주소만 복사한다', async () => {
       const user = userEvent.setup();
