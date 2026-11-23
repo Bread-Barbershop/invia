@@ -1,0 +1,55 @@
+import { toCanvas } from 'qrcode';
+
+async function renderCanvas(url: string) {
+  const canvas = await toCanvas(url, {
+    width: 1024,
+    margin: 4,
+    errorCorrectionLevel: 'H',
+  });
+  const favicon = new Image();
+  favicon.src = '/favicon.ico';
+  try {
+    await favicon.decode();
+  } catch {
+    // Keep the invitation scannable if the decorative image is unavailable.
+    return canvas;
+  }
+
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('QR 캔버스를 열 수 없어요.');
+  const center = canvas.width / 2;
+  const diameter = canvas.width / 6;
+  const iconSize = diameter * 0.68;
+  context.beginPath();
+  context.arc(center, center, diameter / 2, 0, Math.PI * 2);
+  context.fillStyle = '#fff';
+  context.fill();
+  context.lineWidth = canvas.width / 1024;
+  context.strokeStyle = '#dedbd8';
+  context.stroke();
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(
+    favicon,
+    center - iconSize / 2,
+    center - iconSize / 2,
+    iconSize,
+    iconSize
+  );
+  return canvas;
+}
+
+export async function toDataURL(url: string): Promise<string> {
+  return (await renderCanvas(url)).toDataURL('image/png');
+}
+
+export async function toPngBytes(url: string): Promise<Uint8Array> {
+  const canvas = await renderCanvas(url);
+  const png = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      blob =>
+        blob ? resolve(blob) : reject(new Error('QR PNG를 만들 수 없어요.')),
+      'image/png'
+    );
+  });
+  return new Uint8Array(await png.arrayBuffer());
+}

@@ -7,17 +7,14 @@ import {
   DeleteInvitationResponse,
   InvitationVisibilityResult,
   InviteListItem,
-  KakaoShareData,
   LoadInvitationResponse,
 } from '@/app/dashboard/types';
 import type { DashboardPendingInvitation } from '@/shared/constants/dashboardPendingInvitation';
-import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToast } from '@/shared/hooks/useToast';
 import {
-  resolveShareDescription,
-  resolveShareImageUrl,
-  resolveShareTitle,
-} from '@/shared/utils/shareUrlDefaults';
+  loadShareData,
+  shareInvitationWithKakao,
+} from '@/shared/utils/kakaoInvitationShare';
 
 import {
   createInitialInvitationResults,
@@ -45,82 +42,8 @@ type CloneInvitationResponse =
 type UseDashboardInvitationsOptions = {
   loadOnMount?: boolean;
 };
-type ShareUrlResponse = {
-  ok: boolean;
-  data?: KakaoShareData;
-  error?: string;
-};
 
 const CLONE_ERROR_MESSAGE = '초대장 복사에 실패했습니다.';
-
-function shareInvitationWithKakao(shareData: KakaoShareData) {
-  if (typeof window === 'undefined' || !window.Kakao) {
-    throw new Error('카카오 SDK 스크립트가 아직 로드되지 않았습니다.');
-  }
-
-  const kakaoJsKey = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
-  if (!kakaoJsKey) {
-    throw new Error('NEXT_PUBLIC_KAKAO_JS_KEY가 설정되지 않았습니다.');
-  }
-
-  const safeLinkUrl = shareData.invitationUrl || window.location.href;
-  if (!safeLinkUrl) {
-    throw new Error('공유할 초대장 링크가 없습니다.');
-  }
-
-  if (!window.Kakao.isInitialized()) {
-    window.Kakao.init(kakaoJsKey);
-  }
-
-  const messageButtons = [
-    {
-      title: '보러가기',
-      link: {
-        mobileWebUrl: safeLinkUrl,
-        webUrl: safeLinkUrl,
-      },
-    },
-  ];
-
-  if (shareData.showLocationButton && shareData.locationInfo) {
-    const kakaoMapUrl = `https://map.kakao.com/link/map/${encodeURIComponent(
-      shareData.locationInfo.placeName
-    )},${shareData.locationInfo.lat},${shareData.locationInfo.lng}`;
-
-    const bypassUrl = `${window.location.origin}/api/map-redirect?url=${encodeURIComponent(
-      kakaoMapUrl
-    )}`;
-
-    messageButtons.push({
-      title: '위치보기',
-      link: {
-        mobileWebUrl: bypassUrl,
-        webUrl: bypassUrl,
-      },
-    });
-  }
-
-  const imageUrl = resolveShareImageUrl(
-    shareData.imageFileId,
-    window.location.origin
-  );
-
-  window.Kakao.Share.sendDefault({
-    objectType: 'feed',
-    content: {
-      title: resolveShareTitle(shareData.title),
-      description: resolveShareDescription(shareData.description),
-      imageUrl,
-      imageWidth: 800,
-      imageHeight: 600,
-      link: {
-        mobileWebUrl: safeLinkUrl,
-        webUrl: safeLinkUrl,
-      },
-    },
-    buttons: messageButtons,
-  });
-}
 
 function shouldRedirectToHome(status: number, message: string | null) {
   return (
@@ -143,12 +66,7 @@ function useDashboardInvitations(
   options: UseDashboardInvitationsOptions = {}
 ) {
   const router = useRouter();
-  const { confirm } = useConfirm();
-  const {
-    success: successToast,
-    error: errorToast,
-    info: infoToast,
-  } = useToast();
+  const { success: successToast, error: errorToast } = useToast();
   const loadOnMount = options.loadOnMount ?? initialInvites.length === 0;
   const normalizedInitialInvites = normalizeInvites(initialInvites);
 
@@ -209,7 +127,9 @@ function useDashboardInvitations(
       const versions = listVersionsRef.current;
       if (version < versions.applied) return false;
       versions.applied = version;
-      versions.folderIds = new Set(loadedInvites.map(invite => invite.folderId));
+      versions.folderIds = new Set(
+        loadedInvites.map(invite => invite.folderId)
+      );
 
       const clonedFolderIds = clonedFolderIdsRef.current;
       for (const folderId of clonedFolderIds) {
@@ -726,15 +646,6 @@ function useDashboardInvitations(
     async (folderId: string) => {
       if (!folderId) return;
 
-      const isConfirm = await confirm({
-        message: '초대장을 삭제하시겠습니까?',
-        variant: 'white',
-        xPosition: 'center',
-        yPosition: 'center',
-      });
-
-      if (!isConfirm) return;
-
       let isDeleted = false;
       setDeleteErrors(prev => ({ ...prev, [folderId]: null }));
       setDeleteBusy(prev => ({ ...prev, [folderId]: true }));
@@ -781,7 +692,13 @@ function useDashboardInvitations(
         });
       }
     },
-    [clearInvitationTransientState]
+    [
+      clearInvitationTransientState,
+      errorToast,
+      setDeleteBusy,
+      setDeleteErrors,
+      successToast,
+    ]
   );
 
   const handleUpdate = useCallback(
@@ -796,61 +713,23 @@ function useDashboardInvitations(
     [router]
   );
 
-  const handleCopyGuestUrl = useCallback(
-    async (folderId: string) => {
-      const finalUrl = resolveGuestUrl(invitationResults[folderId] ?? null);
-      if (!finalUrl) return;
-
-      try {
-        const invite = invites.find(item => item.folderId === folderId);
-        if (invite && !invite.published) {
-          infoToast('현재 초대장은 비공개 상태입니다.');
-        }
-        await navigator.clipboard.writeText(finalUrl);
-        successToast('복사가 완료되었어요!');
-      } catch (err) {
-        console.error(err);
-        errorToast('링크 복사에 실패했습니다.');
-      }
-    },
-    [invitationResults, invites, successToast, errorToast, infoToast]
-  );
-
-  const loadShareData = useCallback(async (folderId: string) => {
-    const res = await fetch(
-      `/api/drive/shareUrl?invitationFolderId=${encodeURIComponent(folderId)}`,
-      {
-        method: 'GET',
-        cache: 'no-store',
-      }
-    );
-
-    const payload = (await res
-      .json()
-      .catch(() => null)) as ShareUrlResponse | null;
-
-    if (!res.ok || payload?.ok === false || !payload?.data) {
-      throw new Error(payload?.error ?? '공유 데이터를 불러오지 못했습니다.');
-    }
-
-    return payload.data;
-  }, []);
-
   const handleShare = useCallback(
-    async (folderId: string) => {
+    async (
+      folderId: string,
+      audienceFolderId: string,
+      signal: AbortSignal
+    ): Promise<'private' | 'pending' | void> => {
       if (!folderId) return;
       if (shareBusy[folderId]) return;
 
-      const invite = invites.find(item => item.folderId === folderId);
-      if (invite && !invite.published) {
-        infoToast('현재 초대장은 비공개 상태입니다.');
-      }
-
       setShareBusy(prev => ({ ...prev, [folderId]: true }));
       try {
-        const shareData = await loadShareData(folderId);
-        shareInvitationWithKakao(shareData);
+        const shareData = await loadShareData(audienceFolderId, signal);
+        if (signal.aborted) return;
+        if (typeof shareData === 'string') return shareData;
+        await shareInvitationWithKakao(shareData);
       } catch (err) {
+        if (signal.aborted) return;
         console.error(err);
         errorToast(
           err instanceof Error
@@ -861,7 +740,7 @@ function useDashboardInvitations(
         setShareBusy(prev => ({ ...prev, [folderId]: false }));
       }
     },
-    [invites, loadShareData, shareBusy, errorToast, infoToast]
+    [shareBusy, setShareBusy, errorToast]
   );
 
   const getGuestUrl = useCallback(
@@ -920,7 +799,6 @@ function useDashboardInvitations(
     handleDelete,
     handleToggleVisibility,
     handleUpdate,
-    handleCopyGuestUrl,
     handleShare,
     loadShareData,
     getGuestUrl,

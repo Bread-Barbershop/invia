@@ -7,6 +7,7 @@ import {
   type AudienceGroup,
   type AudienceGroupList,
 } from '@/features/invitation/audiences/model';
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 
 import {
   claimAudienceLink,
@@ -14,6 +15,7 @@ import {
   refreshAudienceLink,
   releaseAudienceLink,
   resolveAudienceLink,
+  readAudienceVisibility,
 } from './audienceLinkStore';
 import { captureDriveError } from './captureDriveError';
 import {
@@ -76,7 +78,7 @@ async function resolveRootGuestUrl(
   return fallback;
 }
 
-async function readRootInvitationFiles(rootFolderId: string) {
+export async function readRootInvitationFiles(rootFolderId: string) {
   const files = await listCloneFiles(rootFolderId);
   const metaFile = findSavedInvitationMetaFile(files);
   const meta = metaFile ? await loadInvitationMetaByFileId(metaFile.id) : null;
@@ -118,21 +120,72 @@ async function loadRootInvitation(rootFolderId: string, publicOrigin: string) {
   };
 }
 
+export async function getAudienceOptions(
+  rootFolderId: string,
+  view: 'editor-options' | 'preview-options'
+) {
+  const root = await assertInvitationFolderAccess(rootFolderId, {
+    ownedOnly: view === 'editor-options',
+    allowAudience: false,
+  });
+  if (!root.ownedByMe) return [];
+  const files = await listCloneFiles(rootFolderId, [
+    `appProperties has { key='kind' and value='${AUDIENCE_KIND}' }`,
+  ]);
+  return files.flatMap(file => {
+    const audience = readAudienceFolder(file);
+    return file.ownedByMe && audience?.rootFolderId === rootFolderId
+      ? [audience.group]
+      : [];
+  });
+}
+
+// A saved scope applies to every version, including the default (empty slug).
+async function loadGroupVisibility(
+  marker: string | undefined,
+  dataFileId: string | null | undefined,
+  published: boolean
+): Promise<(slug: string) => GroupShareVisibility> {
+  if (!marker) return () => (published ? 'public' : 'private');
+  if (marker === 'pending' || !dataFileId) return () => 'pending';
+  const scope = await readAudienceVisibility(dataFileId);
+  if (!scope || scope.pending) return () => 'pending';
+  return slug =>
+    scope.published && scope.publicSlugs.includes(slug) ? 'public' : 'private';
+}
+
+export async function getDefaultShareVisibility(
+  folderId: string,
+  dataFileId: string | null | undefined,
+  published: boolean
+) {
+  const root = await assertInvitationFolderAccess(folderId, {
+    ownedOnly: true,
+    allowAudience: false,
+  });
+  const visibility = await loadGroupVisibility(
+    root.appProperties?.audience_visibility,
+    dataFileId,
+    published
+  );
+  return visibility('');
+}
+
 export async function getInvitationAudiences(
   folderId: string,
-  publicOrigin: string
+  publicOrigin: string,
+  shareOptions = false
 ): Promise<AudienceGroupList> {
   const selection = await assertInvitationFolderAccess(folderId, {
     ownedOnly: true,
+    allowAudience: !shareOptions,
   });
   const { rootFolderId, rootInvitationUuid: rootUuid } = selection;
   if (!rootUuid)
     throw new InvitationCloneError('초대장 편집 정보를 찾을 수 없습니다.', 404);
 
-  const { files, dataJsonFileId, rootGuestUrl } = await loadRootInvitation(
-    rootFolderId,
-    publicOrigin
-  );
+  const { files, dataJsonFileId, rootGuestUrl, published } =
+    await loadRootInvitation(rootFolderId, publicOrigin);
   const groups: AudienceGroup[] = [
     {
       name: '기본',
@@ -161,7 +214,24 @@ export async function getInvitationAudiences(
     ...audiences.filter((group): group is AudienceGroup => group !== null)
   );
 
-  return { rootGuestUrl, groups, activeSlug: selection.audience?.slug ?? '' };
+  const list = {
+    rootGuestUrl,
+    groups,
+    activeSlug: selection.audience?.slug ?? '',
+  };
+  if (!shareOptions) return list;
+  const visibility = await loadGroupVisibility(
+    selection.appProperties?.audience_visibility,
+    dataJsonFileId,
+    published
+  );
+  return {
+    ...list,
+    groups: groups.map(group => ({
+      ...group,
+      visibility: visibility(group.slug),
+    })),
+  };
 }
 
 async function restoreAudienceLink(
@@ -348,17 +418,24 @@ export async function getOwnedAudienceLink(
   if (!audience || !folder.ownedByMe) {
     throw new InvitationCloneError('하객 그룹을 찾을 수 없습니다.', 404);
   }
-  await assertInvitationFolderAccess(audience.rootFolderId, {
+  const rootFolder = await assertInvitationFolderAccess(audience.rootFolderId, {
     ownedOnly: true,
     allowAudience: false,
   });
   const root = await loadRootInvitation(audience.rootFolderId, publicOrigin);
+  const visibilityFor = await loadGroupVisibility(
+    rootFolder.appProperties?.audience_visibility,
+    root.dataJsonFileId,
+    root.published
+  );
+  const visibility = visibilityFor(audience.group.slug);
   return {
     ...audience,
     requestId: folder.appProperties?.clone_request,
     rootDataJsonFileId: root.dataJsonFileId,
     guestUrl: buildAudienceGuestUrl(root.rootGuestUrl, audience.group.slug),
-    published: root.published,
+    visibility,
+    published: visibility === 'public',
   };
 }
 

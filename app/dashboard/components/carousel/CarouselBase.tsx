@@ -3,12 +3,19 @@
 import useEmblaCarousel from 'embla-carousel-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { InviteListItem } from '@/app/dashboard/types';
+import type {
+  InvitationPreviewTarget,
+  InviteListItem,
+} from '@/app/dashboard/types';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 
 import { dashboardCarouselLayout } from './carouselLayout';
 import CarouselTrack from './CarouselTrack';
-import { CarouselCardItem } from './carouselTypes';
+import {
+  CarouselCardItem,
+  type ShareAudienceLink,
+  type ShareAudienceWithKakao,
+} from './carouselTypes';
 import CarouselController from './controller/CarouselController';
 
 type CarouselBaseProps = {
@@ -19,19 +26,17 @@ type CarouselBaseProps = {
   showCenterActions?: boolean;
   stageHeight?: string;
   selectedLift?: string;
-  preloadItemCount?: number;
   focusCardId?: string | null;
-  onCardActivate?: (id: string) => void;
   onClone?: (invite: InviteListItem) => void;
   onDelete?: (folderId: string) => void | Promise<void>;
-  onPreview?: (folderId: string) => void;
+  onPreview?: (target: InvitationPreviewTarget) => void;
   onUpdate?: (folderId: string, uuid?: string) => void;
   onToggleVisibility?: (
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: (folderId: string) => void;
-  onShare?: (folderId: string) => Promise<void>;
+  onOpenLinkShare?: ShareAudienceLink;
+  onShare?: ShareAudienceWithKakao;
   getGuestUrl?: (folderId: string) => string | null;
   isDeleting?: (folderId: string) => boolean;
   isSharing?: (folderId: string) => boolean;
@@ -47,15 +52,13 @@ function CarouselBase({
   showCenterActions = false,
   stageHeight = dashboardCarouselLayout.stageHeight,
   selectedLift,
-  preloadItemCount = 0,
   focusCardId,
-  onCardActivate,
   onClone,
   onDelete,
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   getGuestUrl,
   isDeleting,
@@ -129,9 +132,8 @@ function CarouselBase({
   const handleSelect = useCallback(
     (index: number) => {
       emblaApi?.scrollTo(index);
-      if (items[index]) onCardActivate?.(items[index].id);
     },
-    [emblaApi, items, onCardActivate]
+    [emblaApi]
   );
 
   const handleMove = useCallback(
@@ -164,15 +166,13 @@ function CarouselBase({
         showSideActions={showSideActions}
         showCenterActions={showCenterActions}
         selectedLift={selectedLift}
-        preloadItemCount={preloadItemCount}
-        showPreviewLabel={Boolean(onCardActivate)}
         onSelect={handleSelect}
         onClone={onClone}
         onDelete={onDelete}
         onPreview={onPreview}
         onUpdate={onUpdate}
         onToggleVisibility={onToggleVisibility}
-        onCopyUrl={onCopyUrl}
+        onOpenLinkShare={onOpenLinkShare}
         onShare={onShare}
         getGuestUrl={getGuestUrl}
         isDeleting={isDeleting}

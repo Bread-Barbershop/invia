@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import mealMenuStyles from '@/components/organisms/mealMenu/MealMenuPreview.module.css';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import Edit from '@/widgets/editor/leftPanel/components/Edit';
 
 import Preview from './Preview';
+import styles from './Preview.module.css';
 
 jest.mock('@/widgets/mainPoster/components/MainPosterPreview', () => ({
   MainPosterPreview: () => null,
@@ -123,4 +125,88 @@ describe('미리보기 블록 클릭 선택', () => {
       isEdit: false,
     });
   });
+
+  it.each([
+    ['라운드 카드', { sectionStyle: 'rounded' }, '[data-section-style="rounded"]'],
+    ['종이 카드', { sectionStyle: 'paper' }, '[data-section-style="paper"]'],
+    [
+      '테두리 카드',
+      { sectionStyle: 'outlined' },
+      '[data-section-style="outlined"]',
+    ],
+    [
+      '기존 카드',
+      { collectionStyle: 'showcase-2' },
+      '[data-design="showcase-2"]',
+    ],
+    ['카드 없는 블록', { sectionStyle: 'plain' }, `.${mealMenuStyles.wrapper}`],
+  ] as const)(
+    '%s의 실제 영역에 선택선을 표시하고 다른 블록을 선택하면 옮긴다',
+    async (_label, appearance, selector) => {
+      const user = userEvent.setup();
+      const editor = useEditorStore.getState();
+      editor.addBlock('etc', 'mealMenu', 'menu', appearance);
+      editor.addBlock('etc', 'spacer', 'spacer');
+      const { container } = render(<Preview />);
+      const surface = container.querySelector(
+        `[data-preview-block-id="menu"] ${selector}`
+      );
+      const spacer = container.querySelector('[data-preview-block-id="spacer"]');
+      if (!(surface instanceof HTMLElement) || !(spacer instanceof HTMLElement))
+        throw new Error('선택할 미리보기 블록이 없습니다.');
+
+      expect(container.getElementsByClassName(styles.selectedBlock)).toHaveLength(
+        0
+      );
+      await user.click(surface);
+      expect(surface.parentElement).toHaveClass(styles.selectedBlock);
+      expect(surface).not.toHaveClass('ring-primary');
+      expect(container.getElementsByClassName(styles.selectedBlock)).toHaveLength(
+        1
+      );
+
+      await user.click(spacer);
+      expect(surface.parentElement).not.toHaveClass(styles.selectedBlock);
+      expect(spacer.getElementsByClassName(styles.selectedBlock)).toHaveLength(1);
+      act(() => editor.selectedBlock(null));
+      expect(container.getElementsByClassName(styles.selectedBlock)).toHaveLength(
+        0
+      );
+    }
+  );
+
+  it.each(['spacer', 'divider'] as const)(
+    '미리보기에서 %s를 선택해 개별 카드 스타일을 바로 적용한다',
+    async component => {
+      const user = userEvent.setup();
+      const editor = useEditorStore.getState();
+      editor.setSectionStyle('paper');
+      editor.addBlock('wedding', component, 'layout');
+      const { container } = render(
+        <>
+          <Edit />
+          <Preview />
+        </>
+      );
+
+      const preview = container.querySelector(
+        '[data-preview-block-id="layout"]'
+      );
+      if (!(preview instanceof HTMLElement)) {
+        throw new Error('레이아웃 블록 미리보기가 없습니다.');
+      }
+      expect(preview.querySelector('[data-section-style]')).toBeNull();
+
+      await user.click(preview);
+      await user.click(
+        screen.getByRole('combobox', { name: '블록 카드 스타일' })
+      );
+      await user.click(screen.getByRole('option', { name: '테두리 카드' }));
+
+      expect(preview.querySelector('[data-section-style]')).toHaveAttribute(
+        'data-section-style',
+        'outlined'
+      );
+    }
+  );
 });

@@ -1,0 +1,17 @@
+/* Exclude ScrollFadeIn's noscript element when finding the block's surface.
+   A block with multiple roots uses the same container as its rendered content. */
+.selectedBlock > :nth-child(1 of :not(noscript)):nth-last-child(1 of :not(noscript)),
+.selectedBlock:has(> :nth-child(2 of :not(noscript))) {
+  --block-selection-color: #89b8f8;
+  outline: 1px solid var(--block-selection-color);
+  outline-offset: -1px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: blockSelectionBreathe 3s ease-in-out infinite;
+  }
+}
+
+@keyframes blockSelectionBreathe {
+  0%, 100% { outline-color: transparent; }
+  50% { outline-color: var(--block-selection-color); }
+}

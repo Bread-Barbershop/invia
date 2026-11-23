@@ -6,15 +6,19 @@ import { useDashboardInvitationPreview } from '@/app/dashboard/hooks/useDashboar
 import useDashboardInvitations from '@/app/dashboard/hooks/useDashboardInvitations';
 import { InviteListItem } from '@/app/dashboard/types';
 import { getInvitationShowcaseItem } from '@/app/dashboard/utils/getInvitationShowcaseItem';
+import Confirm from '@/components/molecules/confirm/Confirm';
 import { LinkShareModal } from '@/components/molecules/link-share/LinkShareModal';
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 
 import DashboardInvitationPreviewModal from '../preview/DashboardInvitationPreviewModal';
 
+import AudienceVisibilityDialog from './AudienceVisibilityDialog';
 import CarouselBase from './CarouselBase';
 import { dashboardCarouselLayout } from './carouselLayout';
 import { CarouselCardItem } from './carouselTypes';
 import CopyInvitationDialog from './CopyInvitationDialog';
 import DashboardCarouselSkeleton from './DashboardCarouselSkeleton';
+import DeleteInvitationDialog from './DeleteInvitationDialog';
 import EmptyInvitationCard from './EmptyInvitationCard';
 
 type CarouselWrapperProps = {
@@ -124,7 +128,7 @@ function CarouselWrapper({
     handleDelete,
     handleUpdate,
     handleToggleVisibility,
-    handleCopyGuestUrl,
+    loadInvitations,
     handleShare,
     getGuestUrl,
     isDeleting,
@@ -135,8 +139,13 @@ function CarouselWrapper({
   const preview = useDashboardInvitationPreview();
   const [linkShare, setLinkShare] = useState<{
     url: string;
-    notice?: string;
+    recipient: string;
+    downloadName: string;
+    shareFolderId: string;
+    canShareKakao: boolean;
+    visibility: GroupShareVisibility;
   } | null>(null);
+  const closeLinkShare = useCallback(() => setLinkShare(null), []);
   const orderedInvites = useMemo(() => [...invites].reverse(), [invites]);
   const startIndex = Math.max(orderedInvites.length - 1, 0);
   const [resolvedImages, setResolvedImages] = useState<ResolvedImageMap>({});
@@ -146,6 +155,21 @@ function CarouselWrapper({
   const backgroundPreloadedKeysRef = useRef<Set<string>>(new Set());
 
   const [cloneTarget, setCloneTarget] = useState<InviteListItem | null>(null);
+  const [visibilityTarget, setVisibilityTarget] =
+    useState<InviteListItem | null>(null);
+  const closeVisibility = useCallback(() => setVisibilityTarget(null), []);
+  const [blockedShare, setBlockedShare] = useState<{
+    invite: InviteListItem;
+    name: string;
+    visibility: 'private' | 'pending';
+  } | null>(null);
+  const blockedDialog = useRef<HTMLDivElement>(null);
+  const closeBlockedShare = useCallback(() => setBlockedShare(null), []);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const deleteTarget =
+    deleteTargetId &&
+    invites.find(invite => invite.folderId === deleteTargetId);
+  const closeDeleteDialog = useCallback(() => setDeleteTargetId(null), []);
   const [focusCardId, setFocusCardId] = useState<string | null>(null);
   const closeCloneDialog = useCallback(() => {
     setCloneTarget(null);
@@ -263,6 +287,55 @@ function CarouselWrapper({
 
   return (
     <>
+      {blockedShare && (
+        <Confirm
+          ref={blockedDialog}
+          variant="white"
+          yPosition="center"
+          confirmTone="neutral"
+          initialFocus="cancel"
+          actionButtonClassName="w-auto min-w-[66px] whitespace-nowrap px-3"
+          message={
+            blockedShare.visibility === 'private'
+              ? '지금 보내면 하객이 열 수 없어요'
+              : '공개 범위를 확인해 주세요'
+          }
+          description={
+            blockedShare.visibility === 'private'
+              ? `‘${blockedShare.name}’ 링크는 비공개예요. 공개로 변경한 뒤 카카오톡으로 보낼 수 있어요.`
+              : `‘${blockedShare.name}’ 링크의 공개 설정을 확인한 뒤 보내 주세요.`
+          }
+          confirmText="공개 범위 설정"
+          cancelText="닫기"
+          onCancel={closeBlockedShare}
+          onClose={closeBlockedShare}
+          onConfirm={() => {
+            setVisibilityTarget(blockedShare.invite);
+            closeBlockedShare();
+          }}
+        />
+      )}
+      {visibilityTarget && (
+        <AudienceVisibilityDialog
+          invite={visibilityTarget}
+          onClose={closeVisibility}
+          onSaved={() => {
+            closeVisibility();
+            void loadInvitations();
+          }}
+        />
+      )}
+      {deleteTarget && (
+        <DeleteInvitationDialog
+          key={deleteTarget.folderId}
+          invite={deleteTarget}
+          onClose={closeDeleteDialog}
+          onConfirm={() => {
+            closeDeleteDialog();
+            void handleDelete(deleteTarget.folderId);
+          }}
+        />
+      )}
       {cloneTarget && (
         <CopyInvitationDialog
           key={cloneTarget.folderId}
@@ -285,25 +358,38 @@ function CarouselWrapper({
         showCenterActions
         focusCardId={focusCardId}
         onClone={setCloneTarget}
-        onDelete={handleDelete}
+        onDelete={setDeleteTargetId}
         onPreview={preview.openPreview}
         onUpdate={handleUpdate}
-        onToggleVisibility={handleToggleVisibility}
-        onCopyUrl={folderId => {
+        onToggleVisibility={(folderId, nextVisible) => {
           const invite = invites.find(item => item.folderId === folderId);
-          const url = invite?.guestUrl ?? getGuestUrl(folderId);
-          if (!url) return;
+          if (invite?.hasAudienceGroups) setVisibilityTarget(invite);
+          else void handleToggleVisibility(folderId, nextVisible);
+        }}
+        onOpenLinkShare={(folderId, option) => {
+          const invite = invites.find(item => item.folderId === folderId);
+          if (!invite) return;
 
-          void handleCopyGuestUrl(folderId);
           setLinkShare({
-            url,
-            notice:
-              invite?.published === false
-                ? '비공개 초대장이에요. 공개로 변경하면 링크와 QR로 접속할 수 있어요.'
-                : undefined,
+            url: option.url,
+            recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,
+            downloadName: option.downloadName,
+            shareFolderId: option.folderId,
+            canShareKakao:
+              option.folderId !== folderId || Boolean(invite.hasKakaoShareData),
+            visibility: option.visibility,
           });
         }}
-        onShare={handleShare}
+        onShare={async (folderId, option, signal) => {
+          const invite = invites.find(item => item.folderId === folderId);
+          if (!invite) return;
+          const blocked =
+            option.visibility === 'public'
+              ? await handleShare(folderId, option.folderId, signal)
+              : option.visibility;
+          if (blocked && !signal.aborted)
+            setBlockedShare({ invite, name: option.name, visibility: blocked });
+        }}
         getGuestUrl={getGuestUrl}
         isDeleting={isDeleting}
         isSharing={isSharing}
@@ -313,13 +399,18 @@ function CarouselWrapper({
       {linkShare && (
         <LinkShareModal
           url={linkShare.url}
-          notice={linkShare.notice}
-          onClose={() => setLinkShare(null)}
+          recipient={linkShare.recipient}
+          downloadName={linkShare.downloadName}
+          shareFolderId={linkShare.shareFolderId}
+          canShareKakao={linkShare.canShareKakao}
+          visibility={linkShare.visibility}
+          pendingNotice="공개 설정을 확인해 주세요. 링크와 QR은 미리 저장할 수 있어요."
+          onClose={closeLinkShare}
         />
       )}
       <DashboardInvitationPreviewModal
         errorMessage={preview.errorMessage}
-        folderId={preview.folderId}
+        target={preview.target}
         isOpen={preview.isOpen}
         onClose={preview.closePreview}
         onRetry={preview.openPreview}

@@ -1,3 +1,4 @@
+import { isJsonRecord } from '@/shared/utils/json';
 import { isDriveFileId } from '@/shared/utils/media/driveImageUtils';
 import {
   resolveShareDescription,
@@ -19,9 +20,7 @@ const DRIVE_QUERY_PATHS: Record<string, string[]> = {
 };
 const APP_ASSET_PATHS = ['/api/drive/previewAsset', '/api/drive/guestBgm'];
 
-export function isJsonRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+export { isJsonRecord };
 
 function asWebUrl(value: string) {
   if (!/^(https?:\/\/|\/)/i.test(value)) return null;

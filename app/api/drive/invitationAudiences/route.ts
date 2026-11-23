@@ -9,6 +9,7 @@ import { isJsonRecord } from '@/app/api/drive/_lib/cloneInvitationData';
 import { DriveHttpError } from '@/app/api/drive/_lib/ensureWorkspace';
 import {
   createInvitationAudience,
+  getAudienceOptions,
   getInvitationAudiences,
   getInvitationPublicOrigin,
 } from '@/app/api/drive/_lib/invitationAudiences';
@@ -63,12 +64,24 @@ function handleFailure(error: unknown, operation: string) {
 }
 
 export async function GET(req: Request) {
-  const folderId = new URL(req.url).searchParams.get('folderId');
+  const params = new URL(req.url).searchParams;
+  const folderId = params.get('folderId');
   if (!isValidId(folderId)) return failure('초대장 정보를 확인해 주세요.', 400);
 
   try {
+    const view = params.get('view');
+    if (view === 'editor-options' || view === 'preview-options') {
+      return NextResponse.json(
+        { audiences: await getAudienceOptions(folderId, view) },
+        { headers: HEADERS }
+      );
+    }
     return NextResponse.json(
-      await getInvitationAudiences(folderId, getInvitationPublicOrigin(req)),
+      await getInvitationAudiences(
+        folderId,
+        getInvitationPublicOrigin(req),
+        view === 'share-options'
+      ),
       { headers: HEADERS }
     );
   } catch (error) {

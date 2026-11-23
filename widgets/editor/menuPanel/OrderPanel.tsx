@@ -10,7 +10,7 @@ import UploadButton from '../preview/components/UploadButton';
 import { useInvitationUpload } from '../preview/hooks/useInvitationUpload';
 
 function MenuPanel({ audienceName }: { audienceName?: string }) {
-  const upload = useInvitationUpload();
+  const upload = useInvitationUpload(audienceName);
 
   return (
     <div className="w-28 flex flex-col gap-4">

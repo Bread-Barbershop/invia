@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import GuestRenderer from '@/app/guest/[id]/components/GuestRenderer';
 import { normalizeGuestBlock } from '@/app/guest/[id]/validation/normalizeGuestBlock';
@@ -7,7 +8,7 @@ import { MealMenuPreview } from '@/components/organisms/mealMenu/MealMenuPreview
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import type { EditorBlock } from '@/shared/types/block';
 
-import ComponentsPopup from './ComponentsPopup';
+import AddPageButton from './AddPageButton';
 
 jest.mock('next/navigation', () => ({ usePathname: () => '/i/example' }));
 jest.mock('@/widgets/editor/preview/hooks/useInvitationTemplate', () => ({
@@ -49,8 +50,9 @@ describe('식사 메뉴 블록', () => {
   });
 
   it('기타의 식사 메뉴를 누르면 디자인 여덟 가지를 보고 원하는 디자인의 블록을 추가할 수 있다', () => {
-    const onClose = jest.fn();
-    render(<ComponentsPopup onPopClose={onClose} />);
+    render(<AddPageButton />);
+    const addPage = screen.getByRole('button', { name: '+페이지 추가' });
+    fireEvent.click(addPage);
     fireEvent.change(screen.getByPlaceholderText('블록 검색'), {
       target: { value: '셰프' },
     });
@@ -82,7 +84,7 @@ describe('식사 메뉴 블록', () => {
       component: 'mealMenu',
       props: { menuStyle: 'artDeco' },
     });
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(addPage).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('요리와 코스를 옮긴 뒤 디자인을 바꿔도 서빙 순서가 저장되어 공유 화면에 표시된다', async () => {
@@ -94,13 +96,21 @@ describe('식사 메뉴 블록', () => {
     fireEvent.change(screen.getAllByLabelText('요리 이름')[1], {
       target: { value: '한입 요리' },
     });
-    fireEvent.click(
-      screen.getByRole('button', { name: '코스 1 요리 2 위로 이동' })
-    );
-    fireEvent.click(screen.getByRole('button', { name: '코스 2 위로 이동' }));
-    fireEvent.change(screen.getByLabelText('디자인'), {
-      target: { value: 'garden' },
+    const user = userEvent.setup();
+    const dishHandle = screen.getByRole('button', {
+      name: '코스 1 요리 2 순서 변경',
     });
+    dishHandle.focus();
+    await user.keyboard('{ArrowUp}{ArrowUp}');
+    expect(dishHandle).toHaveFocus();
+    const courseHandle = screen.getByRole('button', {
+      name: '코스 2 순서 변경',
+    });
+    courseHandle.focus();
+    await user.keyboard('{ArrowUp}');
+    expect(courseHandle).toHaveFocus();
+    fireEvent.click(screen.getByRole('combobox', { name: '디자인' }));
+    fireEvent.click(screen.getByRole('option', { name: '잉크 가든' }));
 
     const expectedOrder = [
       '안심 스테이크',
@@ -109,7 +119,9 @@ describe('식사 메뉴 블록', () => {
       '바닐라 판나코타',
     ];
     expect(
-      screen.getAllByRole('listitem').map(item => item.firstChild?.textContent)
+      within(screen.getByRole('article', { name: '식사 메뉴' }))
+        .getAllByRole('listitem')
+        .map(item => item.firstChild?.textContent)
     ).toEqual(expectedOrder);
 
     unmount();
@@ -120,8 +132,7 @@ describe('식사 메뉴 블록', () => {
       isZoom,
       backgroundColor,
       scrollAnimation,
-    } =
-      useEditorStore.getState();
+    } = useEditorStore.getState();
     const guestBlock = normalizeGuestBlock(
       JSON.parse(JSON.stringify(block[0])),
       0
@@ -148,7 +159,9 @@ describe('식사 메뉴 블록', () => {
       'garden'
     );
     expect(
-      screen.getAllByRole('listitem').map(item => item.firstChild?.textContent)
+      within(screen.getByRole('article', { name: '식사 메뉴' }))
+        .getAllByRole('listitem')
+        .map(item => item.firstChild?.textContent)
     ).toEqual(expectedOrder);
   });
 
@@ -164,6 +177,44 @@ describe('식사 메뉴 블록', () => {
     fireEvent.click(ornament);
 
     expect(preview).toHaveAttribute('data-corner-art', 'false');
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(within(preview).getAllByRole('listitem')).toHaveLength(3);
   });
+
+  it.each([
+    ['classic', '클래식'],
+    ['garden', '잉크 가든'],
+    ['ivy', '앤틱 아이비'],
+    ['ribbon', '리본과 별'],
+    ['artDeco', '아르데코'],
+  ])(
+    '장식이 꺼져 있어도 %s 디자인을 선택하면 테두리 장식이 켜진다',
+    (menuStyle, designName) => {
+      useEditorStore.getState().addBlock('etc', 'mealMenu', 'menu', {
+        menuStyle: 'ribbon',
+        showCornerArt: false,
+      });
+      render(<MenuEditor />);
+      const design = screen.getByRole('combobox', { name: '디자인' });
+      const artwork = screen.getByRole('checkbox', { name: '테두리 장식' });
+      const preview = screen.getByRole('article', { name: '식사 메뉴' });
+      expect(design).toHaveTextContent('리본과 별 (장식 없음)');
+      expect(artwork).not.toBeChecked();
+
+      fireEvent.click(design);
+      fireEvent.click(screen.getByRole('option', { name: designName }));
+      expect(artwork).toBeChecked();
+      expect(preview).toHaveAttribute('data-menu-style', menuStyle);
+      expect(preview).toHaveAttribute('data-corner-art', 'true');
+
+      fireEvent.click(artwork);
+      expect(preview).toHaveAttribute('data-corner-art', 'false');
+      expect(preview).toHaveAttribute('data-menu-style', menuStyle);
+      fireEvent.click(design);
+      fireEvent.click(screen.getByRole('option', { name: '미니멀' }));
+      expect(
+        screen.queryByRole('checkbox', { name: '테두리 장식' })
+      ).not.toBeInTheDocument();
+      expect(preview).toHaveAttribute('data-corner-art', 'false');
+    }
+  );
 });

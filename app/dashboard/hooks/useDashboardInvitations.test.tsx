@@ -21,8 +21,6 @@ const replaceMock = jest.fn();
 const refreshMock = jest.fn();
 const successToastMock = jest.fn();
 const errorToastMock = jest.fn();
-const infoToastMock = jest.fn();
-const confirmMock = jest.fn();
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -36,13 +34,6 @@ jest.mock('@/shared/hooks/useToast', () => ({
   useToast: () => ({
     success: successToastMock,
     error: errorToastMock,
-    info: infoToastMock,
-  }),
-}));
-
-jest.mock('@/shared/hooks/useConfirm', () => ({
-  useConfirm: () => ({
-    confirm: confirmMock,
   }),
 }));
 
@@ -367,42 +358,6 @@ describe('useDashboardInvitations', () => {
         cache: 'no-store',
         signal: expect.any(AbortSignal),
       }
-    );
-  });
-
-  it('비공개 초대장 공유와 URL 복사는 안내 토스트 후 실제 동작을 계속한다', async () => {
-    const writeText = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    });
-
-    const { result } = renderHook(() =>
-      useDashboardInvitations(
-        [
-          {
-            folderId: 'folder-private',
-            name: 'Private invitation',
-            invitationUuid: 'uuid-private',
-            dataJsonFileId: 'data-json-file-id-private',
-            guestUrl: '/guest/data-json-file-id-private',
-            published: false,
-            readiness: 'idle',
-          },
-        ],
-        { loadOnMount: false }
-      )
-    );
-
-    await act(async () => {
-      await result.current.handleCopyGuestUrl('folder-private');
-    });
-
-    expect(infoToastMock).toHaveBeenCalledWith(
-      '현재 초대장은 비공개 상태입니다.'
-    );
-    expect(writeText).toHaveBeenCalledWith(
-      'http://localhost/guest/data-json-file-id-private'
     );
   });
 });

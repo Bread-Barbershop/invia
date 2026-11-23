@@ -4,6 +4,7 @@ import { Check, Copy, Plus, X } from 'lucide-react';
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { FormSelector } from '@/components/molecules/selector/FormSelector';
 import {
   type AudienceGroup,
   type AudienceGroupList,
@@ -14,6 +15,7 @@ import {
   validateAudienceName,
   validateAudienceSlug,
 } from '@/features/invitation/audiences/model';
+import LoadingSpinner from '@/shared/assets/icons/loadingSpinner.svg';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
@@ -319,8 +321,6 @@ export default function InvitationAudiencesDialog({
     }
   }
 
-  const exampleSlug = slug.trim() || 'family';
-
   return createPortal(
     <dialog
       ref={dialogRef}
@@ -475,20 +475,17 @@ export default function InvitationAudiencesDialog({
                 className="grid min-w-0 gap-3"
               >
                 {groupOptions.length > 1 && (
-                  <label className="grid gap-1.5 text-xs font-semibold">
-                    복제할 초대장
-                    <select
-                      value={source?.folderId ?? ''}
-                      onChange={event => setSourceFolderId(event.target.value)}
-                      className={FIELD_CLASS}
-                    >
-                      {groupOptions.map(group => (
-                        <option key={group.folderId} value={group.folderId}>
-                          {group.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <FormSelector
+                    label="복제할 초대장"
+                    className="grid gap-1.5 text-xs font-semibold"
+                    options={groupOptions.map(group => ({
+                      value: group.folderId,
+                      label: group.name,
+                    }))}
+                    value={source?.folderId ?? ''}
+                    onChange={setSourceFolderId}
+                    disabled={busy || Boolean(pendingAction)}
+                  />
                 )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="grid gap-1.5 text-xs font-semibold">
@@ -539,19 +536,7 @@ export default function InvitationAudiencesDialog({
                 <p id={slugHelpId} className="text-xs text-neutral-600">
                   영문 소문자로 시작하고 숫자와 하이픈도 쓸 수 있어요.
                 </p>
-                <div className="flex min-w-0 items-center justify-end gap-3">
-                  {!validateAudienceSlug(exampleSlug) && (
-                    <output
-                      aria-label="그룹 링크 안내"
-                      className="mr-auto min-w-0 break-words text-xs text-neutral-600"
-                    >
-                      기본 링크 뒤에{' '}
-                      <strong className="break-all font-semibold text-text-primary">
-                        ?to={exampleSlug}
-                      </strong>
-                      가 붙어요.
-                    </output>
-                  )}
+                <div className="flex justify-end">
                   <button className={PRIMARY_BUTTON} type="submit">
                     <Plus size={16} aria-hidden="true" />
                     추가
@@ -596,7 +581,11 @@ export default function InvitationAudiencesDialog({
           </section>
         )}
         {operationMessage && (
-          <p role="status" className="text-sm text-neutral-600">
+          <p role="status" className="flex items-center gap-2 text-sm text-neutral-600">
+            <LoadingSpinner
+              aria-hidden="true"
+              className="size-4 shrink-0 motion-safe:animate-spin"
+            />
             {operationMessage}
           </p>
         )}

@@ -2,19 +2,26 @@ import { Copy } from 'lucide-react';
 import Image from 'next/image';
 import { KeyboardEvent, MouseEvent, useEffect, useState } from 'react';
 
-import type { InviteListItem } from '@/app/dashboard/types';
-import EditIcon from '@/shared/assets/icons/edit.svg';
+import type {
+  InvitationPreviewTarget,
+  InviteListItem,
+} from '@/app/dashboard/types';
 import KakaoIcon from '@/shared/assets/icons/kakao2.svg';
 import LinkIcon from '@/shared/assets/icons/link.svg';
 import { INVITATION_TEMPLATES } from '@/shared/data/invitationTemplates/catalog';
 import InvitationTemplatePoster from '@/widgets/editor/preview/components/InvitationTemplatePoster';
 
 import { dashboardCarouselLayout } from '../carouselLayout';
-import { CarouselCardItem } from '../carouselTypes';
+import {
+  CarouselCardItem,
+  type ShareAudienceLink,
+  type ShareAudienceWithKakao,
+} from '../carouselTypes';
 
 import DashboardActionButton from './actions/DashboardActionButton';
 import DeleteButton from './actions/DeleteButton';
-import PreviewButton from './actions/PreviewButton';
+import InvitationAudienceButton from './actions/InvitationAudienceButton';
+import { useAudienceShare } from './actions/useAudienceShare';
 import ItemHeader from './ItemHeader';
 
 function getImageKey(image: CarouselCardItem['image']) {
@@ -34,14 +41,14 @@ type CarouselItemProps = {
   onSelect: (index: number) => void;
   onClone?: (invite: InviteListItem) => void;
   onDelete?: (folderId: string) => void | Promise<void>;
-  onPreview?: (folderId: string) => void;
+  onPreview?: (target: InvitationPreviewTarget) => void;
   onUpdate?: (folderId: string, uuid?: string) => void;
   onToggleVisibility?: (
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: (folderId: string) => void;
-  onShare?: (folderId: string) => Promise<void>;
+  onOpenLinkShare?: ShareAudienceLink;
+  onShare?: ShareAudienceWithKakao;
   guestUrl: string | null;
   isDeleting: boolean;
   isSharing: boolean;
@@ -65,7 +72,7 @@ function CarouselItem({
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   guestUrl: guestUrlProp,
   isDeleting,
@@ -90,8 +97,14 @@ function CarouselItem({
     Boolean(invite?.isPending) ||
     readiness === 'pending' ||
     readiness === 'checking';
-  const canUseGuestUrl = Boolean(!isPending && guestUrl);
-  const canAttemptShare = Boolean(invite?.hasKakaoShareData && !isPending);
+  const audienceShare = useAudienceShare({
+    invite,
+    guestUrl,
+    active: isSelected && showCenterActions && !isPending,
+    onOpenLinkShare,
+    onKakao: onShare,
+    isSharing,
+  });
   const canToggleVisibility = Boolean(
     invite && !isPending && !isVisibilityUpdating
   );
@@ -131,7 +144,7 @@ function CarouselItem({
       onKeyDown={handleKeyDown}
       aria-label={showPreviewLabel ? `${item.alt} 미리보기` : title}
       aria-haspopup={showPreviewLabel ? 'dialog' : undefined}
-      aria-pressed={isSelected}
+      aria-pressed={showPreviewLabel ? undefined : isSelected}
       className={`group relative shrink-0 overflow-visible cursor-pointer select-none text-left ${
         isSelected ? 'z-10' : 'hover:z-10'
       }`}
@@ -139,6 +152,10 @@ function CarouselItem({
       style={{
         width: cardWidth,
         height: dashboardCarouselLayout.cardHeight,
+        // Embla includes the final slide's margin when measuring a full loop.
+        marginInlineEnd: showPreviewLabel
+          ? dashboardCarouselLayout.trackGap
+          : undefined,
       }}
     >
       <div
@@ -146,7 +163,7 @@ function CarouselItem({
           isSelected
             ? '[transform:translateY(calc(-1*var(--carousel-selected-lift)))]'
             : 'group-hover:[transform:translateY(calc(-1*var(--carousel-hover-lift)))]'
-        }`}
+        } ${showPreviewLabel ? 'group-focus-visible:[transform:translateY(calc(-1*var(--carousel-hover-lift)))] motion-reduce:transition-none' : ''}`}
         style={{
           transitionDuration: `${dashboardCarouselLayout.cardLiftDurationMs}ms`,
           ['--carousel-hover-lift' as string]: hoverLift,
@@ -191,30 +208,26 @@ function CarouselItem({
                 />
               </button>
             )}
-            <button
-              type="button"
-              onClick={event => {
-                handleActionClick(event);
-                onPreview?.(invite.folderId);
-              }}
-              className="cursor-pointer"
-              aria-label="초대장 미리보기"
-              aria-haspopup="dialog"
-            >
-              <PreviewButton />
-            </button>
+            <InvitationAudienceButton
+              invite={invite}
+              action="preview"
+              onSelect={onPreview}
+            />
             <button
               type="button"
               disabled={isDeleting}
               onClick={event => {
                 handleActionClick(event);
                 if (isDeleting) return;
+                event.currentTarget.focus();
                 void onDelete?.(invite.folderId);
               }}
               className={
                 isDeleting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
               }
               aria-disabled={isDeleting}
+              aria-label="초대장 삭제"
+              aria-haspopup="dialog"
             >
               <DeleteButton />
             </button>
@@ -238,6 +251,9 @@ function CarouselItem({
           {isSelected && showHeader && (
             <div className="absolute top-0 left-0 z-10">
               <ItemHeader
+                hasAudienceGroups={invite?.hasAudienceGroups}
+                audienceVisibility={invite?.audienceVisibility}
+                invitationTitle={title}
                 createdTime={invite?.createdTime}
                 isPublished={isPublished}
                 disabled={!canToggleVisibility}
@@ -261,7 +277,10 @@ function CarouselItem({
             }}
           >
             {collectionTemplate ? (
-              <InvitationTemplatePoster template={collectionTemplate} />
+              <InvitationTemplatePoster
+                template={collectionTemplate}
+                sizes={cardWidth}
+              />
             ) : (
               <Image
                 src={displayImage}
@@ -321,37 +340,23 @@ function CarouselItem({
                 <DashboardActionButton
                   icon={KakaoIcon}
                   variant="kakao"
-                  disabled={isSharing || !canAttemptShare}
-                  onClick={event => {
-                    handleActionClick(event);
-                    if (!canAttemptShare) return;
-                    void onShare?.(invite.folderId);
-                  }}
+                  {...audienceShare.kakaoButtonProps}
                 >
-                  카카오톡 공유하기
+                  {audienceShare.kakaoLabel}
                 </DashboardActionButton>
+                {audienceShare.picker}
                 <DashboardActionButton
                   icon={LinkIcon}
                   variant="url"
-                  disabled={!canUseGuestUrl}
-                  onClick={event => {
-                    handleActionClick(event);
-                    if (!canUseGuestUrl) return;
-                    onCopyUrl?.(invite.folderId);
-                  }}
+                  {...audienceShare.linkButtonProps}
                 >
-                  URL 링크 공유하기
+                  {audienceShare.linkLabel}
                 </DashboardActionButton>
-                <DashboardActionButton
-                  icon={EditIcon}
-                  variant="outline"
-                  onClick={event => {
-                    handleActionClick(event);
-                    onUpdate?.(invite.folderId, invite.invitationUuid);
-                  }}
-                >
-                  재편집하기
-                </DashboardActionButton>
+                <InvitationAudienceButton
+                  invite={invite}
+                  action="edit"
+                  onSelect={onUpdate}
+                />
               </div>
             )}
           </div>

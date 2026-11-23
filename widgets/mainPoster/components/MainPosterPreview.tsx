@@ -36,8 +36,10 @@ import {
   isReplaceableSlotTarget,
   SlotTargetObject,
 } from '../utils/imageSlot';
+import { restoreLegacyPosterBackground } from '../utils/legacyPosterBackground';
 
 import { ContextMenu } from './context-menu/ContextMenu';
+import { PosterPhotoCropDialog } from './image/PosterPhotoCropDialog';
 import Toolbar from './Toolbar';
 
 export const MainPosterPreview = () => {
@@ -69,7 +71,7 @@ export const MainPosterPreview = () => {
     handleDeleteEmptyShape,
     setupEventListeners,
     startCrop,
-    isCropping,
+    cropTarget,
     initialData,
     toggleDrawingMode,
     compressImage,
@@ -106,10 +108,11 @@ export const MainPosterPreview = () => {
     const loadData = async () => {
       try {
         setIsCanvasLoading(true);
-        const jsonData =
+        const savedPoster =
           typeof initialData === 'string'
             ? JSON.parse(initialData)
             : initialData;
+        const jsonData = restoreLegacyPosterBackground(savedPoster);
 
         await preloadFonts(jsonData);
         if (signal.aborted) return;
@@ -195,16 +198,13 @@ export const MainPosterPreview = () => {
       //   activeObj instanceof Circle ||
       //   activeObj instanceof Triangle ||
       //   activeObj.isType('line');
-      const isCropZone =
-        (activeObj as FabricObject & { name?: string })?.name === 'crop-zone';
 
       if (isActiveText) {
         setActiveTab('text');
       } else if (
         imagePanelMode === 'user-image' ||
         imagePanelMode === 'background-image' ||
-        imagePanelMode === 'frame-image' ||
-        isCropZone
+        imagePanelMode === 'frame-image'
       ) {
         setActiveTab('image');
       } else if (imagePanelMode === 'empty-frame') {
@@ -284,13 +284,8 @@ export const MainPosterPreview = () => {
     const cleanupEmpty = handleDeleteEmptyShape(fabricCanvas);
 
     const handleDoubleClick = (options: TPointerEventInfo) => {
-      if (
-        options.target &&
-        options.target instanceof FabricImage &&
-        !isReplaceableSlotImage(options.target) &&
-        !isCropping
-      ) {
-        startCrop(fabricCanvas);
+      if (options.target instanceof FabricImage) {
+        startCrop(options.target);
       }
     };
 
@@ -375,8 +370,6 @@ export const MainPosterPreview = () => {
         }
       });
 
-      if (isCropping) return;
-
       const pointer =
         options.scenePoint || fabricCanvas.getScenePoint(options.e);
       const slotTarget =
@@ -410,7 +403,6 @@ export const MainPosterPreview = () => {
     canvas,
     compressImage,
     handleDeleteEmptyShape,
-    isCropping,
     replaceSlotImageBySlot,
     setActiveTab,
     setupEventListeners,
@@ -447,8 +439,7 @@ export const MainPosterPreview = () => {
 
       if (
         target.classList.contains('upper-canvas') ||
-        target.closest('[data-canvas="true"]')
-        // || target.closest('[data-crop-controls="true"]')
+        target.closest('[data-canvas="true"], [data-crop-controls="true"]')
       ) {
         return;
       }
@@ -552,6 +543,9 @@ export const MainPosterPreview = () => {
         )}
       </div>
       {selectedId === 'mainPoster' && <Toolbar />}
+      {canvas && cropTarget && (
+        <PosterPhotoCropDialog canvas={canvas} target={cropTarget} />
+      )}
     </>
   );
 };

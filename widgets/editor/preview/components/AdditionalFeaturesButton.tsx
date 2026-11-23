@@ -4,10 +4,10 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { EditorSwitch } from '@/components/molecules/switch/EditorSwitch';
 import {
   DEFAULT_INVITATION_PRIVACY,
   INVITATION_PRIVACY_FIELDS,
-  type InvitationPrivacy,
 } from '@/features/invitation/privacy/settings';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -17,28 +17,48 @@ import { parseStrictDate } from '@/shared/utils/dateValidation';
 
 import { PrivacyEndDatePicker } from './PrivacyEndDatePicker';
 
-const checkboxClassName =
-  'size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+function getInitialSettings() {
+  const {
+    isZoom,
+    invitationPrivacy: privacy,
+    block: blocks,
+  } = useEditorStore.getState();
+  if (privacy?.eventDate) return { isZoom, privacy };
+  const calendar = blocks.find(
+    (block): block is EditorBlock<'calendar'> => block.component === 'calendar'
+  );
+  const countdown = blocks.find(
+    (block): block is EditorBlock<'countdown'> =>
+      block.component === 'countdown'
+  );
+  const eventDate = [
+    calendar?.props.date,
+    countdown?.props.eventDateTime?.slice(0, 10),
+  ].find(
+    (date): date is string =>
+      typeof date === 'string' && Boolean(parseStrictDate(date))
+  );
+  return {
+    isZoom,
+    privacy: {
+      ...(privacy ?? DEFAULT_INVITATION_PRIVACY),
+      eventDate: eventDate ?? '',
+    },
+  };
+}
 
-function InvitationSettingsModal({
-  initialIsZoom,
-  initialPrivacy,
-  onClose,
-}: {
-  initialIsZoom: boolean;
-  initialPrivacy: InvitationPrivacy;
-  onClose: () => void;
-}) {
+function InvitationSettingsModal({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const checkboxRef = useRef<HTMLInputElement>(null);
+  const zoomSwitchRef = useRef<HTMLInputElement>(null);
   const backdropDismiss = useBackdropDismiss<HTMLDialogElement>(
     onClose,
     'outside-dialog'
   );
   const titleId = useId();
   const optionsId = useId();
-  const [draftIsZoom, setDraftIsZoom] = useState(initialIsZoom);
-  const [privacy, setPrivacy] = useState(initialPrivacy);
+  const [initial] = useState(getInitialSettings);
+  const [draftIsZoom, setDraftIsZoom] = useState(initial.isZoom);
+  const [privacy, setPrivacy] = useState(initial.privacy);
   const [expanded, setExpanded] = useState(false);
   const missingFields = privacy.enabled && !privacy.fields.length;
   const optionsOpen = privacy.enabled && expanded;
@@ -48,7 +68,7 @@ function InvitationSettingsModal({
     if (!dialog) return;
 
     dialog.showModal();
-    checkboxRef.current?.focus();
+    zoomSwitchRef.current?.focus();
     return () => {
       if (dialog.open) dialog.close();
     };
@@ -77,49 +97,44 @@ function InvitationSettingsModal({
             (!parseStrictDate(privacy.eventDate) || missingFields)
           )
             return;
-          // 두 설정을 한 번에 반영하고, 취소한 변경은 저장하지 않는다.
-          useEditorStore.setState({
-            isZoom: draftIsZoom,
-            invitationPrivacy: privacy,
-          });
+          const zoomChanged = draftIsZoom !== initial.isZoom;
+          const privacyChanged =
+            privacy.enabled !== initial.privacy.enabled ||
+            privacy.eventDate !== initial.privacy.eventDate ||
+            INVITATION_PRIVACY_FIELDS.some(
+              ({ key }) =>
+                privacy.fields.includes(key) !==
+                initial.privacy.fields.includes(key)
+            );
+          if (zoomChanged || privacyChanged) {
+            useEditorStore.setState({
+              ...(zoomChanged && { isZoom: draftIsZoom }),
+              ...(privacyChanged && { invitationPrivacy: privacy }),
+            });
+          }
           onClose();
         }}
       >
         <h2 id={titleId} className="text-base font-semibold">
           초대장 설정
         </h2>
-        <label className="flex cursor-pointer items-center gap-3 text-sm">
-          <input
-            ref={checkboxRef}
-            type="checkbox"
-            checked={draftIsZoom}
-            onChange={event => setDraftIsZoom(event.target.checked)}
-            className={checkboxClassName}
-          />
-          <span>초대장 확대 방지</span>
-        </label>
+        <EditorSwitch
+          inputRef={zoomSwitchRef}
+          label="초대장 확대 방지"
+          checked={draftIsZoom}
+          onChange={setDraftIsZoom}
+        />
         <div className="border-t border-black/10 pt-4">
           <div className="flex items-center gap-2">
-            <label className="flex min-h-11 flex-1 cursor-pointer items-start gap-3 py-1.5 text-sm">
-              <input
-                type="checkbox"
-                className={cn(checkboxClassName, 'mt-0.5')}
-                checked={privacy.enabled}
-                onChange={event => {
-                  const enabled = event.target.checked;
-                  setPrivacy(previous => ({ ...previous, enabled }));
-                  if (enabled) setExpanded(true);
-                }}
-              />
-              <span>
-                <span className="block font-medium">
-                  일정이 끝나면 개인정보 가리기
-                </span>
-                <span className="block text-xs text-text-secondary">
-                  일정 다음 날 00:00부터 · 한국 시간 기준
-                </span>
-              </span>
-            </label>
+            <EditorSwitch
+              label="일정이 끝나면 개인정보 가리기"
+              description="일정 다음 날 00:00부터 · 한국 시간 기준"
+              checked={privacy.enabled}
+              onChange={enabled => {
+                setPrivacy(previous => ({ ...previous, enabled }));
+                if (enabled) setExpanded(true);
+              }}
+            />
             {privacy.enabled && (
               <button
                 type="button"
@@ -161,39 +176,26 @@ function InvitationSettingsModal({
                     setPrivacy(previous => ({ ...previous, eventDate }))
                   }
                 />
-                <fieldset className="grid gap-2">
+                <fieldset className="grid min-w-0 gap-2">
                   <legend className="mb-2 text-sm font-medium">
                     가릴 정보
                   </legend>
                   {INVITATION_PRIVACY_FIELDS.map(
                     ({ key, label, description }) => (
-                      <label
+                      <EditorSwitch
                         key={key}
-                        className="flex min-h-11 cursor-pointer gap-2.5 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          className={cn(checkboxClassName, 'mt-0.5')}
-                          checked={privacy.fields.includes(key)}
-                          onChange={event => {
-                            const checked = event.target.checked;
-                            setPrivacy(previous => ({
-                              ...previous,
-                              fields: checked
-                                ? [...previous.fields, key]
-                                : previous.fields.filter(
-                                    field => field !== key
-                                  ),
-                            }));
-                          }}
-                        />
-                        <span>
-                          <span className="block">{label}</span>
-                          <span className="block text-xs text-text-secondary">
-                            {description}
-                          </span>
-                        </span>
-                      </label>
+                        label={label}
+                        description={description}
+                        checked={privacy.fields.includes(key)}
+                        onChange={checked => {
+                          setPrivacy(previous => ({
+                            ...previous,
+                            fields: checked
+                              ? [...previous.fields, key]
+                              : previous.fields.filter(field => field !== key),
+                          }));
+                        }}
+                      />
                     )
                   )}
                 </fieldset>
@@ -245,32 +247,6 @@ export default function InvitationSettingsButton() {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
-  const isZoom = useEditorStore(state => state.isZoom);
-  const privacy = useEditorStore(state => state.invitationPrivacy);
-
-  function getInitialPrivacy(): InvitationPrivacy {
-    if (privacy?.eventDate) return privacy;
-    const blocks = useEditorStore.getState().block;
-    const calendar = blocks.find(
-      (block): block is EditorBlock<'calendar'> =>
-        block.component === 'calendar'
-    );
-    const countdown = blocks.find(
-      (block): block is EditorBlock<'countdown'> =>
-        block.component === 'countdown'
-    );
-    const eventDate = [
-      calendar?.props.date,
-      countdown?.props.eventDateTime?.slice(0, 10),
-    ].find(
-      (date): date is string =>
-        typeof date === 'string' && Boolean(parseStrictDate(date))
-    );
-    return {
-      ...(privacy ?? DEFAULT_INVITATION_PRIVACY),
-      eventDate: eventDate ?? '',
-    };
-  }
 
   useEffect(() => {
     if (wasOpenRef.current && !isOpen) {
@@ -291,13 +267,7 @@ export default function InvitationSettingsButton() {
       >
         초대장 설정
       </button>
-      {isOpen && (
-        <InvitationSettingsModal
-          initialIsZoom={isZoom}
-          initialPrivacy={getInitialPrivacy()}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <InvitationSettingsModal onClose={() => setIsOpen(false)} />}
     </>
   );
 }

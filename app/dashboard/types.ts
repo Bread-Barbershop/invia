@@ -1,4 +1,12 @@
+import type { AudienceVisibilityStatus } from '@/features/invitation/audiences/visibility';
+
 export type InvitationVisibility = 'private' | 'public';
+
+export type InvitationPreviewTarget = {
+  folderId: string;
+  eventTitle: string;
+  audienceName: string;
+};
 
 export type InvitationReadiness =
   | 'idle'
@@ -8,6 +16,8 @@ export type InvitationReadiness =
   | 'failed';
 
 export type InviteListItem = {
+  hasAudienceGroups?: boolean;
+  audienceVisibility?: AudienceVisibilityStatus;
   folderId: string;
   name: string;
   displayTitle?: string;

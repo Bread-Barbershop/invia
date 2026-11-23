@@ -23,6 +23,7 @@ import {
   rootGuestUrl,
   savedBasicInvitation,
 } from './fixtures/invitationAudiences';
+import InvitationSettingsButton from './AdditionalFeaturesButton';
 import InvitationAudiencesButton from './InvitationAudiencesButton';
 import InvitationAudiencesDialog from './InvitationAudiencesDialog';
 
@@ -32,7 +33,11 @@ const save = jest.fn();
 const close = jest.fn();
 const openEditor = jest.fn();
 
-jest.mock('@/shared/assets/icons/loadingSpinner.svg', () => () => null);
+jest.mock('@/shared/assets/icons/loadingSpinner.svg', () => {
+  return function LoadingSpinner(props: object) {
+    return <svg {...props} />;
+  };
+});
 jest.mock('@/widgets/mainPoster/hooks/useTemplate', () => ({
   ...jest.requireActual('@/widgets/mainPoster/hooks/useTemplate'),
   preloadFonts: jest.fn().mockResolvedValue(undefined),
@@ -46,8 +51,9 @@ function mockList(groups: AudienceGroup[], activeSlug = '') {
   mockFetch.mockResolvedValueOnce(reply({ rootGuestUrl, groups, activeSlug }));
 }
 
-function Dialog() {
+function Dialog({ showSettings = false }: { showSettings?: boolean }) {
   useEditorDirtyTracker(true);
+  if (showSettings) return <InvitationSettingsButton />;
   return (
     <InvitationAudiencesDialog
       upload={{
@@ -88,7 +94,7 @@ describe('하객별 구분', () => {
     jest.restoreAllMocks();
   });
 
-  it('공유 주소는 복사 버튼으로 제공하고 화면에는 입력한 그룹의 쿼리만 안내한다', async () => {
+  it('공유 주소는 복사 버튼으로 제공하고 화면에 링크 예시를 표시하지 않는다', async () => {
     const user = userEvent.setup();
     const writeText = jest.spyOn(navigator.clipboard, 'writeText');
     const guestPath = '/guest/root-data';
@@ -107,23 +113,14 @@ describe('하객별 구분', () => {
     ).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('dialog')).not.toHaveTextContent(guestPath);
     expect(copy).toHaveTextContent('링크 복사');
-    const example = screen.getByLabelText('그룹 링크 안내');
-    expect(example).toHaveTextContent('기본 링크 뒤에 ?to=family가 붙어요.');
+    expect(screen.queryByLabelText('그룹 링크 안내')).not.toBeInTheDocument();
     expect(
       screen.queryByRole('combobox', { name: '복제할 초대장' })
     ).not.toBeInTheDocument();
     await user.click(copy);
+    expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith(`http://localhost${guestPath}`);
-
-    const slug = screen.getByLabelText('링크 영문명');
-    await user.type(slug, 'coworkers');
-    expect(example).toHaveTextContent('기본 링크 뒤에 ?to=coworkers가 붙어요.');
-    await user.type(slug, '@');
-    expect(screen.queryByLabelText('그룹 링크 안내')).not.toBeInTheDocument();
-    await user.clear(slug);
-    expect(screen.getByLabelText('그룹 링크 안내')).toHaveTextContent(
-      '?to=family'
-    );
+    expect(screen.getByText('기본 링크를 복사했어요.')).toBeInTheDocument();
   });
 
   it('하객용 편집기에 직접 들어오면 기존 데이터 요청으로 편집 중인 그룹명을 표시한다', async () => {
@@ -175,12 +172,26 @@ describe('하객별 구분', () => {
     const source = await screen.findByRole('combobox', {
       name: '복제할 초대장',
     });
-    await user.selectOptions(source, familyAudience.folderId);
+    expect(source).toHaveTextContent('기본');
+    await user.click(source);
+    expect(screen.getByRole('option', { name: '기본' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    await user.keyboard('{ArrowDown}{Escape}');
+    expect(source).toHaveAttribute('aria-expanded', 'false');
+    expect(source).toHaveTextContent('기본');
+    await user.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    expect(source).toHaveTextContent('가족');
+    expect(source).toHaveFocus();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: '가족' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '가족 링크 복사' }));
     expect(writeText).toHaveBeenCalledWith(
       'http://localhost/i/abc123?to=family'
     );
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('가족 링크를 복사했어요.')).toBeInTheDocument();
     await user.type(screen.getByLabelText('대상 이름'), ' 친구 ');
     await user.type(screen.getByLabelText('링크 영문명'), ' friends ');
     await user.click(screen.getByRole('button', { name: '추가' }));
@@ -264,28 +275,42 @@ describe('하객별 구분', () => {
   it('새 초대장을 명시적으로 저장한 뒤 현재 편집기에서 그룹 목록을 연다', async () => {
     const user = userEvent.setup();
     useEditorStore.setState({ invitationFolderId: '', isDirty: true });
-    save.mockResolvedValueOnce(null).mockImplementationOnce(async () => {
-      useEditorStore.setState({
-        invitationFolderId: basicAudience.folderId,
-        isDirty: false,
+    let failSave!: () => void;
+    save
+      .mockReturnValueOnce(new Promise(resolve => {
+        failSave = () => resolve(null);
+      }))
+      .mockImplementationOnce(async () => {
+        useEditorStore.setState({
+          invitationFolderId: basicAudience.folderId,
+          isDirty: false,
+        });
+        return savedBasicInvitation;
       });
-      return savedBasicInvitation;
-    });
     mockList([basicAudience]);
     render(<Dialog />);
 
     expect(mockFetch).not.toHaveBeenCalled();
     const saveButton = screen.getByRole('button', { name: '저장 후 계속' });
     await user.click(saveButton);
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('저장하고 있어요.');
+    const spinner = status.querySelector('svg');
+    expect(spinner).toHaveAttribute('aria-hidden', 'true');
+    expect(spinner).toHaveClass('motion-safe:animate-spin');
+
+    await act(async () => failSave());
     expect(await screen.findByRole('alert')).toHaveTextContent(
       '현재 초대장을 저장하지 못했어요.'
     );
+    expect(status).not.toBeInTheDocument();
     expect(mockFetch).not.toHaveBeenCalled();
     await user.click(saveButton);
 
     expect(
       await screen.findByRole('button', { name: '기본 링크 복사' })
     ).toBeInTheDocument();
+    expect(screen.queryByText('저장하고 있어요.')).not.toBeInTheDocument();
     expect(save).toHaveBeenCalledWith({ preserveVisibility: false });
     expect(openEditor).not.toHaveBeenCalled();
   });
@@ -323,6 +348,39 @@ describe('하객별 구분', () => {
     );
     expect(save).not.toHaveBeenCalled();
     expect(openEditor).toHaveBeenCalledWith(basicAudience);
+  });
+
+  it.each([
+    ['다른 수정이 없으면 바로 전환한다', false],
+    ['이전에 편집한 내용이 있으면 저장 확인을 표시한다', true],
+  ] as const)('설정을 확인만 한 후 그룹을 열 때 %s', async (_, editBgm) => {
+    const user = userEvent.setup();
+    mockList([basicAudience, familyAudience]);
+    useEditorStore.getState().addBlock('wedding', 'calendar', 'date', {
+      date: '2027-05-15',
+    });
+    const view = render(<Dialog showSettings />);
+    if (editBgm) act(() => useBgmStore.getState().setVolume(0.35));
+    await user.click(screen.getByRole('button', { name: '초대장 설정' }));
+    await user.click(screen.getByRole('button', { name: '적용' }));
+    expect(useEditorStore.getState().invitationPrivacy).toBeUndefined();
+
+    view.rerender(<Dialog />);
+    await user.click(
+      await screen.findByRole('button', {
+        name: familyAudience.name,
+        exact: true,
+      })
+    );
+    if (editBgm) {
+      expect(
+        screen.getByRole('button', { name: '저장 후 계속' })
+      ).toBeVisible();
+      expect(openEditor).not.toHaveBeenCalled();
+    } else {
+      expect(openEditor).toHaveBeenCalledWith(familyAudience);
+    }
+    expect(save).not.toHaveBeenCalled();
   });
 
   it('BGM만 편집한 경우에도 저장 확인을 거치고 성공하기 전에는 전환하지 않는다', async () => {

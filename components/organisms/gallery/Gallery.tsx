@@ -1,4 +1,4 @@
-import { ChangeEvent, PointerEvent, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { Label } from '@/components/atoms/label';
@@ -27,7 +27,10 @@ function Gallery({ blockInfo, id }: Props) {
     isPopupViewer = false,
     isAutoPlay = false,
     ratio,
+    template,
   } = blockInfo.props;
+  const supportsFilmEffect =
+    template !== 'galleryType6' && template !== 'galleryType7';
   const { block, images, updateBlock, updateImage } = useEditorStore(
     useShallow(state => ({
       block: state.block,
@@ -75,12 +78,7 @@ function Gallery({ blockInfo, id }: Props) {
     }
   };
 
-  const handlePictureDelete = (files?: (File | string)[]) => {
-    if (!files) {
-      updateBlock(id, { images: [] });
-      updateImage(id, []);
-      return;
-    }
+  const updatePictures = (files: (File | string)[] = []) => {
     updateBlock(id, { images: files });
     updateImage(id, files);
   };
@@ -93,10 +91,6 @@ function Gallery({ blockInfo, id }: Props) {
   };
   const handleSubTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
     updateBlock(id, { isSubTitle: e.target.checked });
-  };
-
-  const handleAspectRatioChange = (e: PointerEvent<HTMLButtonElement>) => {
-    updateBlock(id, { ratio: e.currentTarget.value });
   };
 
   return (
@@ -131,12 +125,9 @@ function Gallery({ blockInfo, id }: Props) {
           className="py-1 text-center"
           multiple={true}
           value={blockInfo.props.images}
-          onChange={file => handlePictureChange(file)}
-          onReorder={file => {
-            updateBlock(id, { images: file });
-            updateImage(id, file);
-          }}
-          onDelete={file => handlePictureDelete(file)}
+          onChange={handlePictureChange}
+          onUpdateFiles={updatePictures}
+          onDelete={updatePictures}
           loadingCount={loadingCount}
         />
         {blockInfo.props.images && blockInfo.props.images?.length > 0 && (
@@ -144,7 +135,7 @@ function Gallery({ blockInfo, id }: Props) {
             className="gap-2 text-center"
             label="비율"
             selectorOption={ASPECT_RATIO_OPTIONS}
-            onPointerDown={handleAspectRatioChange}
+            onChange={ratio => updateBlock(id, { ratio })}
             selectedValue={ratio}
           />
         )}
@@ -167,11 +158,16 @@ function Gallery({ blockInfo, id }: Props) {
                 팝업뷰어(사진을 터치하여 크게 볼 수 있어요.)
               </span>
             </Checkbox>
-            <Checkbox onChange={handleAutoPlayChange} checked={Boolean(isAutoPlay)}>
-              <span className="text-[13px]">
-                필름 효과 (천천히 무한 반복 재생)
-              </span>
-            </Checkbox>
+            {supportsFilmEffect && (
+              <Checkbox
+                onChange={handleAutoPlayChange}
+                checked={Boolean(isAutoPlay)}
+              >
+                <span className="text-[13px]">
+                  필름 효과 (사진 2장부터 천천히 반복 재생)
+                </span>
+              </Checkbox>
+            )}
           </div>
         </div>
       </div>

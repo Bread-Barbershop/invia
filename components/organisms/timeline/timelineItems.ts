@@ -45,15 +45,21 @@ export function getTimelinePreset(type: InvitationType): TimelineItem[] {
 
 export function normalizeTimelineItems(value: unknown): TimelineItem[] {
   if (!Array.isArray(value)) return [];
+  const ids = new Set<string>();
   return value
     .filter((item): item is Record<string, unknown> =>
       typeof item === 'object' && item !== null
     )
     .slice(0, 20)
-    .map((item, index) => ({
-      id: typeof item.id === 'string' && item.id.length > 0 ? item.id : String(index),
-      time: typeof item.time === 'string' ? item.time.slice(0, 24) : '',
-      title: typeof item.title === 'string' ? item.title.slice(0, 60) : '',
-      description: typeof item.description === 'string' ? item.description.slice(0, 200) : '',
-    }));
+    .map((item, index) => {
+      let id = typeof item.id === 'string' && item.id.length > 0 ? item.id : String(index);
+      while (ids.has(id)) id += '-';
+      ids.add(id);
+      return {
+        id,
+        time: typeof item.time === 'string' ? item.time.slice(0, 24) : '',
+        title: typeof item.title === 'string' ? item.title.slice(0, 60) : '',
+        description: typeof item.description === 'string' ? item.description.slice(0, 200) : '',
+      };
+    });
 }

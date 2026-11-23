@@ -7,11 +7,14 @@ import {
   render,
   renderHook,
   screen,
+  within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useInitData } from '@/app/editor/[id]/hooks/useInitData';
 import type { SavedData } from '@/app/editor/[id]/types/savedata';
 import GuestRenderer from '@/app/guest/[id]/components/GuestRenderer';
+import { EditorBgmPlayerProvider } from '@/components/organisms/bgm/context/EditorBgmPlayerContext';
 import calendarStyles from '@/components/organisms/calendar/calendarPreview.module.css';
 import InvitationChapter from '@/components/organisms/invitation-chapter/InvitationChapter';
 import {
@@ -21,14 +24,22 @@ import {
 import { createInvitationTemplate } from '@/shared/data/invitationTemplates';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 
+import LeftPanel from '../LeftPanel';
+
 import BulkEdit from './BulkEdit';
-import { SectionStyleControls } from './SectionStyleControls';
+import Edit from './Edit';
+
+jest.mock('@/shared/assets/icons/sectionArrow.svg', () => () => null);
 
 jest.mock('@/shared/data/invitationTemplates/originalPosterLoader', () => ({
   loadOriginalPosterJson: async () => ({ version: '7.2.0', objects: [] }),
 }));
 jest.mock('next/navigation', () => ({ usePathname: () => '/guest/test' }));
+jest.mock('@/widgets/mainPoster/components/MainPoster', () => ({
+  MainPoster: () => <h3>포스터 편집 패널</h3>,
+}));
 jest.mock('@/shared/fonts/fontLoader', () => ({
+  hasCustomFontFace: () => false,
   preloadFontFamilyWeights: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('@/components/molecules/text-editor/utils/tiptapJsonToHtml', () => {
@@ -52,6 +63,115 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
   beforeEach(() => useEditorStore.getState().reset());
   afterEach(() => act(() => useEditorStore.getState().reset()));
 
+  it('공지사항 편집 헤더와 항목추가 아래에서 제목보다 먼저 카드 스타일과 등장 효과를 편집한다', async () => {
+    const user = userEvent.setup();
+    const editor = useEditorStore.getState();
+    editor.addBlock('wedding', 'notice', 'notice');
+    editor.selectedBlock('notice');
+    render(<LeftPanel />);
+
+    const detail = within(screen.getByRole('region', { name: '공지사항' }));
+    const heading = detail.getByRole('heading', {
+      name: '공지사항 편집 페이지',
+    });
+    const addItem = detail.getByRole('button', { name: '항목추가' });
+    const card = detail.getByRole('combobox', { name: '블록 카드 스타일' });
+    const effect = detail.getByRole('combobox', { name: '블록 등장 효과' });
+    const title = detail.getByRole('textbox', { name: '제목' });
+
+    expect(heading.parentElement).toContainElement(addItem);
+    expect(heading.compareDocumentPosition(card)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(card).toBeVisible();
+    expect(effect).toBeVisible();
+    expect(detail.getByText('블록 카드 스타일', { selector: 'label' })).toHaveClass(
+      'text-sm font-normal text-text-secondary'
+    );
+    expect(detail.getByText('블록 등장 효과', { selector: 'label' })).toHaveClass(
+      'text-sm font-normal text-text-secondary'
+    );
+    expect(
+      screen.queryByRole('button', { name: '카드 디자인 · 등장 효과' })
+    ).toBeNull();
+
+    addItem.focus();
+    await user.tab();
+    expect(card).toHaveFocus();
+    await user.tab();
+    expect(effect).toHaveFocus();
+    await user.tab();
+    expect(title).toHaveFocus();
+  });
+
+  it('상세 편집에서 블록을 바꾸면 선택한 블록의 설정 한 쌍을 바로 표시한다', () => {
+    const editor = useEditorStore.getState();
+    editor.addBlock('wedding', 'notice', 'notice', { sectionStyle: 'paper' });
+    editor.addBlock('wedding', 'place', 'place', {
+      sectionStyle: 'rounded',
+      entranceEffect: 'from-left',
+    });
+    editor.selectedBlock('notice');
+    render(<Edit />);
+    expect(
+      screen.getByRole('combobox', { name: '블록 카드 스타일' })
+    ).toHaveTextContent('종이 카드');
+
+    act(() => editor.selectedBlock('place'));
+
+    const detail = within(screen.getByRole('region', { name: '예식 장소' }));
+    const heading = detail.getByRole('heading', {
+      name: '예식 장소 편집 페이지',
+    });
+    const card = detail.getByRole('combobox', { name: '블록 카드 스타일' });
+    const effect = detail.getByRole('combobox', { name: '블록 등장 효과' });
+    const title = detail.getByRole('textbox', { name: '제목' });
+    expect(heading.compareDocumentPosition(card)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(effect.compareDocumentPosition(title)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(card).toHaveTextContent('라운드 카드');
+    expect(effect).toHaveTextContent('왼쪽에서 등장');
+    expect(
+      screen.getAllByRole('combobox', { name: '블록 카드 스타일' })
+    ).toHaveLength(1);
+  });
+
+  it('포스터, 공유 썸네일, 초대장 전체 효과와 비활성 방명록에는 개별 설정을 표시하지 않는다', () => {
+    const editor = useEditorStore.getState();
+    editor.addBlock('wedding', 'bgm', 'music');
+    editor.addBlock('wedding', 'visualEffects', 'effects');
+    editor.addBlock('wedding', 'guestbook', 'guestbook');
+    render(
+      <EditorBgmPlayerProvider>
+        <Edit />
+      </EditorBgmPlayerProvider>
+    );
+
+    for (const [id, copy] of [
+      ['mainPoster', '포스터 편집 패널'],
+      ['shareUrl', '공유 썸네일'],
+      ['music', '배경 음악 편집 페이지'],
+      ['effects', '배경 · 오프닝 효과'],
+      [
+        'guestbook',
+        '방명록은 현재 사용할 수 없습니다. 다른 페이지를 선택해 주세요.',
+      ],
+    ]) {
+      act(() => editor.selectedBlock(id));
+
+      expect(screen.getByText(copy)).toBeVisible();
+      expect(
+        screen.queryByRole('combobox', { name: '블록 카드 스타일' })
+      ).toBeNull();
+      expect(
+        screen.queryByRole('combobox', { name: '블록 등장 효과' })
+      ).toBeNull();
+    }
+  });
+
   it('새 블록에 초대장 스타일을 적용하고 개별 변경과 상속 복원을 저장 전 미리보기에 반영한다', async () => {
     const prepared = await createInvitationTemplate('showcase-21');
     act(() => {
@@ -72,31 +192,37 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
           },
         ],
       });
+      useEditorStore.getState().selectedBlock('added-faq');
     });
     const controls = render(
       <>
         <BulkEdit />
-        <SectionStyleControls selectedId="added-faq" />
+        <Edit />
       </>
     );
-    expect(screen.getByLabelText('기본 카드 스타일')).toHaveValue('paper');
-    expect(screen.getByLabelText('이 블록의 카드 스타일')).toHaveValue('');
-
-    fireEvent.change(screen.getByLabelText('기본 카드 스타일'), {
-      target: { value: 'rounded' },
+    const defaultStyle = screen.getByRole('combobox', {
+      name: '기본 카드 스타일',
     });
+    const blockStyle = screen.getByRole('combobox', {
+      name: '블록 카드 스타일',
+    });
+    expect(defaultStyle).toHaveTextContent('종이 카드');
+    expect(blockStyle).toHaveTextContent('초대장 스타일 따르기');
+
+    fireEvent.click(defaultStyle);
+    fireEvent.click(screen.getByRole('option', { name: '라운드 카드' }));
     const inherited = createPreviewSnapshot('data:image/png;base64,test');
     const guest = render(<GuestRenderer {...inherited.snapshot.payload} />);
+    const invitation = within(guest.container);
     expect(
-      screen.getByText('추가한 질문').closest('[data-section-style]')
+      invitation.getByText('추가한 질문').closest('[data-section-style]')
     ).toHaveAttribute('data-section-style', 'rounded');
     expect(
-      screen.getByText('네, 같은 편집기를 사용합니다.')
+      invitation.getByText('네, 같은 편집기를 사용합니다.')
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('이 블록의 카드 스타일'), {
-      target: { value: 'outlined' },
-    });
+    fireEvent.click(blockStyle);
+    fireEvent.click(screen.getByRole('option', { name: '테두리 카드' }));
     const custom = createPreviewSnapshot('data:image/png;base64,test');
     const restored = parsePreviewSnapshot(
       JSON.parse(JSON.stringify(custom.snapshot))
@@ -104,23 +230,73 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
     expect(restored).not.toBeNull();
     guest.rerender(<GuestRenderer {...restored!.payload} />);
     expect(
-      screen.getByText('추가한 질문').closest('[data-section-style]')
+      invitation.getByText('추가한 질문').closest('[data-section-style]')
     ).toHaveAttribute('data-section-style', 'outlined');
     expect(restored!.payload.bulkData.sectionStyle).toBe('rounded');
 
-    fireEvent.change(screen.getByLabelText('이 블록의 카드 스타일'), {
-      target: { value: '' },
-    });
+    fireEvent.click(blockStyle);
+    fireEvent.click(screen.getByRole('option', { name: '초대장 스타일 따르기' }));
     const reset = createPreviewSnapshot('data:image/png;base64,test');
     guest.rerender(<GuestRenderer {...reset.snapshot.payload} />);
     expect(
-      screen.getByText('추가한 질문').closest('[data-section-style]')
+      invitation.getByText('추가한 질문').closest('[data-section-style]')
     ).toHaveAttribute('data-section-style', 'rounded');
     inherited.dispose();
     custom.dispose();
     reset.dispose();
     controls.unmount();
   });
+
+  it.each([
+    ['spacer', '기본 여백 유지'],
+    ['divider', '기본 구분선 유지'],
+  ] as const)(
+    '%s의 개별 스타일과 효과를 직렬화한 뒤 공개 미리보기에서 복원한다',
+    (component, defaultLabel) => {
+      const editor = useEditorStore.getState();
+      editor.setSectionStyle('paper');
+      editor.addBlock('wedding', component, 'layout');
+      editor.selectedBlock('layout');
+      render(<Edit />);
+
+      const card = screen.getByRole('combobox', {
+        name: '블록 카드 스타일',
+      });
+      const effect = screen.getByRole('combobox', {
+        name: '블록 등장 효과',
+      });
+      expect(card).toHaveTextContent(defaultLabel);
+
+      fireEvent.click(card);
+      fireEvent.click(screen.getByRole('option', { name: '라운드 카드' }));
+      fireEvent.click(effect);
+      fireEvent.click(screen.getByRole('option', { name: '페이드' }));
+      const preview = createPreviewSnapshot('data:image/png;base64,test');
+      const restored = parsePreviewSnapshot(
+        JSON.parse(JSON.stringify(preview.snapshot))
+      );
+      preview.dispose();
+      if (!restored) throw new Error('미리보기 설정을 복원할 수 없습니다.');
+      const guest = render(<GuestRenderer {...restored.payload} />);
+
+      const surface = 'section[data-section-style]';
+      expect(guest.container.querySelector(surface)).toHaveAttribute(
+        'data-section-style',
+        'rounded'
+      );
+      expect(restored.payload.blocks[0].props).toMatchObject({
+        sectionStyle: 'rounded',
+        entranceEffect: 'fade',
+      });
+
+      fireEvent.click(card);
+      fireEvent.click(screen.getByRole('option', { name: defaultLabel }));
+      const reset = createPreviewSnapshot('data:image/png;base64,test');
+      guest.rerender(<GuestRenderer {...reset.snapshot.payload} />);
+      reset.dispose();
+      expect(guest.container.querySelector(surface)).toBeNull();
+    }
+  );
 
   it('기본 스타일은 모든 블록을 지운 뒤 추가해도 유지하고 저장 데이터 로딩과 초기화에서 복원한다', async () => {
     const prepared = await createInvitationTemplate('showcase-21');

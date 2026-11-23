@@ -1,11 +1,30 @@
-import type { InviteListItem } from '@/app/dashboard/types';
+import type {
+  InvitationPreviewTarget,
+  InviteListItem,
+} from '@/app/dashboard/types';
+import { cn } from '@/shared/utils/cn';
 
 import {
   dashboardCarouselLayout,
   dashboardCarouselVars,
 } from './carouselLayout';
-import { CarouselCardItem } from './carouselTypes';
+import {
+  CarouselCardItem,
+  type ShareAudienceLink,
+  type ShareAudienceWithKakao,
+} from './carouselTypes';
 import CarouselItem from './item/CarouselItem';
+
+import type { SyntheticEvent } from 'react';
+
+const SHOWCASE_FADE = 'motion-safe:animate-[fade-in_360ms_ease-out]';
+
+function fadeLoadedCover(event: SyntheticEvent<HTMLDivElement>) {
+  // Images still loading after the track appears fade as they arrive.
+  if (event.target instanceof HTMLImageElement) {
+    event.target.classList.add(SHOWCASE_FADE);
+  }
+}
 
 type CarouselTrackProps = {
   emblaRef: (instance: HTMLDivElement | null) => void;
@@ -21,14 +40,14 @@ type CarouselTrackProps = {
   onSelect: (index: number) => void;
   onClone?: (invite: InviteListItem) => void;
   onDelete?: (folderId: string) => void | Promise<void>;
-  onPreview?: (folderId: string) => void;
+  onPreview?: (target: InvitationPreviewTarget) => void;
   onUpdate?: (folderId: string, uuid?: string) => void;
   onToggleVisibility?: (
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: (folderId: string) => void;
-  onShare?: (folderId: string) => Promise<void>;
+  onOpenLinkShare?: ShareAudienceLink;
+  onShare?: ShareAudienceWithKakao;
   getGuestUrl?: (folderId: string) => string | null;
   isDeleting?: (folderId: string) => boolean;
   isSharing?: (folderId: string) => boolean;
@@ -53,7 +72,7 @@ function CarouselTrack({
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   getGuestUrl,
   isDeleting,
@@ -64,9 +83,12 @@ function CarouselTrack({
   return (
     <div
       ref={emblaRef}
-      className={`h-full w-full overflow-hidden ${
-        isReady ? 'opacity-100' : 'opacity-0'
-      }`}
+      className={cn(
+        'h-full w-full overflow-hidden',
+        showPreviewLabel && SHOWCASE_FADE,
+        !showPreviewLabel && !isReady && 'opacity-0'
+      )}
+      onLoadCapture={showPreviewLabel ? fadeLoadedCover : undefined}
       style={{
         ...dashboardCarouselVars,
         paddingTop: 'var(--carousel-safe-top)',
@@ -76,7 +98,7 @@ function CarouselTrack({
       <div
         className="relative flex h-full w-full min-w-full"
         style={{
-          gap: dashboardCarouselLayout.trackGap,
+          gap: showPreviewLabel ? undefined : dashboardCarouselLayout.trackGap,
           top: 'calc(var(--carousel-base-offset) - var(--carousel-safe-top))',
         }}
       >
@@ -98,7 +120,7 @@ function CarouselTrack({
             onPreview={onPreview}
             onUpdate={onUpdate}
             onToggleVisibility={onToggleVisibility}
-            onCopyUrl={onCopyUrl}
+            onOpenLinkShare={onOpenLinkShare}
             onShare={onShare}
             guestUrl={
               item.invite && getGuestUrl

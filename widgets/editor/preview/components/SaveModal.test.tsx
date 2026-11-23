@@ -4,13 +4,13 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toDataURL } from 'qrcode';
 import React from 'react';
 
 import {
   QR_DATA_URL,
   SHARE_URL,
 } from '@/components/molecules/link-share/fixtures/shareLink';
+import { toDataURL } from '@/components/molecules/link-share/invitationQr';
 import { DASHBOARD_PENDING_INVITATION_KEY } from '@/shared/constants/dashboardPendingInvitation';
 
 import {
@@ -19,7 +19,9 @@ import {
 } from './fixtures/invitationAudiences';
 import { SaveModal } from './SaveModal';
 
-jest.mock('qrcode', () => ({ toDataURL: jest.fn() }));
+jest.mock('@/components/molecules/link-share/invitationQr', () => ({
+  toDataURL: jest.fn(),
+}));
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace: jest.fn() }),
 }));
@@ -29,8 +31,17 @@ jest.mock('./SaveLottie', () => ({
 }));
 
 describe('SaveModal', () => {
+  const originalFetch = global.fetch;
+  const prepareSms = jest.fn();
   beforeEach(() => {
+    global.fetch = prepareSms.mockReset().mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }),
+    });
     (toDataURL as jest.Mock).mockResolvedValue(QR_DATA_URL);
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   const commonProps = {
@@ -102,6 +113,7 @@ describe('SaveModal', () => {
 
   it('저장 후 링크 공유하기를 누르면 링크와 QR을 함께 표시하고 닫으면 완료 화면으로 돌아온다', async () => {
     const user = userEvent.setup();
+    const familyUrl = `${SHARE_URL}?to=family`;
     render(
       <SaveModal
         {...commonProps}
@@ -109,7 +121,8 @@ describe('SaveModal', () => {
           invitationFolderId: 'invitation-folder-id',
           invitationUuid: 'invitation-uuid',
           dataJsonFileId: 'data-json-file-id',
-          guestUrl: SHARE_URL,
+          guestUrl: familyUrl,
+          qrDownloadName: '민서·지훈 결혼식 - 가족용 QR.png',
           published: true,
           ready: true,
           createdAt: new Date(0).toISOString(),
@@ -120,11 +133,25 @@ describe('SaveModal', () => {
     await user.click(screen.getByRole('button', { name: '링크 공유하기' }));
 
     expect(screen.getByRole('textbox', { name: '초대장 링크' })).toHaveValue(
-      SHARE_URL
+      familyUrl
     );
     expect(
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
     ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '공유하기' }));
+    expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
+      'download',
+      '민서·지훈 결혼식 - 가족용 QR.png'
+    );
+    expect(
+      screen.getByRole('button', { name: '카카오톡으로 보내기' })
+    ).toBeEnabled();
+    const sms = await screen.findByRole('link', { name: '문자로 보내기' });
+    expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(familyUrl);
+    expect(prepareSms).toHaveBeenCalledWith(
+      '/api/drive/shareUrl?invitationFolderId=invitation-folder-id&intent=sms',
+      expect.anything()
+    );
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(
       screen.getByRole('button', { name: '다시 수정하기' })
@@ -135,7 +162,26 @@ describe('SaveModal', () => {
     expect(commonProps.onClose).not.toHaveBeenCalled();
   });
 
-  it('공개 준비 중인 초대장은 링크와 QR의 접속 가능 시점을 안내한다', async () => {
+  it.each([
+    {
+      state: '공개 준비 중',
+      published: true,
+      notice: [
+        '초대장 공개를 준비 중이에요. 준비가 끝나면 링크와 QR로 접속할 수 있어요.',
+      ],
+    },
+    {
+      state: '비공개',
+      published: false,
+      notice: [
+        '비공개 초대장이에요.',
+        '공개로 변경하면 링크와 QR로 접속할 수 있어요.',
+      ],
+    },
+  ])('$state 초대장을 저장하고 공유 링크의 접속 조건을 안내한다', async ({
+    published,
+    notice,
+  }) => {
     const user = userEvent.setup();
     render(
       <SaveModal
@@ -145,7 +191,7 @@ describe('SaveModal', () => {
           invitationUuid: 'invitation-uuid',
           dataJsonFileId: 'data-json-file-id',
           guestUrl: SHARE_URL,
-          published: true,
+          published,
           ready: false,
           createdAt: new Date(0).toISOString(),
         }}
@@ -154,9 +200,7 @@ describe('SaveModal', () => {
 
     await user.click(screen.getByRole('button', { name: '링크 공유하기' }));
 
-    expect(
-      screen.getByText(/준비가 끝나면 링크와 QR로 접속/)
-    ).toBeInTheDocument();
+    for (const line of notice) expect(screen.getByText(line)).toBeVisible();
     await screen.findByRole('img', { name: '초대장 공유 QR 코드' });
   });
 

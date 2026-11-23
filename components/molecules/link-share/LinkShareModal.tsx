@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import {
   disableBodyScroll,
@@ -11,9 +12,16 @@ import {
   trapFocus,
 } from '@/shared/utils/focusTrap';
 
+import { QrShareActions } from './QrShareActions';
+
 type LinkShareModalProps = {
   url: string;
-  notice?: string;
+  recipient?: string;
+  downloadName?: string;
+  shareFolderId?: string;
+  canShareKakao?: boolean;
+  visibility?: GroupShareVisibility;
+  pendingNotice?: string;
   onClose: () => void;
 };
 
@@ -23,32 +31,45 @@ type QrResult = {
   dataUrl: string | null;
 };
 
-export function LinkShareModal({ url, notice, onClose }: LinkShareModalProps) {
+type CopyTarget = 'link' | 'qr';
+type CopyStatus = {
+  target: CopyTarget;
+  state: 'copying' | 'copied' | 'failed';
+};
+
+export function LinkShareModal({
+  url,
+  recipient,
+  downloadName = 'invitation-qr.png',
+  shareFolderId,
+  canShareKakao,
+  visibility = 'public',
+  pendingNotice,
+  onClose,
+}: LinkShareModalProps) {
   const titleId = useId();
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(onClose);
   const modalRef = useRef<HTMLDivElement>(null);
+  const copying = useRef(false);
   const shareUrl = new URL(url, window.location.origin).href;
   const [qrResult, setQrResult] = useState<QrResult | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [copyStatus, setCopyStatus] = useState<
-    'idle' | 'copying' | 'copied' | 'failed'
-  >('idle');
+  const [copyStatus, setCopyStatus] = useState<CopyStatus | null>(null);
   const currentQr =
     qrResult?.url === shareUrl && qrResult.attempt === attempt
       ? qrResult
       : null;
+  const qrDataUrl = currentQr?.dataUrl;
+  const isCopying = copyStatus?.state === 'copying';
+  const qrCopyDisabled = isCopying || !qrDataUrl;
 
   useEffect(() => {
     let cancelled = false;
 
     async function generateQr() {
       try {
-        const { toDataURL } = await import('qrcode');
-        const dataUrl = await toDataURL(shareUrl, {
-          width: 1024,
-          margin: 4,
-          errorCorrectionLevel: 'M',
-        });
+        const { toDataURL } = await import('./invitationQr');
+        const dataUrl = await toDataURL(shareUrl);
 
         if (!cancelled) setQrResult({ url: shareUrl, attempt, dataUrl });
       } catch {
@@ -91,13 +112,35 @@ export function LinkShareModal({ url, notice, onClose }: LinkShareModalProps) {
     };
   }, [onClose]);
 
-  const handleCopy = async () => {
-    setCopyStatus('copying');
+  const handleCopy = async (target: CopyTarget) => {
+    if (copying.current || (target === 'qr' && !qrDataUrl)) return;
+    copying.current = true;
+    setCopyStatus({ target, state: 'copying' });
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopyStatus('copied');
+      if (target === 'link') {
+        await navigator.clipboard.writeText(shareUrl);
+      } else if (qrDataUrl) {
+        if (
+          typeof navigator.clipboard?.write !== 'function' ||
+          typeof ClipboardItem === 'undefined' ||
+          ClipboardItem.supports?.('image/png') === false
+        ) {
+          throw new Error('이 브라우저에서는 PNG를 복사할 수 없어요.');
+        }
+        // Decode synchronously so the clipboard write retains the click's activation.
+        const bytes = Uint8Array.from(atob(qrDataUrl.split(',')[1]), char =>
+          char.charCodeAt(0)
+        );
+        const image = new Blob([bytes], { type: 'image/png' });
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': image }),
+        ]);
+      }
+      setCopyStatus({ target, state: 'copied' });
     } catch {
-      setCopyStatus('failed');
+      setCopyStatus({ target, state: 'failed' });
+    } finally {
+      copying.current = false;
     }
   };
 
@@ -114,45 +157,58 @@ export function LinkShareModal({ url, notice, onClose }: LinkShareModalProps) {
         tabIndex={-1}
         className="flex max-h-[calc(100dvh-32px)] w-[335px] max-w-full flex-col items-center gap-5 overflow-y-auto rounded-xl bg-white p-5 shadow-xl outline-none"
       >
-        <div className="text-center">
-          <h2 id={titleId} className="text-base font-semibold text-[#202020]">
-            링크와 QR로 공유하기
-          </h2>
-          <p className="mt-2 text-sm text-gray-500">
-            링크를 보내거나 QR을 스캔해 초대장을 열 수 있어요.
-          </p>
+        <div className="flex w-full items-center justify-between gap-3">
+          <div className="min-w-0 text-left">
+            <h2 id={titleId} className="text-base font-semibold text-[#202020]">
+              링크와 QR로 공유하기
+            </h2>
+            <p className="mt-2 break-words text-sm text-gray-600">
+              {recipient ??
+                '링크를 보내거나 QR을 스캔해 초대장을 열 수 있어요.'}
+            </p>
+          </div>
+          <div className="flex size-28 shrink-0 items-center justify-center bg-white">
+            {currentQr?.dataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={currentQr.dataUrl}
+                alt="초대장 공유 QR 코드"
+                width={112}
+                height={112}
+              />
+            ) : currentQr ? (
+              <div className="text-center text-sm">
+                <p role="alert">QR을 만들지 못했어요.</p>
+                <button
+                  type="button"
+                  className="mt-3 cursor-pointer underline underline-offset-4"
+                  onClick={() => setAttempt(value => value + 1)}
+                >
+                  QR 다시 만들기
+                </button>
+              </div>
+            ) : (
+              <p role="status" className="text-sm text-gray-500">
+                QR을 만들고 있어요.
+              </p>
+            )}
+          </div>
         </div>
-        {notice && (
+        {visibility === 'private' && (
+          <div className="w-full rounded-lg bg-red-50 p-3 text-center text-gray-700">
+            <p className="text-sm font-semibold text-[#A51F30]">
+              비공개 초대장이에요.
+            </p>
+            <p className="mt-1 text-xs leading-5">
+              공개로 변경하면 링크와 QR로 접속할 수 있어요.
+            </p>
+          </div>
+        )}
+        {visibility === 'pending' && pendingNotice && (
           <p className="w-full rounded-lg bg-gray-50 p-3 text-center text-xs leading-5 text-gray-600">
-            {notice}
+            {pendingNotice}
           </p>
         )}
-        <div className="flex size-[224px] shrink-0 items-center justify-center bg-white">
-          {currentQr?.dataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={currentQr.dataUrl}
-              alt="초대장 공유 QR 코드"
-              width={224}
-              height={224}
-            />
-          ) : currentQr ? (
-            <div className="text-center text-sm">
-              <p role="alert">QR을 만들지 못했어요.</p>
-              <button
-                type="button"
-                className="mt-3 cursor-pointer underline underline-offset-4"
-                onClick={() => setAttempt(value => value + 1)}
-              >
-                QR 다시 만들기
-              </button>
-            </div>
-          ) : (
-            <p role="status" className="text-sm text-gray-500">
-              QR을 만들고 있어요.
-            </p>
-          )}
-        </div>
         <div className="w-full">
           <label htmlFor={`${titleId}-url`} className="text-xs text-gray-500">
             초대장 링크
@@ -168,40 +224,48 @@ export function LinkShareModal({ url, notice, onClose }: LinkShareModalProps) {
           <div className="mt-3 flex gap-2">
             <button
               type="button"
-              onClick={handleCopy}
-              disabled={copyStatus === 'copying'}
-              className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-lg bg-black text-sm font-semibold text-white hover:bg-[#202020] disabled:cursor-wait disabled:opacity-60"
+              onClick={() => void handleCopy('link')}
+              disabled={isCopying}
+              className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
             >
-              {copyStatus === 'copied' ? '복사 완료' : '링크 복사하기'}
+              {copyStatus?.state === 'copied' && copyStatus.target === 'link'
+                ? '복사 완료'
+                : '링크 복사하기'}
             </button>
-            {currentQr?.dataUrl ? (
-              <a
-                href={currentQr.dataUrl}
-                download="invitation-qr.png"
-                className="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50"
-              >
-                QR 저장하기
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="h-11 flex-1 rounded-lg border border-gray-200 text-sm font-semibold text-gray-400"
-              >
-                QR 저장하기
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => void handleCopy('qr')}
+              disabled={qrCopyDisabled}
+              className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              QR 복사하기
+            </button>
           </div>
-          {copyStatus === 'copied' && (
+          {copyStatus?.state === 'copied' && (
             <p role="status" className="mt-2 text-center text-xs text-gray-500">
-              링크를 복사했어요.
+              {copyStatus.target === 'link'
+                ? '링크를 복사했어요.'
+                : 'QR 이미지를 복사했어요.'}
             </p>
           )}
-          {copyStatus === 'failed' && (
+          {copyStatus?.state === 'failed' && (
             <p role="alert" className="mt-2 text-center text-xs text-red-600">
-              링크를 복사하지 못했어요. 위 링크를 직접 복사해 주세요.
+              {copyStatus.target === 'link'
+                ? '링크를 복사하지 못했어요. 위 링크를 직접 복사해 주세요.'
+                : 'QR 이미지를 복사하지 못했어요. 공유하기를 열어 QR 이미지 저장을 눌러 주세요.'}
             </p>
           )}
+          <QrShareActions
+            key={shareUrl}
+            onCopyQr={() => void handleCopy('qr')}
+            copyDisabled={qrCopyDisabled}
+            dataUrl={currentQr?.dataUrl}
+            filename={downloadName}
+            url={shareUrl}
+            shareFolderId={shareFolderId}
+            canShareKakao={canShareKakao}
+            allowSending={visibility === 'public'}
+          />
         </div>
         <button
           type="button"

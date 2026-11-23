@@ -3,11 +3,17 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { parseGuestPayload } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 
+import Edit from './Edit';
 import { ScrollAnimationControls } from './ScrollAnimationControls';
+
+jest.mock('@/shared/assets/icons/sectionArrow.svg', () => () => null);
+jest.mock('@/widgets/mainPoster/components/MainPoster', () => ({
+  MainPoster: () => null,
+}));
 
 describe('일괄 스크롤 애니메이션 편집', () => {
   beforeEach(() => useEditorStore.getState().reset());
-  afterEach(() => useEditorStore.getState().reset());
+  afterEach(() => act(() => useEditorStore.getState().reset()));
 
   it('선택한 블록과 무관하게 공통 설정을 바꾸고 이후 추가한 블록에도 적용한다', () => {
     act(() => {
@@ -25,20 +31,24 @@ describe('일괄 스크롤 애니메이션 편집', () => {
 
     render(<ScrollAnimationControls />);
     fireEvent.click(screen.getByRole('button', { name: '스크롤 애니메이션' }));
+    const effect = screen.getByRole('combobox', { name: '효과' });
+    expect(effect).toHaveTextContent('효과 없음');
+    fireEvent.click(effect);
+    fireEvent.click(screen.getByRole('option', { name: '왼쪽에서 등장' }));
     const trigger = screen.getByRole('combobox', { name: /스크롤 재생 조건/ });
+    expect(trigger).toHaveTextContent('처음 내릴 때만');
+    fireEvent.click(trigger);
     expect(
-      within(trigger)
+      within(screen.getByRole('listbox'))
         .getAllByRole('option')
         .map(option => option.textContent)
     ).toEqual(['처음 내릴 때만', '내릴 때마다', '올리거나 내릴 때마다']);
-    expect(trigger).toHaveValue('down-only');
-    fireEvent.change(trigger, { target: { value: 'down-repeat' } });
+    fireEvent.click(screen.getByRole('option', { name: '내릴 때마다' }));
     fireEvent.change(screen.getByRole('slider', { name: '등장 시간' }), {
       target: { value: '1400' },
     });
-    fireEvent.change(screen.getByLabelText('부드러움'), {
-      target: { value: 'soft' },
-    });
+    fireEvent.click(screen.getByRole('combobox', { name: '부드러움' }));
+    fireEvent.click(screen.getByRole('option', { name: '아주 부드럽게' }));
 
     act(() => {
       useEditorStore.getState().addBlock('wedding', 'greeting', 'new-block');
@@ -46,7 +56,7 @@ describe('일괄 스크롤 애니메이션 편집', () => {
 
     const state = useEditorStore.getState();
     expect(state.scrollAnimation).toMatchObject({
-      animationType: 'fade-up',
+      animationType: 'from-left',
       triggerMode: 'down-repeat',
       animationDurationMs: 1400,
       animationEasing: 'soft',
@@ -77,6 +87,7 @@ describe('일괄 스크롤 애니메이션 편집', () => {
           type: 'wedding',
           component: 'afterParty',
           props: {
+            entranceEffect: 'from-right',
             animationType: 'zoom-in',
             animationDurationMs: 1900,
           },
@@ -123,6 +134,7 @@ describe('일괄 스크롤 애니메이션 편집', () => {
       animationEasing: 'soft',
     });
     expect(parsed.payload.blocks[0].props).toMatchObject({
+      entranceEffect: 'from-right',
       animationType: 'zoom-in',
       animationDurationMs: 1900,
     });
@@ -162,10 +174,26 @@ describe('일괄 스크롤 애니메이션 편집', () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     expect(parsed.payload.bulkData.scrollAnimation).toEqual({
-      animationType: 'fade-up',
+      animationType: 'none',
       triggerMode: 'down-only',
       animationDurationMs: 700,
       animationEasing: 'natural',
     });
+  });
+  it('두 갤러리 중 선택한 카드만 양옆에서 모이기를 적용하고 전체 설정으로 되돌린다', () => {
+    const { addBlock, selectedBlock } = useEditorStore.getState();
+    addBlock('birthday', 'gallery', 'photos');
+    addBlock('birthday', 'gallery', 'party');
+    selectedBlock('photos');
+    render(<Edit />);
+    const effect = screen.getByRole('combobox', { name: '블록 등장 효과' });
+    expect(effect).toHaveTextContent('전체 설정 따르기 (효과 없음)');
+    fireEvent.click(effect);
+    fireEvent.click(screen.getByRole('option', { name: '양옆에서 모이기' }));
+    expect(useEditorStore.getState().block.map(b => b.props.entranceEffect)).toEqual(['paired', undefined]);
+    expect(useEditorStore.getState().scrollAnimation.animationType).toBe('none');
+    fireEvent.click(effect);
+    fireEvent.click(screen.getByRole('option', { name: /전체 설정 따르기/ }));
+    expect(useEditorStore.getState().block[0].props.entranceEffect).toBeUndefined();
   });
 });

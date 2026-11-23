@@ -17,6 +17,7 @@ jest.mock('@/app/api/drive/_lib/cloneInvitation', () => ({
 }));
 jest.mock('@/app/api/drive/_lib/audienceLinkStore', () => ({
   ...jest.requireActual('@/app/api/drive/_lib/audienceLinkStore'),
+  readAudienceVisibility: jest.fn(),
   claimAudienceLink: jest.fn(),
   commitAudienceLink: jest.fn(),
   releaseAudienceLink: jest.fn(),
@@ -25,6 +26,7 @@ jest.mock('@/app/api/drive/_lib/audienceLinkStore', () => ({
 
 import {
   AudienceLinkStoreUnavailableError,
+  readAudienceVisibility,
   claimAudienceLink,
   commitAudienceLink,
   resolveAudienceLink,
@@ -101,7 +103,7 @@ function driveFixture() {
       fixture.hasGroup = false;
       return new Response(null, { status: 204 });
     }
-    if (q.includes("'me' in owners")) {
+    if (q.startsWith("name='모바일 초대장 invia'")) {
       return Response.json({ files: [{ id: 'workspace-folder' }] });
     }
     if (q.startsWith(`'${ROOT}' in parents`)) {
@@ -138,10 +140,10 @@ function driveFixture() {
   return fixture;
 }
 
-function load(folderId = ROOT) {
+function load(folderId = ROOT, view = '') {
   return GET(
     new Request(
-      `${BASE_URL}/api/drive/invitationAudiences?folderId=${folderId}`
+      `${BASE_URL}/api/drive/invitationAudiences?folderId=${folderId}&view=${view}`
     )
   );
 }
@@ -182,9 +184,50 @@ describe('하객 그룹 API', () => {
     });
   });
 
+  it('마이페이지에서는 공유 링크를 조회하거나 복구하지 않고 소유한 하객 그룹을 반환한다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    expect(await (await load(ROOT, 'editor-options')).json()).toEqual({
+      audiences: [EXAMPLE],
+    });
+    fixture.group.ownedByMe = false;
+    expect(await (await load(ROOT, 'editor-options')).json()).toEqual({
+      audiences: [],
+    });
+    fixture.group.ownedByMe = true;
+    fixture.group.appProperties.kind = 'invitation_audience_staging';
+    expect(await (await load(ROOT, 'editor-options')).json()).toEqual({
+      audiences: [],
+    });
+    fixture.root.ownedByMe = false;
+    expect((await load(ROOT, 'editor-options')).status).toBe(404);
+    expect(resolveAudienceLink).not.toHaveBeenCalled();
+    expect(claimAudienceLink).not.toHaveBeenCalled();
+  });
+
   afterAll(() => {
     if (originalOrigin === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
     else process.env.NEXT_PUBLIC_APP_URL = originalOrigin;
+  });
+
+  it('미리보기는 본인 그룹만 나열하고 읽기 가능한 공유 초대장은 기본 본문만 열 수 있다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    expect(await (await load(ROOT, 'preview-options')).json()).toEqual({
+      audiences: [EXAMPLE],
+    });
+    fixture.group.ownedByMe = false;
+    expect(await (await load(ROOT, 'preview-options')).json()).toEqual({
+      audiences: [],
+    });
+    fixture.group.ownedByMe = true;
+    fixture.root.ownedByMe = false;
+    expect(await (await load(ROOT, 'preview-options')).json()).toEqual({
+      audiences: [],
+    });
+    fixture.root.parents = ['different-workspace'];
+    expect((await load(ROOT, 'preview-options')).status).toBe(404);
+    expect(resolveAudienceLink).not.toHaveBeenCalled();
   });
 
   it('메타파일 없는 기존 초대장에 기본 대상과 대표 링크를 반환한다', async () => {
@@ -199,6 +242,60 @@ describe('하객 그룹 API', () => {
       ],
     });
     expect(resolveAudienceLink).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['partial', true, false, 'private', 'public'],
+    ['private', false, false, 'private', 'private'],
+    ['pending', true, false, 'pending', 'pending'],
+    ['partial', true, true, 'pending', 'pending'],
+  ] as const)(
+    '공유 목록은 전체 표시 %s, 공개 %s, 저장 중 %s에 맞는 개별 상태를 반환한다',
+    async (marker, published, pending, base, family) => {
+      const fixture = driveFixture();
+      fixture.hasGroup = true;
+      fixture.rootMetaUrl = '/guest/root-data-file';
+      Object.assign(fixture.root.appProperties, {
+        audience_visibility: marker,
+      });
+      jest.mocked(resolveAudienceLink).mockResolvedValue(GROUP_DATA);
+      jest
+        .mocked(readAudienceVisibility)
+        .mockResolvedValue({
+          publicSlugs: ['family'],
+          pending,
+          published,
+          revision: 'r1',
+        });
+      const result = await load(ROOT, 'share-options');
+      expect(await result.json()).toMatchObject({
+        groups: [
+          { slug: '', visibility: base },
+          { slug: 'family', visibility: family },
+        ],
+      });
+    }
+  );
+
+  it('기존 초대장은 행사 공개 상태를 따르고 관리 설정이 누락된 초대장은 확인 중으로 표시한다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    fixture.rootMetaUrl = '/guest/root-data-file';
+    jest.mocked(resolveAudienceLink).mockResolvedValue(GROUP_DATA);
+    const options = () =>
+      load(ROOT, 'share-options').then(response => response.json());
+    expect(await options()).toMatchObject({
+      groups: [{ visibility: 'public' }, { visibility: 'public' }],
+    });
+    expect(readAudienceVisibility).not.toHaveBeenCalled();
+    Object.assign(fixture.root.appProperties, {
+      audience_visibility: 'partial',
+    });
+    jest.mocked(readAudienceVisibility).mockResolvedValue(null);
+    expect(await options()).toMatchObject({
+      groups: [{ visibility: 'pending' }, { visibility: 'pending' }],
+    });
+    expect(readAudienceVisibility).toHaveBeenCalledTimes(1);
   });
 
   it('검증된 원본 하위에 복제하고 대표 짧은 주소로 하객 링크를 만든다', async () => {

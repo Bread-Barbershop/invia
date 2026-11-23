@@ -3,10 +3,14 @@ import React from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import ShareUrl from '@/components/organisms/share-url/ShareUrl';
+import { BlockEditorAppearanceContext } from '@/components/organisms/wrapper/LeftEditorWrapper';
 import { isBlockEnabled } from '@/shared/data/registry/blockAvailability';
 import { blockRegistry } from '@/shared/data/registry/registry';
+import { supportsSectionStyle } from '@/shared/data/sectionStyles';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { MainPoster } from '@/widgets/mainPoster/components/MainPoster';
+
+import { SectionStyleControls } from './SectionStyleControls';
 
 function Edit() {
   const { block, selectedId, isEmpty } = useEditorStore(
@@ -41,6 +45,16 @@ function Edit() {
     blockInfo: typeof block;
     id: string;
   }>;
-  return <EditInfo key={selectedId} blockInfo={block} id={selectedId} />;
+  return (
+    <BlockEditorAppearanceContext.Provider
+      value={
+        supportsSectionStyle(block.component) ? (
+          <SectionStyleControls block={block} />
+        ) : null
+      }
+    >
+      <EditInfo key={selectedId} blockInfo={block} id={selectedId} />
+    </BlockEditorAppearanceContext.Provider>
+  );
 }
 export default Edit;
