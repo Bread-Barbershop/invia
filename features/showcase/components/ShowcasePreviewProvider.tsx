@@ -155,9 +155,8 @@ function ShowcasePreviewModal({
             type="button"
             onClick={onClose}
             aria-label="미리보기 닫기"
-            className="flex h-11 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-black/5 px-2.5 text-xs font-semibold whitespace-nowrap text-black/70 transition-colors hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 min-[800px]:h-10 min-[800px]:px-3"
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-black/5 text-black/70 transition-colors hover:bg-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 min-[800px]:size-10"
           >
-            닫기
             <X
               aria-hidden="true"
               strokeWidth={1.5}
