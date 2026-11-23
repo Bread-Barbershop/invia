@@ -18,7 +18,7 @@ export const ImagePanel = () => {
   if (panelMode === 'background-image') {
     return <BackgroundImagePanel />;
   }
-  if (panelMode === 'frame-image') {
+  if (panelMode === 'frame-image' || panelMode === 'empty-frame') {
     return <TemplateImagePanel />;
   }
   return <DefaultImagePanel />;
@@ -84,14 +84,15 @@ const DefaultImagePanel = () => {
         onUploadClick={handleImageUpload}
         onInputChange={handleChangeImage}
       />
-      <Button
-        disabled={!activeUserImage || Boolean(activeUserImage.get('isLocked'))}
-        onClick={() => {
-          if (activeUserImage) startCrop(activeUserImage);
-        }}
-      >
-        사진 자르기 · 배경으로 적용
-      </Button>
+      {activeUserImage && (
+        <Button
+          className="w-fit shrink-0 whitespace-nowrap px-3 motion-safe:animate-[fade-in_180ms_ease-out]"
+          disabled={Boolean(activeUserImage.get('isLocked'))}
+          onClick={() => startCrop(activeUserImage)}
+        >
+          사진 편집
+        </Button>
+      )}
     </LeftEditorWrapper>
   );
 };
