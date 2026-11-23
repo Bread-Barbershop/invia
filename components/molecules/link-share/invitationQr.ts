@@ -41,15 +41,3 @@ async function renderCanvas(url: string) {
 export async function toDataURL(url: string): Promise<string> {
   return (await renderCanvas(url)).toDataURL('image/png');
 }
-
-export async function toPngBytes(url: string): Promise<Uint8Array> {
-  const canvas = await renderCanvas(url);
-  const png = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      blob =>
-        blob ? resolve(blob) : reject(new Error('QR PNG를 만들 수 없어요.')),
-      'image/png'
-    );
-  });
-  return new Uint8Array(await png.arrayBuffer());
-}
