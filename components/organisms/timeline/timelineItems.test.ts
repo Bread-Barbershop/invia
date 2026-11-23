@@ -19,4 +19,9 @@ describe('타임라인 행사별 프리셋과 데이터 정규화', () => {
       id: 'a', title: '기본', time: '', description: '',
     });
   });
+  it('ID가 겹치거나 없는 식순을 옮겨도 각 카드의 ID가 유지된다', () => {
+    const items = normalizeTimelineItems([{ id: '1' }, {}, { id: '1' }]);
+    expect(new Set(items.map(item => item.id)).size).toBe(3);
+    expect(normalizeTimelineItems(items.slice().reverse())).toEqual(items.slice().reverse());
+  });
 });

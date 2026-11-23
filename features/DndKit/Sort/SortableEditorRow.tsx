@@ -10,6 +10,7 @@ interface Props {
   id: string;
   label: string;
   removeLabel: string;
+  removeText?: string;
   heading: ReactNode;
   className: string;
   children: ReactNode;
@@ -21,6 +22,7 @@ export function SortableEditorRow({
   id,
   label,
   removeLabel,
+  removeText,
   heading,
   className,
   children,
@@ -64,10 +66,15 @@ export function SortableEditorRow({
         </button>
         <UtilityButton
           variant="danger"
+          className={
+            removeText
+              ? 'text-xs text-text-secondary hover:text-primary'
+              : undefined
+          }
           aria-label={removeLabel}
           onClick={onRemove}
         >
-          <Trash2 size={15} />
+          {removeText ?? <Trash2 size={15} />}
         </UtilityButton>
       </div>
       {children}

@@ -4,6 +4,8 @@ import { useCallback, useRef, useState } from 'react';
 
 import Confirm from '@/components/molecules/confirm/Confirm';
 import { NavigationBar } from '@/components/molecules/navigation-bar/NavigationBar';
+import { SortableEditorRow } from '@/features/DndKit/Sort/SortableEditorRow';
+import SortableWrapper from '@/features/DndKit/Sort/SortableWrapper';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import type { EditorBlock } from '@/shared/types/block';
 
@@ -64,36 +66,42 @@ export function TimelineBlock({
             onClose={closePresetConfirm}
           />
         )}
-        {items.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-2 rounded-lg border border-border-divider p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-text-primary">{index + 1}번째 순서</span>
-              <button
-                type="button"
-                aria-label={`${index + 1}번째 순서 삭제`}
-                onClick={() => updateBlock(id, { items: items.filter(row => row.id !== item.id) })}
-                className="text-xs text-text-secondary hover:text-primary"
-              >
-                삭제
-              </button>
-            </div>
-            {([
-              { field: 'time', label: '시간', max: 24 },
-              { field: 'title', label: '일정 제목', max: 60 },
-              { field: 'description', label: '상세 설명', max: 200 },
-            ] as const).map(input => (
-              <label className="flex flex-col gap-1 text-xs text-text-secondary" key={input.field}>
-                {input.label}
-                <input
-                  value={item[input.field]}
-                  maxLength={input.max}
-                  onChange={event => changeItem(item.id, input.field, event.target.value)}
-                  className="h-9 w-full rounded-md border border-border-divider px-2 text-sm text-text-primary outline-none focus:border-primary"
-                />
-              </label>
-            ))}
-          </div>
-        ))}
+        <SortableWrapper
+          vertical
+          items={items}
+          onChange={items => updateBlock(id, { items })}
+          className="flex-col gap-3 empty:hidden"
+        >
+          {(item, index, moveItem) => (
+            <SortableEditorRow
+              key={item.id}
+              id={item.id}
+              label={`${index + 1}번째`}
+              heading={<span className="text-sm font-semibold text-text-primary">{index + 1}번째 순서</span>}
+              removeLabel={`${index + 1}번째 순서 삭제`}
+              removeText="삭제"
+              onRemove={() => updateBlock(id, { items: items.filter(row => row.id !== item.id) })}
+              onMove={moveItem}
+              className="flex flex-col gap-2 rounded-lg border border-border-divider p-3"
+            >
+              {([
+                { field: 'time', label: '시간', max: 24 },
+                { field: 'title', label: '일정 제목', max: 60 },
+                { field: 'description', label: '상세 설명', max: 200 },
+              ] as const).map(input => (
+                <label className="flex flex-col gap-1 text-xs text-text-secondary" key={input.field}>
+                  {input.label}
+                  <input
+                    value={item[input.field]}
+                    maxLength={input.max}
+                    onChange={event => changeItem(item.id, input.field, event.target.value)}
+                    className="h-9 w-full rounded-md border border-border-divider px-2 text-sm text-text-primary outline-none focus:border-primary"
+                  />
+                </label>
+              ))}
+            </SortableEditorRow>
+          )}
+        </SortableWrapper>
         <button
           type="button"
           disabled={items.length >= 20}
