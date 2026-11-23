@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 import { usePrefersReducedMotion } from '@/components/organisms/gallery/hooks/usePrefersReducedMotion';
 import type {
@@ -30,18 +30,15 @@ export function ParticleLayer({
   easing,
   contained = false,
   inline = false,
-  burst = false,
 }: {
   effect: string;
   speed: number;
   easing: string;
   contained?: boolean;
   inline?: boolean;
-  burst?: boolean;
 }) {
-  const [finished, setFinished] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
-  if (finished || reducedMotion || !isParticleEffect(effect)) return null;
+  if (reducedMotion || !isParticleEffect(effect)) return null;
   const preset = PRESETS[effect];
   return (
     <div
@@ -49,34 +46,22 @@ export function ParticleLayer({
         'invia-effect-layer',
         contained && 'invia-effect-preview',
         inline && 'invia-effect-inline',
-        burst && 'invia-effect-burst',
       ]
         .filter(Boolean)
         .join(' ')}
-      onAnimationEnd={event => {
-        if (burst && event.target === event.currentTarget) setFinished(true);
-      }}
       aria-hidden="true"
-      style={
-        {
-          '--burst-duration': `${2.45 / speed}s`,
-          '--motion-easing': easing,
-        } as CSSProperties
-      }
+      style={{ '--motion-easing': easing } as CSSProperties}
     >
       {PARTICLES.slice(0, preset.count).map(i => {
         const seed = (i * 73 + 41) % 101;
         const depth = ((i * 47 + 19) % 97) / 96;
-        const duration =
-          (burst
-            ? 1.65 + seed * 0.005
-            : preset.duration * (1.4 - depth * 0.55)) / speed;
+        const duration = (preset.duration * (1.4 - depth * 0.55)) / speed;
         const size = preset.size + depth * preset.spread;
         const style = {
           '--x': String((i * 37 + 13) % 100) + '%',
           '--y': String((i * 29 + 8) % 100) + '%',
           '--duration': `${duration}s`,
-          '--delay': `${burst ? (seed * 0.003) / speed : (-duration * seed) / 100}s`,
+          '--delay': `${(-duration * seed) / 100}s`,
           '--sway-duration': `${(3 + (seed % 4)) / speed}s`,
           '--tilt': `${((i * 53) % 140) - 70}deg`,
           '--tumble-duration': `${(4.3 + seed * 0.035) / speed}s`,

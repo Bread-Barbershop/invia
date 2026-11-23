@@ -42,15 +42,14 @@ function expectFontPreviewBackground(backgroundColor: string) {
 describe('일괄 편집 즉시 반영', () => {
   beforeEach(() => useEditorStore.getState().reset());
 
-  it('배경 편집 아래 초대장 연출에 오프닝과 축하 효과, 스크롤 설정을 표시한다', () => {
+  it('배경 편집 아래 초대장 연출에 오프닝, 배경 효과, 스크롤 설정을 표시한다', () => {
+    useEditorStore.getState().updateInvitationEffects({ confetti: true });
     render(<BulkEdit />);
 
     const backgroundHeading = screen.getByText('배경 편집');
     const effectsHeading = screen.getByText('초대장 연출');
     const opening = screen.getByRole('combobox', { name: '오프닝' });
-    const celebration = screen.getByRole('switch', {
-      name: '축하 효과 컨페티',
-    });
+    const ambient = screen.getByRole('combobox', { name: '배경 효과' });
     const scroll = screen.getByRole('combobox', { name: '스크롤 애니메이션' });
 
     expect(
@@ -58,28 +57,27 @@ describe('일괄 편집 즉시 반영', () => {
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(effectsHeading.closest('details')).toContainElement(opening);
-    expect(effectsHeading.closest('details')).toContainElement(celebration);
+    expect(effectsHeading.closest('details')).toContainElement(ambient);
     expect(effectsHeading.closest('details')).toContainElement(scroll);
     expect(opening).toHaveTextContent('바로 시작');
-    expect(celebration).not.toBeChecked();
+    expect(screen.queryByText('축하 효과')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '처음부터 보기' })).toBeDisabled();
   });
 
-  it('별도 블록을 추가하지 않고 오프닝과 축하 효과를 하객 미리보기에 전달한다', () => {
+  it('별도 블록을 추가하지 않고 오프닝을 하객 미리보기에 전달한다', () => {
     render(<BulkEdit />);
     fireEvent.click(screen.getByRole('combobox', { name: '오프닝' }));
     fireEvent.click(screen.getByRole('option', { name: '편지봉투 열기' }));
-    fireEvent.click(screen.getByRole('switch', { name: '축하 효과 컨페티' }));
 
     const preview = createPreviewSnapshot('data:image/png;base64,test');
     expect(preview.snapshot.payload.bulkData.invitationEffects).toEqual({
       opening: 'envelope',
-      confetti: true,
     });
     expect(preview.snapshot.payload.blocks).toHaveLength(0);
     preview.dispose();
   });
 
-  it('배경 효과와 범위를 미리보기에 저장하고 오프닝 컨페티를 독립적으로 끈다', () => {
+  it('종이 컨페티 배경 효과와 표시 범위를 미리보기에 전달한다', () => {
     render(<BulkEdit />);
     const effect = screen.getByRole('combobox', { name: '배경 효과' });
     expect(effect).toHaveTextContent('없음');
@@ -91,29 +89,23 @@ describe('일괄 편집 즉시 반영', () => {
     expect(scope).toHaveTextContent('메인 포스터에만');
     fireEvent.click(scope);
     fireEvent.click(screen.getByRole('option', { name: '화면 전체에' }));
-    const openingConfetti = screen.getByRole('switch', {
-      name: '축하 효과 컨페티',
-    });
-    fireEvent.click(openingConfetti);
-    fireEvent.click(openingConfetti);
 
     const preview = createPreviewSnapshot('data:image/png;base64,test');
     expect(preview.snapshot.payload.bulkData.invitationEffects).toEqual({
       ambientEffect: 'confetti',
       ambientScope: 'screen',
-      confetti: false,
     });
     preview.dispose();
   });
 
-  it('예전 컨페티 조합에서도 오프닝 스위치로 배경 효과가 사라지지 않는다', () => {
+  it('저장된 기존 배경 효과 조합과 표시 범위를 표시한다', () => {
     const store = useEditorStore.getState();
     store.addBlock('wedding', 'visualEffects', 'old-confetti');
     store.updateBlock('old-confetti', { effect: 'confetti' });
     store.addBlock('wedding', 'visualEffects', 'old-petals');
     store.updateBlock('old-petals', { effect: 'petals' });
+    store.updateInvitationEffects({ confetti: true, ambientEffect: 'blocks' });
     render(<BulkEdit />);
-    fireEvent.click(screen.getByRole('switch', { name: '축하 효과 컨페티' }));
     const effect = screen.getByRole('combobox', { name: '배경 효과' });
     expect(effect).toHaveTextContent('기존 효과 조합');
     fireEvent.click(effect);

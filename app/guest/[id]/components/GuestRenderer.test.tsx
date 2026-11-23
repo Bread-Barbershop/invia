@@ -207,7 +207,7 @@ describe('GuestRenderer', () => {
     expect(JSON.stringify(blocks)).toBe(before);
   });
 
-  it('오래된 효과 블록이 중복되어도 한 봉투를 열고 컨페티를 한 번 재생한다', () => {
+  it('오래된 효과 블록이 중복되어도 봉투와 배경 컨페티를 하나씩 표시한다', () => {
     HTMLDialogElement.prototype.showModal = function () {
       this.setAttribute('open', '');
     };
@@ -229,39 +229,50 @@ describe('GuestRenderer', () => {
       },
       { id: 'picture', type: 'wedding', component: 'picture', props: {} },
     ];
-    render(
-      <GuestRenderer
-        bulkData={{ ...bulkData, invitationEffects: { confetti: true } }}
-        blocks={blocks}
-      />
-    );
+    render(<GuestRenderer bulkData={bulkData} blocks={blocks} />);
 
     const cover = screen.getByRole('dialog', { name: '초대장 열기' });
     expect(screen.getAllByTestId('scroll-animation')).toHaveLength(1);
-    expect(document.querySelector('.invia-effect-layer')).toBeNull();
+    expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: '초대장 열기' }));
     fireEvent.animationEnd(cover);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    const bursts = document.querySelectorAll('.invia-effect-burst');
-    expect(bursts).toHaveLength(1);
-    fireEvent.animationEnd(bursts[0]);
-    expect(document.querySelector('.invia-effect-layer')).toBeNull();
+    expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
+    expect(document.querySelector('.invia-effect-confetti')).toBeInTheDocument();
   });
 
-  it('바로 시작하고 축하 효과를 켜면 첫 화면에서 컨페티를 재생한다', () => {
-    render(
+  it('예전 축하 효과가 켜져 있어도 배경 효과 선택에 따라 종이 컨페티를 표시한다', () => {
+    const savedEffects = {
+      opening: 'direct',
+      confetti: true,
+      ambientScope: 'screen',
+    } as const;
+    const { rerender } = render(
       <GuestRenderer
         bulkData={{
           ...bulkData,
-          invitationEffects: { opening: 'direct', confetti: true },
+          invitationEffects: { ...savedEffects, ambientEffect: 'confetti' },
         }}
         blocks={[]}
       />
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(document.querySelectorAll('.invia-effect-burst')).toHaveLength(1);
+    expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
+    expect(document.querySelector('.invia-effect-confetti')).toBeInTheDocument();
+
+    rerender(
+      <GuestRenderer
+        bulkData={{
+          ...bulkData,
+          invitationEffects: { ...savedEffects, ambientEffect: 'none' },
+        }}
+        blocks={[]}
+      />
+    );
+
+    expect(document.querySelector('.invia-effect-layer')).toBeNull();
   });
 
   it('전체 스타일에서 기존 봉투와 컨페티를 끄면 저장된 눈 내림은 유지한다', () => {

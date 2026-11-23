@@ -13,18 +13,6 @@
 .invia-effect-inline {
   z-index: 0;
 }
-.invia-effect-burst {
-  animation: invia-burst-finish var(--burst-duration) linear forwards;
-}
-.invia-effect-burst .invia-effect-particle {
-  animation-iteration-count: 1;
-  animation-fill-mode: both;
-}
-@keyframes invia-burst-finish {
-  to {
-    opacity: 0;
-  }
-}
 .invia-effect-particle {
   position: absolute;
   top: -24px;

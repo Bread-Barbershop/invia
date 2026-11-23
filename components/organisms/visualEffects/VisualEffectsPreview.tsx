@@ -213,7 +213,6 @@ function InvitationEffectsLayers({
   const [opened, setOpened] = useState(effects.opening === 'direct');
   const reveal = useCallback(() => setOpened(true), []);
   const contained = scope !== 'viewport';
-  const prefersReducedMotion = usePrefersReducedMotion();
 
   return (
     <>
@@ -222,14 +221,6 @@ function InvitationEffectsLayers({
           effects={effects}
           placement="screen"
           contained={contained}
-        />
-      )}
-      {opened && effects.confetti && !prefersReducedMotion && (
-        <ParticleLayer
-          effect="confetti"
-          {...effects.confettiMotion}
-          contained={contained}
-          burst
         />
       )}
       {!opened && (
@@ -261,7 +252,6 @@ export function InvitationVisualEffects({
   if (
     !mounted ||
     (effects.opening === 'direct' &&
-      !effects.confetti &&
       (effects.ambientScope !== 'screen' || !effects.ambient.length))
   )
     return null;
