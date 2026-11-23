@@ -148,7 +148,7 @@ describe('미리보기 블록 클릭 선택', () => {
 
       await user.click(preview);
       await user.click(
-        screen.getByRole('combobox', { name: '이 블록의 카드 스타일' })
+        screen.getByRole('combobox', { name: '블록 카드 스타일' })
       );
       await user.click(screen.getByRole('option', { name: '테두리 카드' }));
 

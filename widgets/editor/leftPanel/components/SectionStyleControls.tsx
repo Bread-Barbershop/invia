@@ -12,6 +12,8 @@ import { resolveSectionStyle } from '@/shared/data/sectionStyles';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import type { EditorBlock } from '@/shared/types/block';
 
+const FIELD_LABEL_CLASS = 'text-sm font-normal text-text-secondary';
+
 export function SectionStyleControls({ block }: { block: EditorBlock }) {
   const updateAppearance = useEditorStore(state => state.updateBlockAppearance);
   const commonEffect = useEditorStore(
@@ -28,13 +30,15 @@ export function SectionStyleControls({ block }: { block: EditorBlock }) {
   return (
     <div className="grid w-full shrink-0 gap-3 py-2">
       <SectionStyleSelect
-        label="이 블록의 카드 스타일"
+        label="블록 카드 스타일"
+        labelClassName={FIELD_LABEL_CLASS}
         value={resolveSectionStyle(props.sectionStyle)}
         inheritLabel={inheritLabel}
         onChange={sectionStyle => updateAppearance(id, { sectionStyle })}
       />
       <FormSelector
-        label="이 블록의 등장 효과"
+        label="블록 등장 효과"
+        labelClassName={FIELD_LABEL_CLASS}
         className="flex flex-col gap-1.5 text-xs font-medium text-text-secondary"
         options={[
           {

@@ -75,8 +75,8 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
       name: '공지사항 편집 페이지',
     });
     const addItem = detail.getByRole('button', { name: '항목추가' });
-    const card = detail.getByRole('combobox', { name: '이 블록의 카드 스타일' });
-    const effect = detail.getByRole('combobox', { name: '이 블록의 등장 효과' });
+    const card = detail.getByRole('combobox', { name: '블록 카드 스타일' });
+    const effect = detail.getByRole('combobox', { name: '블록 등장 효과' });
     const title = detail.getByRole('textbox', { name: '제목' });
 
     expect(heading.parentElement).toContainElement(addItem);
@@ -85,6 +85,12 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
     );
     expect(card).toBeVisible();
     expect(effect).toBeVisible();
+    expect(detail.getByText('블록 카드 스타일', { selector: 'label' })).toHaveClass(
+      'text-sm font-normal text-text-secondary'
+    );
+    expect(detail.getByText('블록 등장 효과', { selector: 'label' })).toHaveClass(
+      'text-sm font-normal text-text-secondary'
+    );
     expect(
       screen.queryByRole('button', { name: '카드 디자인 · 등장 효과' })
     ).toBeNull();
@@ -108,7 +114,7 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
     editor.selectedBlock('notice');
     render(<Edit />);
     expect(
-      screen.getByRole('combobox', { name: '이 블록의 카드 스타일' })
+      screen.getByRole('combobox', { name: '블록 카드 스타일' })
     ).toHaveTextContent('종이 카드');
 
     act(() => editor.selectedBlock('place'));
@@ -117,8 +123,8 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
     const heading = detail.getByRole('heading', {
       name: '예식 장소 편집 페이지',
     });
-    const card = detail.getByRole('combobox', { name: '이 블록의 카드 스타일' });
-    const effect = detail.getByRole('combobox', { name: '이 블록의 등장 효과' });
+    const card = detail.getByRole('combobox', { name: '블록 카드 스타일' });
+    const effect = detail.getByRole('combobox', { name: '블록 등장 효과' });
     const title = detail.getByRole('textbox', { name: '제목' });
     expect(heading.compareDocumentPosition(card)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
@@ -129,7 +135,7 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
     expect(card).toHaveTextContent('라운드 카드');
     expect(effect).toHaveTextContent('왼쪽에서 등장');
     expect(
-      screen.getAllByRole('combobox', { name: '이 블록의 카드 스타일' })
+      screen.getAllByRole('combobox', { name: '블록 카드 스타일' })
     ).toHaveLength(1);
   });
 
@@ -158,10 +164,10 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
 
       expect(screen.getByText(copy)).toBeVisible();
       expect(
-        screen.queryByRole('combobox', { name: '이 블록의 카드 스타일' })
+        screen.queryByRole('combobox', { name: '블록 카드 스타일' })
       ).toBeNull();
       expect(
-        screen.queryByRole('combobox', { name: '이 블록의 등장 효과' })
+        screen.queryByRole('combobox', { name: '블록 등장 효과' })
       ).toBeNull();
     }
   });
@@ -198,7 +204,7 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
       name: '기본 카드 스타일',
     });
     const blockStyle = screen.getByRole('combobox', {
-      name: '이 블록의 카드 스타일',
+      name: '블록 카드 스타일',
     });
     expect(defaultStyle).toHaveTextContent('종이 카드');
     expect(blockStyle).toHaveTextContent('초대장 스타일 따르기');
@@ -254,10 +260,10 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
       render(<Edit />);
 
       const card = screen.getByRole('combobox', {
-        name: '이 블록의 카드 스타일',
+        name: '블록 카드 스타일',
       });
       const effect = screen.getByRole('combobox', {
-        name: '이 블록의 등장 효과',
+        name: '블록 등장 효과',
       });
       expect(card).toHaveTextContent(defaultLabel);
 

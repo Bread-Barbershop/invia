@@ -21,6 +21,7 @@ export function FormSelector<T extends FormOption>({
   placeholder,
   onChange,
   className,
+  labelClassName,
   disabled,
   invalid,
   describedBy,
@@ -31,6 +32,7 @@ export function FormSelector<T extends FormOption>({
   placeholder?: string;
   onChange: (value: T['value']) => void;
   className?: string;
+  labelClassName?: string;
   disabled?: boolean;
   invalid?: boolean;
   describedBy?: string;
@@ -45,7 +47,7 @@ export function FormSelector<T extends FormOption>({
 
   return (
     <div className={cn('min-w-0', className)}>
-      <label id={`${id}-label`} htmlFor={id}>
+      <label id={`${id}-label`} htmlFor={id} className={labelClassName}>
         {label}
       </label>
       <Selector

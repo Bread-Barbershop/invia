@@ -15,12 +15,14 @@ import { FormSelector } from '../selector/FormSelector';
 
 export function SectionStyleSelect({
   label,
+  labelClassName,
   value,
   onChange,
   inheritLabel,
   sectionHeading = false,
 }: {
   label: string;
+  labelClassName?: string;
   value: SectionStyle | undefined;
   onChange: (value: SectionStyle | undefined) => void;
   inheritLabel?: string;
@@ -45,6 +47,7 @@ export function SectionStyleSelect({
           label
         )
       }
+      labelClassName={labelClassName}
       className="flex w-full flex-col gap-2 text-xs font-medium"
       options={options}
       value={value ?? ''}
