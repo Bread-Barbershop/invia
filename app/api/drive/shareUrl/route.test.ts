@@ -25,6 +25,7 @@ jest.mock('@/app/api/short-url/_lib/shortUrlStore', () => ({
   getOrCreateShortCode: jest.fn(),
 }));
 jest.mock('@/app/api/drive/_lib/invitationAudiences', () => ({
+  getDefaultShareVisibility: jest.fn(),
   getOwnedAudienceLink: jest.fn(),
   updateAudienceLinkTarget: jest.fn(),
 }));
@@ -41,6 +42,7 @@ import {
 import { downloadFiles } from '@/app/api/drive/_lib/getSaveDataFetch';
 import { getOrCreateShortCode } from '@/app/api/short-url/_lib/shortUrlStore';
 import {
+  getDefaultShareVisibility,
   getOwnedAudienceLink,
   updateAudienceLinkTarget,
 } from '@/app/api/drive/_lib/invitationAudiences';
@@ -63,6 +65,23 @@ describe('shareUrl route', () => {
     });
   });
 
+  it.each(['private', 'pending'] as const)(
+    '기본 초대장이 %s이면 카카오 공유용 카드 대신 최신 상태를 반환한다',
+    async visibility => {
+      (loadInvitationMeta as jest.Mock).mockResolvedValue({
+        payload: { published: true, dataJsonFileId: 'root-data', kakaoShare: shareData },
+      });
+      jest.mocked(getDefaultShareVisibility).mockResolvedValue(visibility);
+      const response = await GET(new Request(
+        'http://localhost/api/drive/shareUrl?invitationFolderId=root&intent=share'
+      ));
+      expect(response.status).toBe(409);
+      expect(await response.json()).toEqual({ ok: false, visibility });
+      expect(getDefaultShareVisibility).toHaveBeenCalledWith('root', 'root-data', true);
+      expect(downloadFiles).not.toHaveBeenCalled();
+    }
+  );
+
   it('하객 그룹 저장 시 초대장 대표 URL에 대상을 붙이고 별도 짧은 링크를 발급하지 않는다', async () => {
     const guestUrl = 'http://localhost/i/aB7kQ2x?to=family';
     jest.mocked(getOwnedAudienceLink).mockResolvedValue({
@@ -70,6 +89,7 @@ describe('shareUrl route', () => {
       rootDataJsonFileId: 'root-data-file',
       requestId: 'claim-key',
       guestUrl,
+      visibility: 'private',
       published: false,
       group: {
         folderId: 'group-folder',
@@ -126,6 +146,7 @@ describe('shareUrl route', () => {
       rootDataJsonFileId: 'root-data-file',
       requestId: 'claim-key',
       guestUrl,
+      visibility: 'public',
       published: true,
       group: {
         folderId: 'group-folder',

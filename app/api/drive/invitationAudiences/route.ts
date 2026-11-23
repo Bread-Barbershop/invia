@@ -77,7 +77,11 @@ export async function GET(req: Request) {
       );
     }
     return NextResponse.json(
-      await getInvitationAudiences(folderId, getInvitationPublicOrigin(req)),
+      await getInvitationAudiences(
+        folderId,
+        getInvitationPublicOrigin(req),
+        view === 'share-options'
+      ),
       { headers: HEADERS }
     );
   } catch (error) {

@@ -13,6 +13,7 @@ import { DriveHttpError } from '@/app/api/drive/_lib/ensureWorkspace';
 import { downloadFiles } from '@/app/api/drive/_lib/getSaveDataFetch';
 import { guestPath } from '@/app/api/drive/_lib/guestReadiness';
 import {
+  getDefaultShareVisibility,
   getOwnedAudienceLink,
   updateAudienceLinkTarget,
 } from '@/app/api/drive/_lib/invitationAudiences';
@@ -294,6 +295,21 @@ export async function GET(req: Request) {
       publicOrigin
     );
     const meta = await loadInvitationMeta(invitationFolderId);
+    if (searchParams.get('intent') === 'share') {
+      const visibility =
+        audience?.visibility ??
+        (await getDefaultShareVisibility(
+          invitationFolderId,
+          meta?.payload.dataJsonFileId,
+          meta?.payload.published === true
+        ));
+      if (visibility !== 'public') {
+        return NextResponse.json(
+          { ok: false, visibility },
+          { status: 409, headers: { 'Cache-Control': 'no-store' } }
+        );
+      }
+    }
     if (meta?.payload.kakaoShare) {
       const currentDataId = audience
         ? await updateAudienceLinkTarget(audience)

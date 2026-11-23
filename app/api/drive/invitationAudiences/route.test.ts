@@ -17,6 +17,7 @@ jest.mock('@/app/api/drive/_lib/cloneInvitation', () => ({
 }));
 jest.mock('@/app/api/drive/_lib/audienceLinkStore', () => ({
   ...jest.requireActual('@/app/api/drive/_lib/audienceLinkStore'),
+  readAudienceVisibility: jest.fn(),
   claimAudienceLink: jest.fn(),
   commitAudienceLink: jest.fn(),
   releaseAudienceLink: jest.fn(),
@@ -25,6 +26,7 @@ jest.mock('@/app/api/drive/_lib/audienceLinkStore', () => ({
 
 import {
   AudienceLinkStoreUnavailableError,
+  readAudienceVisibility,
   claimAudienceLink,
   commitAudienceLink,
   resolveAudienceLink,
@@ -240,6 +242,60 @@ describe('하객 그룹 API', () => {
       ],
     });
     expect(resolveAudienceLink).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['partial', true, false, 'private', 'public'],
+    ['private', false, false, 'private', 'private'],
+    ['pending', true, false, 'pending', 'pending'],
+    ['partial', true, true, 'pending', 'pending'],
+  ] as const)(
+    '공유 목록은 전체 표시 %s, 공개 %s, 저장 중 %s에 맞는 개별 상태를 반환한다',
+    async (marker, published, pending, base, family) => {
+      const fixture = driveFixture();
+      fixture.hasGroup = true;
+      fixture.rootMetaUrl = '/guest/root-data-file';
+      Object.assign(fixture.root.appProperties, {
+        audience_visibility: marker,
+      });
+      jest.mocked(resolveAudienceLink).mockResolvedValue(GROUP_DATA);
+      jest
+        .mocked(readAudienceVisibility)
+        .mockResolvedValue({
+          publicSlugs: ['family'],
+          pending,
+          published,
+          revision: 'r1',
+        });
+      const result = await load(ROOT, 'share-options');
+      expect(await result.json()).toMatchObject({
+        groups: [
+          { slug: '', visibility: base },
+          { slug: 'family', visibility: family },
+        ],
+      });
+    }
+  );
+
+  it('기존 초대장은 행사 공개 상태를 따르고 관리 설정이 누락된 초대장은 확인 중으로 표시한다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    fixture.rootMetaUrl = '/guest/root-data-file';
+    jest.mocked(resolveAudienceLink).mockResolvedValue(GROUP_DATA);
+    const options = () =>
+      load(ROOT, 'share-options').then(response => response.json());
+    expect(await options()).toMatchObject({
+      groups: [{ visibility: 'public' }, { visibility: 'public' }],
+    });
+    expect(readAudienceVisibility).not.toHaveBeenCalled();
+    Object.assign(fixture.root.appProperties, {
+      audience_visibility: 'partial',
+    });
+    jest.mocked(readAudienceVisibility).mockResolvedValue(null);
+    expect(await options()).toMatchObject({
+      groups: [{ visibility: 'pending' }, { visibility: 'pending' }],
+    });
+    expect(readAudienceVisibility).toHaveBeenCalledTimes(1);
   });
 
   it('검증된 원본 하위에 복제하고 대표 짧은 주소로 하객 링크를 만든다', async () => {
