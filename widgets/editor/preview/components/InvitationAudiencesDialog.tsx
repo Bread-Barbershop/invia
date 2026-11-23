@@ -15,6 +15,7 @@ import {
   validateAudienceName,
   validateAudienceSlug,
 } from '@/features/invitation/audiences/model';
+import LoadingSpinner from '@/shared/assets/icons/loadingSpinner.svg';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
@@ -594,7 +595,11 @@ export default function InvitationAudiencesDialog({
           </section>
         )}
         {operationMessage && (
-          <p role="status" className="text-sm text-neutral-600">
+          <p role="status" className="flex items-center gap-2 text-sm text-neutral-600">
+            <LoadingSpinner
+              aria-hidden="true"
+              className="size-4 shrink-0 motion-safe:animate-spin"
+            />
             {operationMessage}
           </p>
         )}

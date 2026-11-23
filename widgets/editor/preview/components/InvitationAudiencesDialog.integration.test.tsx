@@ -33,7 +33,11 @@ const save = jest.fn();
 const close = jest.fn();
 const openEditor = jest.fn();
 
-jest.mock('@/shared/assets/icons/loadingSpinner.svg', () => () => null);
+jest.mock('@/shared/assets/icons/loadingSpinner.svg', () => {
+  return function LoadingSpinner(props: object) {
+    return <svg {...props} />;
+  };
+});
 jest.mock('@/widgets/mainPoster/hooks/useTemplate', () => ({
   ...jest.requireActual('@/widgets/mainPoster/hooks/useTemplate'),
   preloadFonts: jest.fn().mockResolvedValue(undefined),
@@ -278,28 +282,42 @@ describe('하객별 구분', () => {
   it('새 초대장을 명시적으로 저장한 뒤 현재 편집기에서 그룹 목록을 연다', async () => {
     const user = userEvent.setup();
     useEditorStore.setState({ invitationFolderId: '', isDirty: true });
-    save.mockResolvedValueOnce(null).mockImplementationOnce(async () => {
-      useEditorStore.setState({
-        invitationFolderId: basicAudience.folderId,
-        isDirty: false,
+    let failSave!: () => void;
+    save
+      .mockReturnValueOnce(new Promise(resolve => {
+        failSave = () => resolve(null);
+      }))
+      .mockImplementationOnce(async () => {
+        useEditorStore.setState({
+          invitationFolderId: basicAudience.folderId,
+          isDirty: false,
+        });
+        return savedBasicInvitation;
       });
-      return savedBasicInvitation;
-    });
     mockList([basicAudience]);
     render(<Dialog />);
 
     expect(mockFetch).not.toHaveBeenCalled();
     const saveButton = screen.getByRole('button', { name: '저장 후 계속' });
     await user.click(saveButton);
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('저장하고 있어요.');
+    const spinner = status.querySelector('svg');
+    expect(spinner).toHaveAttribute('aria-hidden', 'true');
+    expect(spinner).toHaveClass('motion-safe:animate-spin');
+
+    await act(async () => failSave());
     expect(await screen.findByRole('alert')).toHaveTextContent(
       '현재 초대장을 저장하지 못했어요.'
     );
+    expect(status).not.toBeInTheDocument();
     expect(mockFetch).not.toHaveBeenCalled();
     await user.click(saveButton);
 
     expect(
       await screen.findByRole('button', { name: '기본 링크 복사' })
     ).toBeInTheDocument();
+    expect(screen.queryByText('저장하고 있어요.')).not.toBeInTheDocument();
     expect(save).toHaveBeenCalledWith({ preserveVisibility: false });
     expect(openEditor).not.toHaveBeenCalled();
   });
