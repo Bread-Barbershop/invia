@@ -13,7 +13,7 @@ export type CarouselCardItem = {
 export type ShareAudienceLink = (
   folderId: string,
   url: string,
-  audienceName: string
+  audienceName?: string
 ) => void;
 
 export type ShareAudienceWithKakao = (

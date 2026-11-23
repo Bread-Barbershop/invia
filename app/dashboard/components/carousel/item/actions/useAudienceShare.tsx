@@ -134,7 +134,11 @@ export function useAudienceShare({
   function share(option: ShareOption, via: ShareChannel) {
     if (!invite) return;
     if (via === 'link') {
-      onCopyUrl?.(invite.folderId, option.url, option.name);
+      onCopyUrl?.(
+        invite.folderId,
+        option.url,
+        options && options.length > 1 ? option.name : undefined
+      );
       return;
     }
     if (!onKakao || pendingKakao.current) return;

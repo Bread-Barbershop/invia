@@ -669,6 +669,7 @@ describe('대시보드 초대장', () => {
 
     it.each([
       ['기본 초대장', 'http://localhost/i/wedding'],
+      ['가족용', 'http://localhost/i/wedding?to=family'],
       ['직장용', 'http://localhost/i/wedding?to=work'],
     ])(
       '%s을 선택한 뒤에만 같은 주소를 복사하고 QR을 만든다',
@@ -705,6 +706,9 @@ describe('대시보드 초대장', () => {
           await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
         ).toBeVisible();
         expect(toDataURL).toHaveBeenCalledWith(url, expect.any(Object));
+        expect(
+          screen.getByRole('link', { name: 'QR 저장하기' })
+        ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
         await user.click(screen.getByRole('button', { name: '닫기' }));
         expect(trigger).toHaveFocus();
       }
@@ -734,6 +738,10 @@ describe('대시보드 초대장', () => {
       expect(toDataURL).toHaveBeenCalledWith(
         'http://localhost/i/wedding',
         expect.any(Object)
+      );
+      expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+        'download',
+        '민서·지훈 결혼식 QR.png'
       );
     });
   });
