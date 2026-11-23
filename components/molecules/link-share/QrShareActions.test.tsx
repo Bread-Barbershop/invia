@@ -15,17 +15,31 @@ function setApi(target: object, name: string, value: unknown) {
   });
 }
 
-function openActions(allowSending = true) {
+function openActions(
+  allowSending = true,
+  url = 'https://invia.example/i/wedding?to=family'
+) {
   render(
     <QrShareActions
       dataUrl={QR_DATA_URL}
       filename={filename}
-      kakaoFolderId="family"
+      url={url}
+      shareFolderId="family"
       allowSending={allowSending}
     />
   );
   fireEvent.click(screen.getByRole('button', { name: '공유하기' }));
 }
+
+const message = '민서 & 지훈 💐 초대합니다.';
+const prepareSms = jest.fn();
+
+beforeEach(() => {
+  prepareSms
+    .mockReset()
+    .mockResolvedValue({ ok: true, json: async () => ({ message }) });
+  setApi(globalThis, 'fetch', prepareSms);
+});
 
 afterEach(() => {
   while (restore.length) restore.pop()?.();
@@ -101,9 +115,47 @@ it('비공개 그룹은 카카오톡과 앱 전송을 막고 QR 복사를 허용
   setApi(navigator, 'clipboard', { write: jest.fn() });
   setApi(window, 'ClipboardItem', jest.fn());
   openActions(false);
+  expect(screen.getByRole('button', { name: /문자로 보내기/ })).toBeDisabled();
+  expect(prepareSms).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: /카카오톡으로/ })).toBeDisabled();
   expect(
     screen.getByRole('button', { name: 'QR 이미지 보내기' })
   ).toBeDisabled();
   expect(screen.getByRole('button', { name: 'QR 이미지 복사' })).toBeEnabled();
+});
+
+it.each([
+  ['Android', 'Linux', 5, '?'],
+  ['iPhone', 'iPhone', 5, '&'],
+  ['Macintosh', 'MacIntel', 5, '&'],
+  ['Macintosh', 'MacIntel', 0, '?'],
+])(
+  '문자 앱에 %s 기기의 수신자 없는 초안과 그룹 URL을 전달한다',
+  async (agent, platform, points, separator) => {
+    setApi(navigator, 'userAgent', agent);
+    setApi(navigator, 'platform', platform);
+    setApi(navigator, 'maxTouchPoints', points);
+    const url = 'https://invia.example/i/w?to=family&q=a%26b#장소';
+    openActions(true, url);
+    expect(
+      await screen.findByRole('link', { name: '문자로 보내기' })
+    ).toHaveAttribute(
+      'href',
+      `sms:${separator}body=${encodeURIComponent(`${message}\n${url}`)}`
+    );
+  }
+);
+
+it('초안 조회 실패 후 다시 시도하고 서버에서 비공개로 확인하면 문자 앱을 열 수 없다', async () => {
+  prepareSms
+    .mockRejectedValueOnce(new Error('offline'))
+    .mockResolvedValueOnce({ status: 409 });
+  openActions();
+  fireEvent.click(
+    await screen.findByRole('button', { name: /문자 초안 다시 준비하기/ })
+  );
+  expect(
+    await screen.findByRole('button', { name: /공개 후 보낼 수 있어요/ })
+  ).toBeDisabled();
+  expect(screen.queryByRole('link', { name: '문자로 보내기' })).toBeNull();
 });

@@ -31,8 +31,17 @@ jest.mock('./SaveLottie', () => ({
 }));
 
 describe('SaveModal', () => {
+  const originalFetch = global.fetch;
+  const prepareSms = jest.fn();
   beforeEach(() => {
+    global.fetch = prepareSms.mockReset().mockResolvedValue({
+      ok: true,
+      json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }),
+    });
     (toDataURL as jest.Mock).mockResolvedValue(QR_DATA_URL);
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   const commonProps = {
@@ -104,6 +113,7 @@ describe('SaveModal', () => {
 
   it('저장 후 링크 공유하기를 누르면 링크와 QR을 함께 표시하고 닫으면 완료 화면으로 돌아온다', async () => {
     const user = userEvent.setup();
+    const familyUrl = `${SHARE_URL}?to=family`;
     render(
       <SaveModal
         {...commonProps}
@@ -111,7 +121,7 @@ describe('SaveModal', () => {
           invitationFolderId: 'invitation-folder-id',
           invitationUuid: 'invitation-uuid',
           dataJsonFileId: 'data-json-file-id',
-          guestUrl: SHARE_URL,
+          guestUrl: familyUrl,
           qrDownloadName: '민서·지훈 결혼식 - 가족용 QR.png',
           published: true,
           ready: true,
@@ -123,7 +133,7 @@ describe('SaveModal', () => {
     await user.click(screen.getByRole('button', { name: '링크 공유하기' }));
 
     expect(screen.getByRole('textbox', { name: '초대장 링크' })).toHaveValue(
-      SHARE_URL
+      familyUrl
     );
     expect(
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
@@ -134,8 +144,14 @@ describe('SaveModal', () => {
     );
     await user.click(screen.getByRole('button', { name: '공유하기' }));
     expect(
-      screen.getByRole('button', { name: '카카오톡으로 초대장 링크 보내기' })
+      screen.getByRole('button', { name: '카카오톡으로 보내기' })
     ).toBeEnabled();
+    const sms = await screen.findByRole('link', { name: '문자로 보내기' });
+    expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(familyUrl);
+    expect(prepareSms).toHaveBeenCalledWith(
+      '/api/drive/shareUrl?invitationFolderId=invitation-folder-id&intent=sms',
+      expect.anything()
+    );
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(
       screen.getByRole('button', { name: '다시 수정하기' })

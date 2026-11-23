@@ -17,7 +17,8 @@ type LinkShareModalProps = {
   url: string;
   recipient?: string;
   downloadName?: string;
-  kakaoFolderId?: string;
+  shareFolderId?: string;
+  canShareKakao?: boolean;
   allowSending?: boolean;
   notice?: string;
   onClose: () => void;
@@ -33,7 +34,8 @@ export function LinkShareModal({
   url,
   recipient,
   downloadName = 'invitation-qr.png',
-  kakaoFolderId,
+  shareFolderId,
+  canShareKakao,
   allowSending = true,
   notice,
   onClose,
@@ -124,45 +126,48 @@ export function LinkShareModal({
         tabIndex={-1}
         className="flex max-h-[calc(100dvh-32px)] w-[335px] max-w-full flex-col items-center gap-5 overflow-y-auto rounded-xl bg-white p-5 shadow-xl outline-none"
       >
-        <div className="text-center">
-          <h2 id={titleId} className="text-base font-semibold text-[#202020]">
-            링크와 QR로 공유하기
-          </h2>
-          <p className="mt-2 break-words text-sm text-gray-600">
-            {recipient ?? '링크를 보내거나 QR을 스캔해 초대장을 열 수 있어요.'}
-          </p>
+        <div className="flex w-full items-center justify-between gap-3">
+          <div className="min-w-0 text-left">
+            <h2 id={titleId} className="text-base font-semibold text-[#202020]">
+              링크와 QR로 공유하기
+            </h2>
+            <p className="mt-2 break-words text-sm text-gray-600">
+              {recipient ??
+                '링크를 보내거나 QR을 스캔해 초대장을 열 수 있어요.'}
+            </p>
+          </div>
+          <div className="flex size-28 shrink-0 items-center justify-center bg-white">
+            {currentQr?.dataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={currentQr.dataUrl}
+                alt="초대장 공유 QR 코드"
+                width={112}
+                height={112}
+              />
+            ) : currentQr ? (
+              <div className="text-center text-sm">
+                <p role="alert">QR을 만들지 못했어요.</p>
+                <button
+                  type="button"
+                  className="mt-3 cursor-pointer underline underline-offset-4"
+                  onClick={() => setAttempt(value => value + 1)}
+                >
+                  QR 다시 만들기
+                </button>
+              </div>
+            ) : (
+              <p role="status" className="text-sm text-gray-500">
+                QR을 만들고 있어요.
+              </p>
+            )}
+          </div>
         </div>
         {notice && (
           <p className="w-full rounded-lg bg-gray-50 p-3 text-center text-xs leading-5 text-gray-600">
             {notice}
           </p>
         )}
-        <div className="flex size-[224px] shrink-0 items-center justify-center bg-white">
-          {currentQr?.dataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={currentQr.dataUrl}
-              alt="초대장 공유 QR 코드"
-              width={224}
-              height={224}
-            />
-          ) : currentQr ? (
-            <div className="text-center text-sm">
-              <p role="alert">QR을 만들지 못했어요.</p>
-              <button
-                type="button"
-                className="mt-3 cursor-pointer underline underline-offset-4"
-                onClick={() => setAttempt(value => value + 1)}
-              >
-                QR 다시 만들기
-              </button>
-            </div>
-          ) : (
-            <p role="status" className="text-sm text-gray-500">
-              QR을 만들고 있어요.
-            </p>
-          )}
-        </div>
         <div className="w-full">
           <label htmlFor={`${titleId}-url`} className="text-xs text-gray-500">
             초대장 링크
@@ -204,7 +209,8 @@ export function LinkShareModal({
           </div>
           {copyStatus === 'copied' && (
             <p role="status" className="mt-2 text-center text-xs text-gray-500">
-              링크를 복사했어요.
+              <span>링크를 복사했어요.</span> 인스타그램 DM 등 원하는 대화방에
+              붙여넣어 주세요.
             </p>
           )}
           {copyStatus === 'failed' && (
@@ -216,7 +222,9 @@ export function LinkShareModal({
             key={shareUrl}
             dataUrl={currentQr?.dataUrl}
             filename={downloadName}
-            kakaoFolderId={kakaoFolderId}
+            url={shareUrl}
+            shareFolderId={shareFolderId}
+            canShareKakao={canShareKakao}
             allowSending={allowSending}
           />
         </div>
