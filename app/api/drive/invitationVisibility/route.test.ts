@@ -113,6 +113,7 @@ describe('invitationVisibility route', () => {
       rootDataJsonFileId: 'root-data',
       requestId: 'claim-key',
       guestUrl,
+      visibility: 'private',
       published: false,
       group: {
         folderId: 'invitation-folder-id',

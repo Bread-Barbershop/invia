@@ -11,31 +11,39 @@ import {
 import type { InviteListItem } from '@/app/dashboard/types';
 import {
   buildAudienceGuestUrl,
-  type AudienceGroupList,
+  type AudienceGroup,
 } from '@/features/invitation/audiences/model';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 
 import type {
   ShareAudienceLink,
   ShareAudienceWithKakao,
+  ShareOption,
 } from '../../carouselTypes';
 
-type ShareOption = { folderId: string; name: string; url: string };
 type ShareChannel = 'link' | 'kakao';
 const LOAD_ERROR = '공유할 하객 그룹을 불러오지 못했어요.';
+const statusLabels = {
+  public: '공개',
+  private: '비공개',
+  pending: '설정 확인 중',
+} as const;
 
 async function loadShareOptions(
   folderId: string,
   signal: AbortSignal
 ): Promise<ShareOption[]> {
-  const params = new URLSearchParams({ folderId });
+  const params = new URLSearchParams({ folderId, view: 'share-options' });
   const response = await fetch(`/api/drive/invitationAudiences?${params}`, {
     cache: 'no-store',
     signal,
   });
   const list = await response.json();
   if (!response.ok) throw new Error(list?.message ?? LOAD_ERROR);
-  const { groups, rootGuestUrl } = list as AudienceGroupList;
+  const { groups, rootGuestUrl } = list as {
+    groups: (AudienceGroup & Pick<ShareOption, 'visibility'>)[];
+    rootGuestUrl: string;
+  };
   if (
     !rootGuestUrl ||
     !Array.isArray(groups) ||
@@ -45,6 +53,7 @@ async function loadShareOptions(
   }
   return groups.map(group => ({
     folderId: group.folderId,
+    visibility: statusLabels[group.visibility] ? group.visibility : 'pending',
     name: group.slug ? group.name : '기본 초대장',
     url: new URL(
       buildAudienceGuestUrl(rootGuestUrl, group.slug),
@@ -70,9 +79,11 @@ export function useAudienceShare({
 }) {
   const [attempt, setAttempt] = useState(0);
   const folderId = invite?.folderId;
+  const published = invite?.published;
+  const scope = invite?.audienceVisibility;
   const request = useMemo(
-    () => ({ folderId, guestUrl, active, attempt }),
-    [folderId, guestUrl, active, attempt]
+    () => ({ folderId, guestUrl, active, attempt, published, scope }),
+    [folderId, guestUrl, active, attempt, published, scope]
   );
   const [result, setResult] = useState<{
     request: typeof request;
@@ -134,21 +145,15 @@ export function useAudienceShare({
   function share(option: ShareOption, via: ShareChannel) {
     if (!invite) return;
     if (via === 'link') {
-      onCopyUrl?.(
-        invite.folderId,
-        option.url,
-        options && options.length > 1 ? option.name : undefined
-      );
+      onCopyUrl?.(invite.folderId, option, (options?.length ?? 0) > 1);
       return;
     }
     if (!onKakao || pendingKakao.current) return;
     const controller = new AbortController();
     pendingKakao.current = controller;
-    void onKakao(invite.folderId, option.folderId, controller.signal).finally(
-      () => {
-        if (pendingKakao.current === controller) pendingKakao.current = null;
-      }
-    );
+    void onKakao(invite.folderId, option, controller.signal).finally(() => {
+      if (pendingKakao.current === controller) pendingKakao.current = null;
+    });
   }
 
   function buttonProps(via: ShareChannel, available: boolean) {
@@ -220,6 +225,8 @@ export function useAudienceShare({
             <li key={option.url}>
               <button
                 type="button"
+                aria-label={option.name}
+                aria-describedby={`${eventId}-${option.folderId}`}
                 disabled={
                   channel === 'kakao' &&
                   option.folderId === folderId &&
@@ -232,6 +239,12 @@ export function useAudienceShare({
                 }}
               >
                 <span className="min-w-0 break-words">{option.name}</span>
+                <span
+                  id={`${eventId}-${option.folderId}`}
+                  className="ml-auto shrink-0 text-xs font-medium text-text-secondary"
+                >
+                  {statusLabels[option.visibility]}
+                </span>
                 <ChevronRight
                   aria-hidden="true"
                   size={16}

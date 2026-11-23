@@ -1,9 +1,11 @@
 import type { AudienceGroup } from '@/features/invitation/audiences/model';
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 
 import { privateInvite } from './invitationPreview';
 
 export const shareInvite = {
   ...privateInvite,
+  published: true,
   displayTitle: '민서·지훈 결혼식',
   guestUrl: '/guest/saved-root',
 };
@@ -42,9 +44,19 @@ export const baseKakaoCard = {
   invitationUrl: 'https://invia.example/i/wedding',
   showLocationButton: false,
 };
-export function shareAudienceResponse(groups: AudienceGroup[]) {
+export function shareAudienceResponse(
+  groups: AudienceGroup[],
+  statuses: Record<string, GroupShareVisibility> = {}
+) {
   return {
     ok: true,
-    json: async () => ({ groups, rootGuestUrl: '/i/wedding', activeSlug: '' }),
+    json: async () => ({
+      groups: groups.map(group => ({
+        ...group,
+        visibility: statuses[group.slug] ?? 'public',
+      })),
+      rootGuestUrl: '/i/wedding',
+      activeSlug: '',
+    }),
   };
 }

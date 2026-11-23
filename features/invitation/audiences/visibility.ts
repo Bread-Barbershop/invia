@@ -17,6 +17,8 @@ export type AudienceVisibilityStatus =
   | 'private'
   | 'pending';
 
+export type GroupShareVisibility = Exclude<AudienceVisibilityStatus, 'partial'>;
+
 export function visibilityStatus({
   groups,
   visibility,
