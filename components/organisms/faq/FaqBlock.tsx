@@ -21,7 +21,24 @@ export function FaqBlock({ blockInfo, id }: { blockInfo: EditorBlock<'faq'>; id:
             value={title} onChange={e => updateBlock(id, { title: e.target.value })} />
         </label>
         {items.map((item, index) => (
-          <section key={index} className="flex flex-col gap-2 rounded-lg border border-border-divider p-3">
+          <section
+            key={index}
+            aria-labelledby={`${id}-question-${index}`}
+            className="flex flex-col gap-2 rounded-lg border border-border-divider p-3"
+          >
+            <div className="flex items-center justify-between">
+              <h4 id={`${id}-question-${index}`} className="text-sm font-semibold text-text-primary">
+                {index + 1}번째 질문
+              </h4>
+              <button
+                type="button"
+                aria-label={`${index + 1}번째 질문 삭제`}
+                onClick={() => updateBlock(id, { items: items.filter((_, i) => i !== index) })}
+                className="text-xs text-text-secondary hover:text-primary"
+              >
+                삭제
+              </button>
+            </div>
             <label className="flex flex-col gap-1 text-xs">질문
               <input className="h-10 rounded-md border border-border-divider px-3 text-sm"
                 value={item.question} maxLength={120}
@@ -32,10 +49,6 @@ export function FaqBlock({ blockInfo, id }: { blockInfo: EditorBlock<'faq'>; id:
                 value={item.answer} maxLength={1000}
                 onChange={e => change(index, 'answer', e.target.value)} />
             </label>
-            <button type="button" className="self-end text-xs text-red-600"
-              onClick={() => updateBlock(id, { items: items.filter((_, i) => i !== index) })}>
-              항목 삭제
-            </button>
           </section>
         ))}
         <button type="button" className="rounded-md border border-border-divider py-3 text-sm text-primary"
