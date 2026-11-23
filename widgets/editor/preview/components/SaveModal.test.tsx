@@ -4,13 +4,13 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toDataURL } from 'qrcode';
 import React from 'react';
 
 import {
   QR_DATA_URL,
   SHARE_URL,
 } from '@/components/molecules/link-share/fixtures/shareLink';
+import { toDataURL } from '@/components/molecules/link-share/invitationQr';
 import { DASHBOARD_PENDING_INVITATION_KEY } from '@/shared/constants/dashboardPendingInvitation';
 
 import {
@@ -19,7 +19,9 @@ import {
 } from './fixtures/invitationAudiences';
 import { SaveModal } from './SaveModal';
 
-jest.mock('qrcode', () => ({ toDataURL: jest.fn() }));
+jest.mock('@/components/molecules/link-share/invitationQr', () => ({
+  toDataURL: jest.fn(),
+}));
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace: jest.fn() }),
 }));

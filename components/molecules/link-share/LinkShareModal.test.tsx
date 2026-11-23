@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toDataURL } from 'qrcode';
 
 import { QR_DATA_URL, SHARE_URL } from './fixtures/shareLink';
+import { toDataURL } from './invitationQr';
 import { LinkShareModal } from './LinkShareModal';
 
-jest.mock('qrcode', () => ({ toDataURL: jest.fn() }));
+jest.mock('./invitationQr', () => ({ toDataURL: jest.fn() }));
 
 const mockToDataURL = toDataURL as jest.Mock;
 
