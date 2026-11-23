@@ -186,7 +186,7 @@ describe('일괄 스크롤 애니메이션 편집', () => {
     addBlock('birthday', 'gallery', 'party');
     selectedBlock('photos');
     render(<Edit />);
-    const effect = screen.getByRole('combobox', { name: '이 블록의 등장 효과' });
+    const effect = screen.getByRole('combobox', { name: '블록 등장 효과' });
     expect(effect).toHaveTextContent('전체 설정 따르기 (효과 없음)');
     fireEvent.click(effect);
     fireEvent.click(screen.getByRole('option', { name: '양옆에서 모이기' }));
