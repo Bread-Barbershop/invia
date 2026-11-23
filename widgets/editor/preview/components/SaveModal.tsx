@@ -327,7 +327,7 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
         <LinkShareModal
           url={pendingInvitation.guestUrl}
           downloadName={pendingInvitation.qrDownloadName}
-          kakaoFolderId={pendingInvitation.invitationFolderId}
+          shareFolderId={pendingInvitation.invitationFolderId}
           allowSending={
             pendingInvitation.published !== false &&
             pendingInvitation.ready !== false

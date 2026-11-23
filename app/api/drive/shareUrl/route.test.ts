@@ -35,6 +35,7 @@ jest.mock('@/app/api/drive/_lib/getSaveDataFetch', () => ({
 }));
 
 import { GET, POST } from '@/app/api/drive/shareUrl/route';
+import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
 import {
   loadInvitationMeta,
   upsertInvitationMeta,
@@ -81,6 +82,31 @@ describe('shareUrl route', () => {
       expect(downloadFiles).not.toHaveBeenCalled();
     }
   );
+
+  it('카카오 카드가 없는 공개 초대장은 저장된 행사명으로 문자 초안을 준비한다', async () => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
+    (loadInvitationMeta as jest.Mock).mockResolvedValue({ payload: { dataJsonFileId: 'root', published: true } });
+    (downloadFiles as jest.Mock).mockResolvedValue({ bulkData: {}, blocks: [
+      { component: 'coupleIntroduction', props: { brideFirst: true, bride: '민서', groom: '지훈' } },
+    ] });
+    const response = await GET(new Request('http://localhost/api/drive/shareUrl?invitationFolderId=root&intent=sms'));
+    expect(await response.json()).toEqual({ message: '민서·지훈 결혼식에 초대합니다.' });
+  });
+
+  it('직접 쓴 공유 제목은 문구를 덧붙이지 않고 문자에 그대로 쓴다', async () => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
+    (loadInvitationMeta as jest.Mock).mockResolvedValue({ payload: { dataJsonFileId: 'root' } });
+    (downloadFiles as jest.Mock).mockResolvedValue({ bulkData: {}, shareUrl: { urlTitle: '함께 축하해 주세요 💐' } });
+    const response = await GET(new Request('http://localhost/api/drive/shareUrl?invitationFolderId=root&intent=sms'));
+    expect(await response.json()).toEqual({ message: '함께 축하해 주세요 💐' });
+  });
+
+  it.each(['private', 'pending'] as const)('공개 상태가 %s이면 문자 초안 없이 반환한다', async state => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue(state);
+    const response = await GET(new Request('http://localhost/api/drive/shareUrl?invitationFolderId=root&intent=sms'));
+    expect(response.status).toBe(409);
+    expect(downloadFiles).not.toHaveBeenCalled();
+  });
 
   it('하객 그룹 저장 시 초대장 대표 URL에 대상을 붙이고 별도 짧은 링크를 발급하지 않는다', async () => {
     const guestUrl = 'http://localhost/i/aB7kQ2x?to=family';
@@ -173,6 +199,11 @@ describe('shareUrl route', () => {
       data: { title: '', description: '', invitationUrl: guestUrl },
       dataJsonFileId: 'current-group-data',
     });
+    const sms = await GET(new Request(
+      'http://localhost/api/drive/shareUrl?invitationFolderId=group-folder&intent=sms'
+    ));
+    expect(await sms.json()).toEqual({ message: DEFAULT_TITLE });
+    expect(downloadFiles).toHaveBeenLastCalledWith('current-group-data');
   });
 
   it('공유 데이터를 meta.json에 저장한다', async () => {

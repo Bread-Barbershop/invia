@@ -678,12 +678,12 @@ describe('대시보드 초대장', () => {
       async (name, url) => {
         const user = userEvent.setup();
         const copy = jest.spyOn(navigator.clipboard, 'writeText');
-        mockFetch.mockResolvedValue(
+        mockFetch.mockResolvedValueOnce(
           shareAudienceResponse([baseGroup, familyGroup, workGroup], {
             '': 'private',
             work: 'private',
           })
-        );
+        ).mockResolvedValue({ ok: true, json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }) });
         showCard();
         const trigger = await screen.findByRole('button', {
           name: 'URL 링크 공유하기',
@@ -725,6 +725,14 @@ describe('대시보드 초대장', () => {
         expect(
           screen.getByRole('link', { name: 'QR 저장하기' })
         ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
+        await user.click(screen.getByRole('button', { name: '공유하기' }));
+        if (name === '가족용') {
+          const sms = await screen.findByRole('link', { name: '문자로 보내기' });
+          expect(mockFetch).toHaveBeenLastCalledWith('/api/drive/shareUrl?invitationFolderId=family-folder&intent=sms', expect.anything());
+          expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(`민서·지훈 결혼식에 초대합니다.\n${url}`);
+        } else {
+          expect(screen.getByRole('button', { name: /문자로 보내기/ })).toBeDisabled();
+        }
         await user.click(screen.getByRole('button', { name: '닫기' }));
         expect(trigger).toHaveFocus();
       }
@@ -836,6 +844,7 @@ describe('대시보드 초대장', () => {
         const user = userEvent.setup();
         mockFetch
           .mockResolvedValueOnce(shareAudienceResponse([baseGroup, workGroup]))
+          .mockResolvedValueOnce({ ok: true, json: async () => ({ message: '초대합니다.' }) })
           .mockResolvedValueOnce(
             isPublic
               ? {
@@ -856,7 +865,7 @@ describe('대시보드 초대장', () => {
         await user.click(screen.getByRole('button', { name: '공유하기' }));
         await user.click(
           screen.getByRole('button', {
-            name: '카카오톡으로 초대장 링크 보내기',
+            name: '카카오톡으로 보내기',
           })
         );
         expect(mockFetch).toHaveBeenLastCalledWith(

@@ -24,6 +24,11 @@ import {
   hideCustomShareText,
   normalizeInvitationPrivacy,
 } from '@/features/invitation/privacy/settings';
+import {
+  customShareTitle,
+  titleFromSavedInvitation,
+} from '@/shared/utils/invitationTitle';
+import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
 
 function getSharePublicOrigin(req: Request) {
   return (
@@ -166,20 +171,31 @@ function createReadableShareData(
   };
 }
 
+async function loadShareContent(dataJsonFileId?: string | null) {
+  const invitation = dataJsonFileId
+    ? await downloadFiles(encodeURIComponent(dataJsonFileId))
+    : null;
+  const fields = getActivePrivacyFields(
+    normalizeInvitationPrivacy(invitation?.bulkData?.invitationPrivacy),
+    Date.now()
+  );
+  return {
+    invitation,
+    fields,
+    hideText: !invitation?.bulkData || hideCustomShareText(fields),
+  };
+}
+
 async function protectKakaoShare(share: ShareUrlPayload, dataJsonFileId?: string | null) {
   if (!dataJsonFileId) return share;
 
   // Read the same saved settings as the guest page. Share metadata is saved
   // separately and can be older than the invitation itself.
-  const invitation = await downloadFiles(encodeURIComponent(dataJsonFileId));
-  const fields = getActivePrivacyFields(
-    normalizeInvitationPrivacy(invitation?.bulkData?.invitationPrivacy),
-    Date.now()
-  );
+  const { invitation, fields, hideText } = await loadShareContent(dataJsonFileId);
   const unavailable = !invitation?.bulkData;
   return {
     ...share,
-    ...(unavailable || hideCustomShareText(fields) ? { title: '', description: '' } : {}),
+    ...(hideText ? { title: '', description: '' } : {}),
     ...(unavailable || fields.has('media') ? { imageFileId: undefined } : {}),
     ...(unavailable || fields.has('location') ? { showLocationButton: false, locationInfo: undefined } : {}),
   };
@@ -295,7 +311,8 @@ export async function GET(req: Request) {
       publicOrigin
     );
     const meta = await loadInvitationMeta(invitationFolderId);
-    if (searchParams.get('intent') === 'share') {
+    const intent = searchParams.get('intent');
+    if (intent === 'share' || intent === 'sms') {
       const visibility =
         audience?.visibility ??
         (await getDefaultShareVisibility(
@@ -309,6 +326,25 @@ export async function GET(req: Request) {
           { status: 409, headers: { 'Cache-Control': 'no-store' } }
         );
       }
+    }
+    if (intent === 'sms') {
+      const dataId = audience
+        ? await updateAudienceLinkTarget(audience)
+        : meta?.payload.dataJsonFileId;
+      const { invitation, hideText } = await loadShareContent(dataId);
+      let message = DEFAULT_TITLE;
+      if (invitation && !hideText) {
+        const custom =
+          customShareTitle(invitation.shareUrl?.urlTitle) ||
+          customShareTitle(invitation.shareUrl?.title) ||
+          customShareTitle(meta?.payload.kakaoShare?.title);
+        const event = titleFromSavedInvitation({ blocks: invitation.blocks });
+        message = custom || (event ? `${event}에 초대합니다.` : DEFAULT_TITLE);
+      }
+      return NextResponse.json(
+        { message },
+        { headers: { 'Cache-Control': 'no-store' } }
+      );
     }
     if (meta?.payload.kakaoShare) {
       const currentDataId = audience

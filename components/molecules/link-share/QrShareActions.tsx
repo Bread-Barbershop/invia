@@ -1,3 +1,4 @@
+import { Copy, ImageIcon, MessageCircle, Share2 } from 'lucide-react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import {
@@ -5,20 +6,24 @@ import {
   shareInvitationWithKakao,
 } from '@/shared/utils/kakaoInvitationShare';
 
+import { ShareActionLabel, shareRow } from './ShareActionLabel';
+import { SmsShareAction } from './SmsShareAction';
+
 type Props = {
   dataUrl?: string | null;
   filename: string;
-  kakaoFolderId?: string;
+  url: string;
+  shareFolderId?: string;
+  canShareKakao?: boolean;
   allowSending: boolean;
 };
-
-const actionStyle =
-  'min-h-11 w-full rounded-lg px-3 text-left text-sm font-medium hover:bg-neutral-50 focus-visible:outline-2 disabled:opacity-50';
 
 export function QrShareActions({
   dataUrl,
   filename,
-  kakaoFolderId,
+  url,
+  shareFolderId,
+  canShareKakao = true,
   allowSending,
 }: Props) {
   const id = useId();
@@ -52,8 +57,8 @@ export function QrShareActions({
     setBusy(true);
     setFeedback('');
     try {
-      if (action === 'kakao' && kakaoFolderId) {
-        const data = await loadShareData(kakaoFolderId, controller.signal);
+      if (action === 'kakao' && shareFolderId && canShareKakao) {
+        const data = await loadShareData(shareFolderId, controller.signal);
         if (controller.signal.aborted) return;
         if (typeof data === 'string') {
           setFeedback('공개 상태를 확인한 뒤 카카오톡으로 보내 주세요.');
@@ -95,7 +100,7 @@ export function QrShareActions({
         type="button"
         aria-expanded={expanded}
         aria-controls={id}
-        className="min-h-11 w-full rounded-lg bg-black px-3 text-sm font-semibold text-white hover:bg-neutral-800"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-3 text-sm font-semibold text-white hover:bg-neutral-800"
         onClick={() => {
           if (expanded) {
             pending.current?.abort();
@@ -106,41 +111,69 @@ export function QrShareActions({
           setExpanded(!expanded);
         }}
       >
-        공유하기
+        <Share2 size={16} aria-hidden="true" /> 공유하기
       </button>
       <div
         id={id}
         hidden={!expanded}
         className="mt-2 rounded-lg border border-gray-200 p-1"
       >
-        {kakaoFolderId && (
+        {shareFolderId && canShareKakao && (
           <button
             type="button"
-            className={actionStyle}
+            className={shareRow}
+            aria-label="카카오톡으로 보내기"
             disabled={busy || !allowSending}
             onClick={() => void run('kakao')}
           >
-            카카오톡으로 초대장 링크 보내기
+            <ShareActionLabel
+              icon={MessageCircle}
+              title="카카오톡으로 보내기"
+              detail="초대장 링크 카드"
+              tone="bg-[#fee500] text-[#332122]"
+            />
+          </button>
+        )}
+        {expanded && shareFolderId && (
+          <SmsShareAction
+            key={`${shareFolderId}-${allowSending}`}
+            folderId={shareFolderId}
+            url={url}
+            allowSending={allowSending}
+            busy={busy}
+          />
+        )}
+        {shareFolderId && (canShareFile || canCopy) && (
+          <hr className="my-1 border-neutral-200" />
+        )}
+        {canShareFile && (
+          <button
+            type="button"
+            className={shareRow}
+            aria-label="QR 이미지 보내기"
+            disabled={busy || !allowSending}
+            onClick={() => void run('share')}
+          >
+            <ShareActionLabel
+              icon={ImageIcon}
+              title="QR 이미지 보내기"
+              detail="기기에서 앱 선택"
+            />
           </button>
         )}
         {canCopy && (
           <button
             type="button"
-            className={actionStyle}
+            className={shareRow}
+            aria-label="QR 이미지 복사"
             disabled={busy || !file}
             onClick={() => void run('copy')}
           >
-            QR 이미지 복사
-          </button>
-        )}
-        {canShareFile && (
-          <button
-            type="button"
-            className={actionStyle}
-            disabled={busy || !allowSending}
-            onClick={() => void run('share')}
-          >
-            QR 이미지 보내기
+            <ShareActionLabel
+              icon={Copy}
+              title="QR 이미지 복사"
+              detail="채팅창에 붙여넣기"
+            />
           </button>
         )}
         {dataUrl && !canShareFile && !canCopy && (

@@ -141,7 +141,8 @@ function CarouselWrapper({
     url: string;
     recipient: string;
     downloadName: string;
-    kakaoFolderId?: string;
+    shareFolderId: string;
+    canShareKakao: boolean;
     allowSending: boolean;
     notice?: string;
   } | null>(null);
@@ -375,10 +376,9 @@ function CarouselWrapper({
             url: option.url,
             recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,
             downloadName: option.downloadName,
-            kakaoFolderId:
-              option.folderId !== folderId || invite.hasKakaoShareData
-                ? option.folderId
-                : undefined,
+            shareFolderId: option.folderId,
+            canShareKakao:
+              option.folderId !== folderId || Boolean(invite.hasKakaoShareData),
             allowSending: option.visibility === 'public',
             notice:
               option.visibility === 'private'
@@ -409,7 +409,8 @@ function CarouselWrapper({
           url={linkShare.url}
           recipient={linkShare.recipient}
           downloadName={linkShare.downloadName}
-          kakaoFolderId={linkShare.kakaoFolderId}
+          shareFolderId={linkShare.shareFolderId}
+          canShareKakao={linkShare.canShareKakao}
           allowSending={linkShare.allowSending}
           notice={linkShare.notice}
           onClose={closeLinkShare}
