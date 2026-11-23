@@ -674,9 +674,11 @@ describe('대시보드 초대장', () => {
       ['가족용', 'http://localhost/i/wedding?to=family'],
       ['직장용', 'http://localhost/i/wedding?to=work'],
     ])(
-      '%s을 선택한 뒤에만 같은 주소를 복사하고 QR을 만든다',
+      '%s 공유창은 기존 클립보드를 유지하고 링크 복사 버튼으로 선택한 주소를 복사한다',
       async (name, url) => {
         const user = userEvent.setup();
+        const greeting = '어머니, 결혼식 날 뵈어요!';
+        await navigator.clipboard.writeText(greeting);
         const copy = jest.spyOn(navigator.clipboard, 'writeText');
         mockFetch.mockResolvedValueOnce(
           shareAudienceResponse([baseGroup, familyGroup, workGroup], {
@@ -686,7 +688,7 @@ describe('대시보드 초대장', () => {
         ).mockResolvedValue({ ok: true, json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }) });
         showCard();
         const trigger = await screen.findByRole('button', {
-          name: 'URL 링크 공유하기',
+          name: '링크·QR 공유하기',
         });
         await user.click(trigger);
         const picker = screen.getByRole('dialog', {
@@ -705,8 +707,7 @@ describe('대시보드 초대장', () => {
         expect(toDataURL).not.toHaveBeenCalled();
         await user.keyboard('{Enter}');
         await user.click(screen.getByRole('button', { name, exact: true }));
-        expect(copy).toHaveBeenCalledTimes(1);
-        expect(copy).toHaveBeenCalledWith(url);
+        expect(copy).not.toHaveBeenCalled();
         expect(screen.getByText(`민서·지훈 결혼식 · ${name}`)).toBeVisible();
         expect(
           screen.getByRole('textbox', { name: '초대장 링크' })
@@ -730,9 +731,15 @@ describe('대시보드 초대장', () => {
           const sms = await screen.findByRole('link', { name: '문자로 보내기' });
           expect(mockFetch).toHaveBeenLastCalledWith('/api/drive/shareUrl?invitationFolderId=family-folder&intent=sms', expect.anything());
           expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(`민서·지훈 결혼식에 초대합니다.\n${url}`);
+          sms.addEventListener('click', event => event.preventDefault(), { once: true });
+          await user.click(sms);
         } else {
           expect(screen.getByRole('button', { name: /문자로 보내기/ })).toBeDisabled();
         }
+        expect(await navigator.clipboard.readText()).toBe(greeting);
+        await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
+        expect(copy).toHaveBeenCalledTimes(1);
+        expect(await navigator.clipboard.readText()).toBe(url);
         await user.click(screen.getByRole('button', { name: '닫기' }));
         expect(trigger).toHaveFocus();
       }
@@ -748,7 +755,7 @@ describe('대시보드 초대장', () => {
       );
       showCard();
       await user.click(
-        await screen.findByRole('button', { name: 'URL 링크 공유하기' })
+        await screen.findByRole('button', { name: '링크·QR 공유하기' })
       );
       expect(
         screen.getByText('직장용 QR은 공개 후 접속할 수 있어요.')
@@ -768,7 +775,7 @@ describe('대시보드 초대장', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('목록을 다시 불러온 뒤 기본 초대장만 있으면 한 번의 공유 클릭으로 복사한다', async () => {
+    it('목록을 다시 불러온 뒤 기본 초대장만 있으면 자동 복사 없이 공유창을 바로 연다', async () => {
       const user = userEvent.setup();
       const copy = jest.spyOn(navigator.clipboard, 'writeText');
       mockFetch
@@ -780,9 +787,9 @@ describe('대시보드 초대장', () => {
       );
       expect(copy).not.toHaveBeenCalled();
       await user.click(
-        await screen.findByRole('button', { name: 'URL 링크 공유하기' })
+        await screen.findByRole('button', { name: '링크·QR 공유하기' })
       );
-      expect(copy).toHaveBeenCalledWith('http://localhost/i/wedding');
+      expect(copy).not.toHaveBeenCalled();
       expect(
         screen.queryByRole('dialog', { name: '누구에게 보낼 초대장인가요?' })
       ).not.toBeInTheDocument();
@@ -797,6 +804,9 @@ describe('대시보드 초대장', () => {
         'download',
         '민서·지훈 결혼식 QR.png'
       );
+      await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
+      expect(copy).toHaveBeenCalledTimes(1);
+      expect(copy).toHaveBeenCalledWith('http://localhost/i/wedding');
     });
   });
 
@@ -859,7 +869,7 @@ describe('대시보드 초대장', () => {
           );
         showKakaoCard(false);
         await user.click(
-          await screen.findByRole('button', { name: 'URL 링크 공유하기' })
+          await screen.findByRole('button', { name: '링크·QR 공유하기' })
         );
         await user.click(screen.getByRole('button', { name: '직장용' }));
         await user.click(screen.getByRole('button', { name: '공유하기' }));
@@ -1054,7 +1064,7 @@ describe('대시보드 초대장', () => {
       }
     );
 
-    it('카카오톡 선택을 취소하고 링크 공유로 바꾸면 같은 그룹의 주소만 복사한다', async () => {
+    it('카카오톡 선택을 취소하고 직장용 공유창을 열고 닫아도 복사하지 않는다', async () => {
       const user = userEvent.setup();
       const copy = jest.spyOn(navigator.clipboard, 'writeText');
       mockFetch.mockResolvedValueOnce(
@@ -1064,11 +1074,15 @@ describe('대시보드 초대장', () => {
       await user.click(await readyKakaoButton());
       await user.click(screen.getByRole('button', { name: '닫기' }));
       await user.click(
-        screen.getByRole('button', { name: 'URL 링크 공유하기' })
+        screen.getByRole('button', { name: '링크·QR 공유하기' })
       );
       expect(screen.getByRole('button', { name: '기본 초대장' })).toBeEnabled();
       await user.click(screen.getByRole('button', { name: '직장용' }));
-      expect(copy).toHaveBeenCalledWith('http://localhost/i/wedding?to=work');
+      expect(screen.getByRole('textbox', { name: '초대장 링크' })).toHaveValue(
+        'http://localhost/i/wedding?to=work'
+      );
+      await user.click(screen.getByRole('button', { name: '닫기' }));
+      expect(copy).not.toHaveBeenCalled();
       expect(mockFetch).toHaveBeenCalledTimes(1);
       expect(sendDefault).not.toHaveBeenCalled();
     });

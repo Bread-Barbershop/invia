@@ -46,7 +46,7 @@ type CarouselTrackProps = {
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: ShareAudienceLink;
+  onOpenLinkShare?: ShareAudienceLink;
   onShare?: ShareAudienceWithKakao;
   getGuestUrl?: (folderId: string) => string | null;
   isDeleting?: (folderId: string) => boolean;
@@ -72,7 +72,7 @@ function CarouselTrack({
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   getGuestUrl,
   isDeleting,
@@ -120,7 +120,7 @@ function CarouselTrack({
             onPreview={onPreview}
             onUpdate={onUpdate}
             onToggleVisibility={onToggleVisibility}
-            onCopyUrl={onCopyUrl}
+            onOpenLinkShare={onOpenLinkShare}
             onShare={onShare}
             guestUrl={
               item.invite && getGuestUrl

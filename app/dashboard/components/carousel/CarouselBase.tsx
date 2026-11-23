@@ -35,7 +35,7 @@ type CarouselBaseProps = {
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: ShareAudienceLink;
+  onOpenLinkShare?: ShareAudienceLink;
   onShare?: ShareAudienceWithKakao;
   getGuestUrl?: (folderId: string) => string | null;
   isDeleting?: (folderId: string) => boolean;
@@ -58,7 +58,7 @@ function CarouselBase({
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   getGuestUrl,
   isDeleting,
@@ -172,7 +172,7 @@ function CarouselBase({
         onPreview={onPreview}
         onUpdate={onUpdate}
         onToggleVisibility={onToggleVisibility}
-        onCopyUrl={onCopyUrl}
+        onOpenLinkShare={onOpenLinkShare}
         onShare={onShare}
         getGuestUrl={getGuestUrl}
         isDeleting={isDeleting}

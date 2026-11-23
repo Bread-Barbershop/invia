@@ -47,7 +47,7 @@ type CarouselItemProps = {
     folderId: string,
     nextVisible: boolean
   ) => void | Promise<void>;
-  onCopyUrl?: ShareAudienceLink;
+  onOpenLinkShare?: ShareAudienceLink;
   onShare?: ShareAudienceWithKakao;
   guestUrl: string | null;
   isDeleting: boolean;
@@ -72,7 +72,7 @@ function CarouselItem({
   onPreview,
   onUpdate,
   onToggleVisibility,
-  onCopyUrl,
+  onOpenLinkShare,
   onShare,
   guestUrl: guestUrlProp,
   isDeleting,
@@ -101,7 +101,7 @@ function CarouselItem({
     invite,
     guestUrl,
     active: isSelected && showCenterActions && !isPending,
-    onCopyUrl,
+    onOpenLinkShare,
     onKakao: onShare,
     isSharing,
   });
