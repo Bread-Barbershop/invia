@@ -447,8 +447,13 @@ describe('대시보드 초대장', () => {
     });
     await user.click(trigger);
     const master = await screen.findByRole('switch', {
-      name: '행사 전체 공개',
+      name: /^공개 여부$/,
     });
+    expect(
+      screen.getByText(
+        '끄면 모든 하객 링크가 닫혀요. 다시 켜면 아래 설정이 복원돼요.'
+      )
+    ).toBeVisible();
     const groupSwitch = (name: string) =>
       screen.getByRole('switch', { name: name + ' 공개' });
     expect(master).toBeChecked();

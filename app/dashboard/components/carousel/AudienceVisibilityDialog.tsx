@@ -13,11 +13,13 @@ type Props = {
 
 function PublicSwitch({
   name,
+  ariaLabel = `${name} 공개`,
   checked,
   disabled,
   onChange,
 }: {
   name: string;
+  ariaLabel?: string;
   checked: boolean;
   disabled: boolean;
   onChange: () => void;
@@ -32,7 +34,7 @@ function PublicSwitch({
         <input
           type="checkbox"
           role="switch"
-          aria-label={`${name} 공개`}
+          aria-label={ariaLabel}
           checked={checked}
           disabled={disabled}
           onChange={onChange}
@@ -163,14 +165,14 @@ export default function AudienceVisibilityDialog({
       {options ? (
         <>
           <PublicSwitch
-            name="행사 전체"
+            name="공개 여부"
+            ariaLabel="공개 여부"
             checked={published}
             disabled={busy}
             onChange={() => setPublished(!published)}
           />
           <p className="mb-3 text-xs text-text-secondary">
-            행사 전체를 끄면 모든 하객 링크가 닫혀요. 다시 켜면 아래 설정이
-            복원돼요.
+            끄면 모든 하객 링크가 닫혀요. 다시 켜면 아래 설정이 복원돼요.
           </p>
           <div className="border-t border-neutral-200 pt-1">
             {options.groups.map(group => (
