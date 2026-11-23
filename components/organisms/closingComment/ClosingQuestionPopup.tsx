@@ -134,27 +134,30 @@ function ClosingQuestionPopup({
           </li>
         )}
 
-        {options.map((text, index) => (
-          <li
-            key={`${text}-${index}`}
-            className={cn('flex h-9 items-center justify-center gap-1 p-0')}
-          >
-            <div className={cn('flex-center shrink-0 w-8 h-8')}>
-              <Radio
-                name={radioName}
-                aria-label={text}
-                value={text}
-                onChange={() => onSelect(text)}
-              />
-            </div>
-
-            <PopupText
-              text={text}
-              className="flex-1 text-[13px]"
-              twoLineEllipsis={false}
-            />
-          </li>
-        ))}
+        {options.map((text, index) => {
+          const inputId = `${radioName}-option-${index}`;
+          return (
+            <li
+              key={`${text}-${index}`}
+              className="relative flex h-9 items-center justify-center gap-1 p-0 has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-primary"
+            >
+              <div className="flex-center shrink-0 w-8 h-8">
+                <Radio
+                  id={inputId}
+                  name={radioName}
+                  value={text}
+                  onChange={() => onSelect(text)}
+                />
+              </div>
+              <label
+                htmlFor={inputId}
+                className="min-w-0 flex-1 cursor-pointer before:absolute before:inset-0"
+              >
+                <PopupText text={text} className="text-[13px]" />
+              </label>
+            </li>
+          );
+        })}
       </ul>
     </Popup>
   );

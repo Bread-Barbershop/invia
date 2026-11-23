@@ -6,6 +6,7 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import type { EditorBlock } from '@/shared/types/block';
@@ -58,14 +59,18 @@ describe('돌잔치 마무리 문구 편집', () => {
   });
 
   it('돌잔치 예시를 선택한 후 직접 고친 문구는 아이 이름이 바뀌어도 유지한다', async () => {
+    const user = userEvent.setup();
     const { container } = render(<ClosingEditorAndPreview />);
     const preview = within(
       screen.getByRole('region', { name: '초대장 미리보기' })
     );
     const sentence = '하은이가 맞이한 첫 생일을 함께 기뻐해 주세요.';
     fireEvent.click(screen.getByRole('button', { name: '예시보기' }));
-    fireEvent.click(screen.getByRole('radio', { name: sentence }));
+    await user.click(screen.getByText(sentence));
     expect(await preview.findByText(sentence)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('radio', { name: sentence })
+    ).not.toBeInTheDocument();
 
     const custom = '하은의 첫돌에 초대해요!';
     const paragraph = container.querySelector('[contenteditable="true"] p')!;
@@ -100,13 +105,15 @@ describe('돌잔치 마무리 문구 편집', () => {
   });
 
   it('꺾쇠가 있는 이름도 미리보기에서 입력한 글자로 표시한다', async () => {
+    const user = userEvent.setup();
     useEditorStore
       .getState()
       .updateBlock<'myChild'>('child', { name: '별<Bom>' });
     render(<ClosingEditorAndPreview />);
     const sentence = '별<Bom>의 첫 번째 생일을 함께 축하해 주세요.';
     fireEvent.click(screen.getByRole('button', { name: '예시보기' }));
-    fireEvent.click(screen.getByRole('radio', { name: sentence }));
+    screen.getByRole('radio', { name: sentence }).focus();
+    await user.keyboard('[Space]');
     const preview = within(
       screen.getByRole('region', { name: '초대장 미리보기' })
     );
