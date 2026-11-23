@@ -9,12 +9,14 @@ import {
 } from 'react';
 
 import type { InviteListItem } from '@/app/dashboard/types';
-import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
+import { groupQrDownloadNames } from '@/components/molecules/link-share/qrDownloadName';
 import {
   buildAudienceGuestUrl,
   type AudienceGroup,
 } from '@/features/invitation/audiences/model';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
+
+import AudienceQrDownload from './AudienceQrDownload';
 
 import type {
   ShareAudienceLink,
@@ -94,20 +96,20 @@ export function useAudienceShare({
   } | null>(null);
   const groups = result?.request === request ? result.options : undefined;
   const eventTitle = invite?.displayTitle || invite?.name || '초대장';
-  const options = useMemo(
-    () =>
-      groups?.map(group => ({
-        ...group,
-        downloadName: qrDownloadName(
-          eventTitle,
-          groups.length > 1 ? group.name : undefined
-        ),
-      })),
-    [groups, eventTitle]
-  );
+  const options = useMemo(() => {
+    if (!groups) return;
+    const names = groupQrDownloadNames(
+      eventTitle,
+      groups.map(group => group.name)
+    );
+    return groups.map((group, index) => ({
+      ...group,
+      downloadName: names[index],
+    }));
+  }, [groups, eventTitle]);
   const error = result?.request === request ? result.error : undefined;
   const dialog = useRef<HTMLDialogElement>(null);
-  const [channel, setChannel] = useState<ShareChannel>('link');
+  const [channel, setChannel] = useState<ShareChannel | null>(null);
   const pendingKakao = useRef<AbortController | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const titleId = useId();
@@ -147,6 +149,7 @@ export function useAudienceShare({
   }, [enabled, request]);
 
   function closePicker() {
+    setChannel(null);
     dialog.current?.close();
     trigger.current?.focus({ preventScroll: true });
   }
@@ -249,7 +252,7 @@ export function useAudienceShare({
                 className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border border-neutral-200 px-4 py-3 text-left text-sm font-semibold hover:bg-neutral-50 focus-visible:outline-2 disabled:opacity-50"
                 onClick={() => {
                   closePicker();
-                  share(option, channel);
+                  if (channel) share(option, channel);
                 }}
               >
                 <span className="min-w-0 break-words">{option.name}</span>
@@ -268,6 +271,13 @@ export function useAudienceShare({
             </li>
           ))}
         </ul>
+        {channel === 'link' && (
+          <AudienceQrDownload
+            key={eventTitle}
+            eventTitle={eventTitle}
+            options={options}
+          />
+        )}
         <button
           type="button"
           onClick={closePicker}

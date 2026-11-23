@@ -18,10 +18,30 @@ function fileLabel(text: string, maxBytes: number) {
   return label.trimEnd();
 }
 
-export function qrDownloadName(eventTitle: string, audienceName?: string) {
+export function qrDownloadName(
+  eventTitle: string,
+  audienceName?: string,
+  copy = 1
+) {
   const audience = fileLabel(audienceName ?? '', 120);
-  const suffix = (audience ? ` - ${audience}` : '') + ' QR.png';
+  const suffix =
+    (audience ? ` - ${audience}` : '') +
+    (copy > 1 ? ` QR (${copy}).png` : ' QR.png');
   const title =
     fileLabel(eventTitle, 255 - new Blob([suffix]).size) || '초대장';
   return title + suffix;
+}
+
+export function groupQrDownloadNames(eventTitle: string, names: string[]) {
+  const used = new Set<string>();
+  return names.map(name => {
+    const audience = names.length > 1 ? name : undefined;
+    let copy = 1;
+    let filename = qrDownloadName(eventTitle, audience);
+    while (used.has(filename.toLowerCase())) {
+      filename = qrDownloadName(eventTitle, audience, ++copy);
+    }
+    used.add(filename.toLowerCase());
+    return filename;
+  });
 }

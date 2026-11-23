@@ -33,7 +33,7 @@ describe('초대장 QR PNG', () => {
     const { context, exportPng, favicon } = setup();
     const url = new URL(SHARE_URL);
     url.searchParams.set('to', 'family');
-    const png = await toDataURL(url.href, { width: 1024, margin: 4 });
+    const png = await toDataURL(url.href);
     expect(mockToCanvas).toHaveBeenCalledWith(url.href, {
       width: 1024,
       margin: 4,
@@ -61,9 +61,7 @@ describe('초대장 QR PNG', () => {
     jest
       .mocked(favicon.decode)
       .mockRejectedValue(new Error('image unavailable'));
-    await expect(
-      toDataURL(SHARE_URL, { width: 1024, margin: 4 })
-    ).resolves.toBe(QR_DATA_URL);
+    await expect(toDataURL(SHARE_URL)).resolves.toBe(QR_DATA_URL);
     expect(context.fill).not.toHaveBeenCalled();
     expect(context.drawImage).not.toHaveBeenCalled();
   });

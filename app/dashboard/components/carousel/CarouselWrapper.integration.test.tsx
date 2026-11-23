@@ -721,7 +721,7 @@ describe('대시보드 초대장', () => {
         expect(
           await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
         ).toBeVisible();
-        expect(toDataURL).toHaveBeenCalledWith(url, expect.any(Object));
+        expect(toDataURL).toHaveBeenCalledWith(url);
         expect(
           screen.getByRole('link', { name: 'QR 저장하기' })
         ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
@@ -729,6 +729,36 @@ describe('대시보드 초대장', () => {
         expect(trigger).toHaveFocus();
       }
     );
+
+    it('링크 공유 목록에 모든 QR의 개수와 비공개·확인 중 그룹 안내를 표시한다', async () => {
+      const user = userEvent.setup();
+      mockFetch.mockResolvedValue(
+        shareAudienceResponse([baseGroup, familyGroup, workGroup], {
+          work: 'private',
+          family: 'pending',
+        })
+      );
+      showCard();
+      await user.click(
+        await screen.findByRole('button', { name: 'URL 링크 공유하기' })
+      );
+      expect(
+        screen.getByText('직장용 QR은 공개 후 접속할 수 있어요.')
+      ).toBeVisible();
+      expect(
+        screen.getByText('가족용 QR은 보내기 전에 공개 상태를 확인해 주세요.')
+      ).toBeVisible();
+      expect(
+        screen.getByRole('button', { name: 'QR 3개 한 번에 받기' })
+      ).toBeEnabled();
+      await user.click(screen.getByRole('button', { name: '닫기' }));
+      await user.click(
+        screen.getByRole('button', { name: '카카오톡 공유하기' })
+      );
+      expect(
+        screen.queryByRole('button', { name: /한 번에 받기/ })
+      ).not.toBeInTheDocument();
+    });
 
     it('목록을 다시 불러온 뒤 기본 초대장만 있으면 한 번의 공유 클릭으로 복사한다', async () => {
       const user = userEvent.setup();
@@ -751,10 +781,10 @@ describe('대시보드 초대장', () => {
       expect(
         await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
       ).toBeVisible();
-      expect(toDataURL).toHaveBeenCalledWith(
-        'http://localhost/i/wedding',
-        expect.any(Object)
-      );
+      expect(toDataURL).toHaveBeenCalledWith('http://localhost/i/wedding');
+      expect(
+        screen.queryByRole('button', { name: /한 번에 받기/ })
+      ).not.toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
         'download',
         '민서·지훈 결혼식 QR.png'
