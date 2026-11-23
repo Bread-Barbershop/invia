@@ -3,10 +3,13 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { parseGuestPayload } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 
+import Edit from './Edit';
 import { ScrollAnimationControls } from './ScrollAnimationControls';
-import { SectionStyleControls } from './SectionStyleControls';
 
 jest.mock('@/shared/assets/icons/sectionArrow.svg', () => () => null);
+jest.mock('@/widgets/mainPoster/components/MainPoster', () => ({
+  MainPoster: () => null,
+}));
 
 describe('일괄 스크롤 애니메이션 편집', () => {
   beforeEach(() => useEditorStore.getState().reset());
@@ -178,11 +181,11 @@ describe('일괄 스크롤 애니메이션 편집', () => {
     });
   });
   it('두 갤러리 중 선택한 카드만 양옆에서 모이기를 적용하고 전체 설정으로 되돌린다', () => {
-    const { addBlock } = useEditorStore.getState();
+    const { addBlock, selectedBlock } = useEditorStore.getState();
     addBlock('birthday', 'gallery', 'photos');
     addBlock('birthday', 'gallery', 'party');
-    render(<SectionStyleControls selectedId="photos" />);
-    fireEvent.click(screen.getByRole('button', { name: '카드 디자인 · 등장 효과' }));
+    selectedBlock('photos');
+    render(<Edit />);
     const effect = screen.getByRole('combobox', { name: '이 블록의 등장 효과' });
     expect(effect).toHaveTextContent('전체 설정 따르기 (효과 없음)');
     fireEvent.click(effect);

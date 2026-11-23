@@ -22,6 +22,7 @@ import { createHash, webcrypto } from 'node:crypto';
 import { updateFileToDrive } from './updateFileToDrive';
 import { uploadFileToDrive } from './uploadFileToDrive';
 import * as Sentry from '@sentry/nextjs';
+import type { EditorBlock } from '@/shared/types/block';
 import type { BulkJson } from '@/shared/types/invitationSave';
 import {
   readSponsorEntries,
@@ -187,6 +188,59 @@ describe('saveInvitationFlow', () => {
         method: 'POST',
       })
     );
+  });
+
+  it('여백과 세로 구분선의 개별 카드 스타일과 등장 효과를 저장한다', async () => {
+    const blocks: [EditorBlock<'spacer'>, EditorBlock<'divider'>] = [
+      {
+        id: 'spacer',
+        type: 'wedding',
+        component: 'spacer',
+        props: { height: 32, sectionStyle: 'rounded', entranceEffect: 'fade' },
+      },
+      {
+        id: 'divider',
+        type: 'wedding',
+        component: 'divider',
+        props: {
+          height: 48,
+          thickness: 1,
+          color: '#E2E8F0',
+          topSpacing: 12,
+          bottomSpacing: 12,
+          sectionStyle: 'outlined',
+          entranceEffect: 'from-left',
+        },
+      },
+    ];
+
+    const result = await saveInvitationFlow({
+      bulkData,
+      images: [],
+      audio: null,
+      data: blocks,
+      shareUrl,
+      bgmData,
+      mainPoster: { version: '7.1.0', objects: [] },
+      invitationThumbnail: {
+        name: 'invitation-thumbnail.png',
+        mimeType: 'image/png',
+        dataUrl: '',
+        width: 0,
+        height: 0,
+        createdAt: '',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    const [file] = jest.mocked(updateFileToDrive).mock.calls[0];
+    const json = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+    expect(JSON.parse(json)).toMatchObject({ blocks });
   });
 
   it('공지사항만 수정하면 같은 표지를 재사용하고 표지가 바뀌면 새 이미지를 보낸다', async () => {

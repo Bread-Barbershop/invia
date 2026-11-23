@@ -123,4 +123,39 @@ describe('미리보기 블록 클릭 선택', () => {
       isEdit: false,
     });
   });
+
+  it.each(['spacer', 'divider'] as const)(
+    '미리보기에서 %s를 선택해 개별 카드 스타일을 바로 적용한다',
+    async component => {
+      const user = userEvent.setup();
+      const editor = useEditorStore.getState();
+      editor.setSectionStyle('paper');
+      editor.addBlock('wedding', component, 'layout');
+      const { container } = render(
+        <>
+          <Edit />
+          <Preview />
+        </>
+      );
+
+      const preview = container.querySelector(
+        '[data-preview-block-id="layout"]'
+      );
+      if (!(preview instanceof HTMLElement)) {
+        throw new Error('레이아웃 블록 미리보기가 없습니다.');
+      }
+      expect(preview.querySelector('[data-section-style]')).toBeNull();
+
+      await user.click(preview);
+      await user.click(
+        screen.getByRole('combobox', { name: '이 블록의 카드 스타일' })
+      );
+      await user.click(screen.getByRole('option', { name: '테두리 카드' }));
+
+      expect(preview.querySelector('[data-section-style]')).toHaveAttribute(
+        'data-section-style',
+        'outlined'
+      );
+    }
+  );
 });

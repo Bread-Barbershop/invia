@@ -108,19 +108,16 @@ export function Place({ blockInfo, id }: Props) {
     <>
       <NaverMapScript onReady={() => setIsScriptLoaded(true)} />
       <LeftEditorWrapper ariaLabel={defaultTitle}>
-        <div className="flex flex-col gap-1 w-full">
-          <NavigationBar>{defaultTitle} 편집 페이지</NavigationBar>
-          <TextField
-            label="제목"
-            inputProps={{
-              placeholder: defaultTitle,
-              onChange: e =>
-                handleUpdateBlock('title', e.target.value),
-              value: title ?? '',
-            }}
-            className="w-full py-1.5 text-center"
-          />
-        </div>
+        <NavigationBar>{defaultTitle} 편집 페이지</NavigationBar>
+        <TextField
+          label="제목"
+          inputProps={{
+            placeholder: defaultTitle,
+            onChange: e => handleUpdateBlock('title', e.target.value),
+            value: title ?? '',
+          }}
+          className="w-full py-1.5 text-center"
+        />
         {checkedSubTitle && (
           <TextField
             label="영문제목"
