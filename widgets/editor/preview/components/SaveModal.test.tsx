@@ -162,7 +162,26 @@ describe('SaveModal', () => {
     expect(commonProps.onClose).not.toHaveBeenCalled();
   });
 
-  it('공개 준비 중인 초대장은 링크와 QR의 접속 가능 시점을 안내한다', async () => {
+  it.each([
+    {
+      state: '공개 준비 중',
+      published: true,
+      notice: [
+        '초대장 공개를 준비 중이에요. 준비가 끝나면 링크와 QR로 접속할 수 있어요.',
+      ],
+    },
+    {
+      state: '비공개',
+      published: false,
+      notice: [
+        '비공개 초대장이에요.',
+        '공개로 변경하면 링크와 QR로 접속할 수 있어요.',
+      ],
+    },
+  ])('$state 초대장을 저장하고 공유 링크의 접속 조건을 안내한다', async ({
+    published,
+    notice,
+  }) => {
     const user = userEvent.setup();
     render(
       <SaveModal
@@ -172,7 +191,7 @@ describe('SaveModal', () => {
           invitationUuid: 'invitation-uuid',
           dataJsonFileId: 'data-json-file-id',
           guestUrl: SHARE_URL,
-          published: true,
+          published,
           ready: false,
           createdAt: new Date(0).toISOString(),
         }}
@@ -181,9 +200,7 @@ describe('SaveModal', () => {
 
     await user.click(screen.getByRole('button', { name: '링크 공유하기' }));
 
-    expect(
-      screen.getByText(/준비가 끝나면 링크와 QR로 접속/)
-    ).toBeInTheDocument();
+    for (const line of notice) expect(screen.getByText(line)).toBeVisible();
     await screen.findByRole('img', { name: '초대장 공유 QR 코드' });
   });
 

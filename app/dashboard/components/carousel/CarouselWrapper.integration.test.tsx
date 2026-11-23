@@ -714,10 +714,16 @@ describe('대시보드 초대장', () => {
         ).toHaveValue(url);
         if (name === '가족용') {
           expect(
-            screen.queryByText(/비공개 초대장이에요/)
+            screen.queryByText('비공개 초대장이에요.')
           ).not.toBeInTheDocument();
         } else {
-          expect(screen.getByText(/비공개 초대장이에요/)).toBeVisible();
+          const title = screen.getByText('비공개 초대장이에요.');
+          const detail = screen.getByText(
+            '공개로 변경하면 링크와 QR로 접속할 수 있어요.'
+          );
+          expect(title).toBeVisible();
+          expect(detail).toBeVisible();
+          expect(title.nextElementSibling).toBe(detail);
         }
         expect(
           await screen.findByRole('img', { name: '초대장 공유 QR 코드' })

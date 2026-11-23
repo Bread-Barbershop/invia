@@ -8,6 +8,7 @@ import { InviteListItem } from '@/app/dashboard/types';
 import { getInvitationShowcaseItem } from '@/app/dashboard/utils/getInvitationShowcaseItem';
 import Confirm from '@/components/molecules/confirm/Confirm';
 import { LinkShareModal } from '@/components/molecules/link-share/LinkShareModal';
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 
 import DashboardInvitationPreviewModal from '../preview/DashboardInvitationPreviewModal';
 
@@ -142,8 +143,7 @@ function CarouselWrapper({
     downloadName: string;
     shareFolderId: string;
     canShareKakao: boolean;
-    allowSending: boolean;
-    notice?: string;
+    visibility: GroupShareVisibility;
   } | null>(null);
   const closeLinkShare = useCallback(() => setLinkShare(null), []);
   const orderedInvites = useMemo(() => [...invites].reverse(), [invites]);
@@ -377,13 +377,7 @@ function CarouselWrapper({
             shareFolderId: option.folderId,
             canShareKakao:
               option.folderId !== folderId || Boolean(invite.hasKakaoShareData),
-            allowSending: option.visibility === 'public',
-            notice:
-              option.visibility === 'private'
-                ? '비공개 초대장이에요. 공개로 변경하면 링크와 QR로 접속할 수 있어요.'
-                : option.visibility === 'pending'
-                  ? '공개 설정을 확인해 주세요. 링크와 QR은 미리 저장할 수 있어요.'
-                  : undefined,
+            visibility: option.visibility,
           });
         }}
         onShare={async (folderId, option, signal) => {
@@ -409,8 +403,8 @@ function CarouselWrapper({
           downloadName={linkShare.downloadName}
           shareFolderId={linkShare.shareFolderId}
           canShareKakao={linkShare.canShareKakao}
-          allowSending={linkShare.allowSending}
-          notice={linkShare.notice}
+          visibility={linkShare.visibility}
+          pendingNotice="공개 설정을 확인해 주세요. 링크와 QR은 미리 저장할 수 있어요."
           onClose={closeLinkShare}
         />
       )}

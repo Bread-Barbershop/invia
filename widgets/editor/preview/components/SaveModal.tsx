@@ -328,17 +328,14 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
           url={pendingInvitation.guestUrl}
           downloadName={pendingInvitation.qrDownloadName}
           shareFolderId={pendingInvitation.invitationFolderId}
-          allowSending={
-            pendingInvitation.published !== false &&
-            pendingInvitation.ready !== false
-          }
-          notice={
+          visibility={
             pendingInvitation.published === false
-              ? '비공개 초대장이에요. 대시보드에서 공개로 변경하면 링크와 QR로 접속할 수 있어요.'
+              ? 'private'
               : pendingInvitation.ready === false
-                ? '초대장 공개를 준비 중이에요. 준비가 끝나면 링크와 QR로 접속할 수 있어요.'
-                : undefined
+                ? 'pending'
+                : 'public'
           }
+          pendingNotice="초대장 공개를 준비 중이에요. 준비가 끝나면 링크와 QR로 접속할 수 있어요."
           onClose={() => setIsSharing(false)}
         />
       );

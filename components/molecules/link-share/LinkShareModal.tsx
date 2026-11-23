@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import type { GroupShareVisibility } from '@/features/invitation/audiences/visibility';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import {
   disableBodyScroll,
@@ -19,8 +20,8 @@ type LinkShareModalProps = {
   downloadName?: string;
   shareFolderId?: string;
   canShareKakao?: boolean;
-  allowSending?: boolean;
-  notice?: string;
+  visibility?: GroupShareVisibility;
+  pendingNotice?: string;
   onClose: () => void;
 };
 
@@ -36,8 +37,8 @@ export function LinkShareModal({
   downloadName = 'invitation-qr.png',
   shareFolderId,
   canShareKakao,
-  allowSending = true,
-  notice,
+  visibility = 'public',
+  pendingNotice,
   onClose,
 }: LinkShareModalProps) {
   const titleId = useId();
@@ -163,9 +164,19 @@ export function LinkShareModal({
             )}
           </div>
         </div>
-        {notice && (
+        {visibility === 'private' && (
+          <div className="w-full rounded-lg bg-red-50 p-3 text-center text-gray-700">
+            <p className="text-sm font-semibold text-[#A51F30]">
+              비공개 초대장이에요.
+            </p>
+            <p className="mt-1 text-xs leading-5">
+              공개로 변경하면 링크와 QR로 접속할 수 있어요.
+            </p>
+          </div>
+        )}
+        {visibility === 'pending' && pendingNotice && (
           <p className="w-full rounded-lg bg-gray-50 p-3 text-center text-xs leading-5 text-gray-600">
-            {notice}
+            {pendingNotice}
           </p>
         )}
         <div className="w-full">
@@ -225,7 +236,7 @@ export function LinkShareModal({
             url={shareUrl}
             shareFolderId={shareFolderId}
             canShareKakao={canShareKakao}
-            allowSending={allowSending}
+            allowSending={visibility === 'public'}
           />
         </div>
         <button
