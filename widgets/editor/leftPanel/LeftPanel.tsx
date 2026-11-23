@@ -6,20 +6,15 @@ import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 
 import BulkEdit from './components/BulkEdit';
 import Edit from './components/Edit';
-import { SectionStyleControls } from './components/SectionStyleControls';
 import { StylePanelSection } from './components/StylePanelSection';
 
 function LeftPanel() {
-  const { isEdit, setIsEdit, selectedId } = useEditorStore(
+  const { isEdit, setIsEdit } = useEditorStore(
     useShallow(state => ({
       isEdit: state.isEdit,
       setIsEdit: state.setIsEdit,
-      selectedId: state.selectedId,
     }))
   );
-
-  const isComponentSelected =
-    !!selectedId && selectedId !== 'mainPoster' && selectedId !== 'shareUrl';
 
   return (
     <div
@@ -35,10 +30,6 @@ function LeftPanel() {
           <BulkEdit />
         </div>
       </StylePanelSection>
-
-      {isComponentSelected && !isEdit && (
-        <SectionStyleControls key={selectedId} selectedId={selectedId!} />
-      )}
 
       <div
         className={`flex flex-col bg-white rounded-lg shadow-edit border border-black/5 transition-default ${

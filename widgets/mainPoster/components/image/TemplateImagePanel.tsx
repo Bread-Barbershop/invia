@@ -48,7 +48,6 @@ export const TemplateImagePanel = () => {
   });
   const activeSlotEntity = getActiveSlotEntity();
   const activeSlotKey = activeSlotEntity?.slotId ?? null;
-  const hasActiveSlot = Boolean(activeSlotKey);
   const position = activeSlotKey
     ? (getSlotImagePositionBySlot(activeSlotKey) ?? { x: 0, y: 0 })
     : { x: 0, y: 0 };
@@ -57,6 +56,8 @@ export const TemplateImagePanel = () => {
     : SCALE_MIN;
 
   const selectedImage = canvas?.getActiveObject();
+  const filledImage = isFilledSlotImage(selectedImage) ? selectedImage : null;
+  const canAdjustPhoto = Boolean(activeSlotKey && filledImage);
 
   useEffect(() => {
     setDisplayValue({
@@ -169,14 +170,14 @@ export const TemplateImagePanel = () => {
           </p>
         }
       />
-      <Button
-        disabled={!isFilledSlotImage(selectedImage)}
-        onClick={() => {
-          if (isFilledSlotImage(selectedImage)) startCrop(selectedImage);
-        }}
-      >
-        사진 자르기 · 배경으로 적용
-      </Button>
+      {filledImage && (
+        <Button
+          className="w-fit shrink-0 whitespace-nowrap px-3 motion-safe:animate-[fade-in_180ms_ease-out]"
+          onClick={() => startCrop(filledImage)}
+        >
+          사진 편집
+        </Button>
+      )}
       <RangeControl
         label="X축"
         min={POSITION_MIN}
@@ -185,7 +186,7 @@ export const TemplateImagePanel = () => {
         value={position.x}
         displayValue={displayValue.x}
         allowNegative
-        disabled={!hasActiveSlot || !canvas}
+        disabled={!canAdjustPhoto}
         onDisplayValueChange={value => {
           setDisplayValue(current => ({
             ...current,
@@ -207,7 +208,7 @@ export const TemplateImagePanel = () => {
         value={position.y}
         displayValue={displayValue.y}
         allowNegative
-        disabled={!hasActiveSlot || !canvas}
+        disabled={!canAdjustPhoto}
         onDisplayValueChange={value => {
           setDisplayValue(current => ({
             ...current,
@@ -228,7 +229,7 @@ export const TemplateImagePanel = () => {
         step={5}
         value={scaleToOffset(scale)}
         displayValue={displayValue.scale}
-        disabled={!hasActiveSlot || !canvas}
+        disabled={!canAdjustPhoto}
         onDisplayValueChange={value => {
           setDisplayValue(current => ({
             ...current,

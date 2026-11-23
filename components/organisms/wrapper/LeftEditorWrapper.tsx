@@ -1,6 +1,12 @@
+'use client';
+
+import { Children, createContext, useContext } from 'react';
+
 import { cn } from '@/shared/utils/cn';
 
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
+
+export const BlockEditorAppearanceContext = createContext<ReactNode>(null);
 
 interface Props extends HTMLAttributes<HTMLElement> {
   ariaLabel?: string;
@@ -12,6 +18,10 @@ export const LeftEditorWrapper = ({
   ariaLabel,
   ...sectionProps
 }: Props) => {
+  const appearance = useContext(BlockEditorAppearanceContext);
+  // Detail editors put their header first, before any block-specific fields.
+  const [header, ...fields] = appearance ? Children.toArray(children) : [];
+
   return (
     <div className="grid w-full justify-items-center">
       <section
@@ -22,7 +32,15 @@ export const LeftEditorWrapper = ({
         )}
         aria-label={ariaLabel}
       >
-        {children}
+        {appearance ? (
+          <>
+            {header}
+            {appearance}
+            {fields}
+          </>
+        ) : (
+          children
+        )}
       </section>
     </div>
   );

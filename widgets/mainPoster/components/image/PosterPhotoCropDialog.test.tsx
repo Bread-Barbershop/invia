@@ -70,10 +70,12 @@ function openCrop(slotId?: string) {
     .mocked(useFabricContext)
     .mockReturnValue(actions as unknown as ReturnType<typeof useFabricContext>);
   render(
-    <PosterPhotoCropDialog
-      canvas={canvas as unknown as Canvas}
-      target={target}
-    />
+    <div hidden>
+      <PosterPhotoCropDialog
+        canvas={canvas as unknown as Canvas}
+        target={target}
+      />
+    </div>
   );
   const image = screen.getByAltText('자를 사진');
   Object.defineProperties(image, {
@@ -87,6 +89,20 @@ function openCrop(slotId?: string) {
 
 describe('포스터 사진 자르기', () => {
   afterEach(() => jest.restoreAllMocks());
+
+  it('미리보기가 숨겨져 있어도 자르기 창을 열고 Escape 취소를 처리한다', () => {
+    const { actions } = openCrop();
+    const dialog = screen.getByRole('dialog', { name: '사진 자르기' });
+    expect(dialog.parentElement).toBe(document.body);
+    expect(dialog).toBeVisible();
+    expect(dialog).toHaveAttribute('data-crop-controls', 'true');
+
+    const cancel = new Event('cancel', { cancelable: true });
+    fireEvent(dialog, cancel);
+
+    expect(cancel.defaultPrevented).toBe(true);
+    expect(actions.setCropTarget).toHaveBeenCalledWith(null);
+  });
 
   it('정사각형 선택 영역에서 세로 표지에 보이는 부분을 미리 보고 같은 좌표를 배경에 적용한다', async () => {
     const { drawImage, image, target, canvas, actions, background } =

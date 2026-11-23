@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { convertToPercentCrop } from 'react-image-crop';
 
 import { drawPhotoCrop } from '@/components/molecules/picture/photoCrop';
@@ -104,7 +105,7 @@ export function PosterPhotoCropDialog({
       return background;
     });
 
-  return (
+  return createPortal(
     <PhotoCropDialog
       src={source}
       initialCrop={initialCrop}
@@ -114,6 +115,7 @@ export function PosterPhotoCropDialog({
         onApplyBackground: applyBackground,
       }}
       onClose={() => setCropTarget(null)}
-    />
+    />,
+    document.body
   );
 }

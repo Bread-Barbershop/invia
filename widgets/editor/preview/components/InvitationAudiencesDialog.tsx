@@ -15,6 +15,7 @@ import {
   validateAudienceName,
   validateAudienceSlug,
 } from '@/features/invitation/audiences/model';
+import LoadingSpinner from '@/shared/assets/icons/loadingSpinner.svg';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
@@ -320,8 +321,6 @@ export default function InvitationAudiencesDialog({
     }
   }
 
-  const exampleSlug = slug.trim() || 'family';
-
   return createPortal(
     <dialog
       ref={dialogRef}
@@ -537,19 +536,7 @@ export default function InvitationAudiencesDialog({
                 <p id={slugHelpId} className="text-xs text-neutral-600">
                   영문 소문자로 시작하고 숫자와 하이픈도 쓸 수 있어요.
                 </p>
-                <div className="flex min-w-0 items-center justify-end gap-3">
-                  {!validateAudienceSlug(exampleSlug) && (
-                    <output
-                      aria-label="그룹 링크 안내"
-                      className="mr-auto min-w-0 break-words text-xs text-neutral-600"
-                    >
-                      기본 링크 뒤에{' '}
-                      <strong className="break-all font-semibold text-text-primary">
-                        ?to={exampleSlug}
-                      </strong>
-                      가 붙어요.
-                    </output>
-                  )}
+                <div className="flex justify-end">
                   <button className={PRIMARY_BUTTON} type="submit">
                     <Plus size={16} aria-hidden="true" />
                     추가
@@ -594,7 +581,11 @@ export default function InvitationAudiencesDialog({
           </section>
         )}
         {operationMessage && (
-          <p role="status" className="text-sm text-neutral-600">
+          <p role="status" className="flex items-center gap-2 text-sm text-neutral-600">
+            <LoadingSpinner
+              aria-hidden="true"
+              className="size-4 shrink-0 motion-safe:animate-spin"
+            />
             {operationMessage}
           </p>
         )}

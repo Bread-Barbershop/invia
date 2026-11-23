@@ -12,7 +12,9 @@ export function resolveSectionStyle(value: unknown): SectionStyle | undefined {
 }
 
 export function supportsSectionStyle(component: string) {
-  return !['spacer', 'divider', 'bgm', 'visualEffects', 'shareUrl'].includes(
-    component
-  );
+  return !['bgm', 'visualEffects', 'shareUrl'].includes(component);
+}
+
+export function inheritsSectionStyle(component: string) {
+  return component !== 'spacer' && component !== 'divider';
 }

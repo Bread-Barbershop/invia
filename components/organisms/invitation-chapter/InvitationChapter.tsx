@@ -1,4 +1,5 @@
 import {
+  inheritsSectionStyle,
   resolveSectionStyle,
   supportsSectionStyle,
 } from '@/shared/data/sectionStyles';
@@ -32,8 +33,10 @@ export default function InvitationChapter({
   sectionStyle?: unknown;
   defaultStyle?: unknown;
 }) {
+  const inheritsStyle = inheritsSectionStyle(component);
   const style =
-    resolveSectionStyle(sectionStyle) ?? resolveSectionStyle(defaultStyle);
+    resolveSectionStyle(sectionStyle) ??
+    (inheritsStyle ? resolveSectionStyle(defaultStyle) : undefined);
   if (style) {
     if (style === 'plain' || !supportsSectionStyle(component))
       return <>{children}</>;
@@ -48,8 +51,7 @@ export default function InvitationChapter({
   const supported =
     typeof collectionStyle === 'string' &&
     /^showcase-(?:[0-9]|1[0-9]|2[0-4])$/.test(collectionStyle);
-  if (!supported || component === 'spacer' || component === 'divider')
-    return <>{children}</>;
+  if (!supported || !inheritsStyle) return <>{children}</>;
   return (
     <section
       className={styles.chapter}
