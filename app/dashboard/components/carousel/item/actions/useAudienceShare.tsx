@@ -70,14 +70,14 @@ export function useAudienceShare({
   invite,
   guestUrl,
   active,
-  onCopyUrl,
+  onOpenLinkShare,
   onKakao,
   isSharing,
 }: {
   invite?: InviteListItem;
   guestUrl: string | null;
   active: boolean;
-  onCopyUrl?: ShareAudienceLink;
+  onOpenLinkShare?: ShareAudienceLink;
   onKakao?: ShareAudienceWithKakao;
   isSharing: boolean;
 }) {
@@ -114,7 +114,7 @@ export function useAudienceShare({
   const trigger = useRef<HTMLButtonElement | null>(null);
   const titleId = useId();
   const eventId = useId();
-  const linkEnabled = Boolean(active && guestUrl && onCopyUrl);
+  const linkEnabled = Boolean(active && guestUrl && onOpenLinkShare);
   const canLookUpKakao = Boolean(
     active &&
     onKakao &&
@@ -125,7 +125,6 @@ export function useAudienceShare({
     canLookUpKakao &&
     Boolean(error || invite?.hasKakaoShareData || (options?.length ?? 0) > 1);
 
-  // 선택된 카드에서 목록을 미리 준비해야 복사가 사용자 클릭 안에서 실행된다.
   useEffect(() => {
     if (!enabled || !request.folderId) return;
     const controller = new AbortController();
@@ -162,7 +161,7 @@ export function useAudienceShare({
   function share(option: ShareOption, via: ShareChannel) {
     if (!invite) return;
     if (via === 'link') {
-      onCopyUrl?.(invite.folderId, option);
+      onOpenLinkShare?.(invite.folderId, option);
       return;
     }
     if (!onKakao || pendingKakao.current) return;
@@ -178,7 +177,9 @@ export function useAudienceShare({
       disabled: !available || loading || isSharing,
       'aria-busy': loading || (via === 'kakao' && isSharing),
       'aria-haspopup':
-        options && options.length > 1 ? ('dialog' as const) : undefined,
+        options && (via === 'link' || options.length > 1)
+          ? ('dialog' as const)
+          : undefined,
       title: error,
       onClick: (event: MouseEvent<HTMLButtonElement>) => {
         if (error) {
@@ -211,7 +212,7 @@ export function useAudienceShare({
         ? '공유 다시 준비하기'
         : loading
           ? '공유 준비 중…'
-          : 'URL 링크 공유하기',
+          : '링크·QR 공유하기',
     picker: invite && options && options.length > 1 && (
       <dialog
         ref={dialog}

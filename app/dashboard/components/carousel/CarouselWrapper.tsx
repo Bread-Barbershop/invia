@@ -128,7 +128,6 @@ function CarouselWrapper({
     handleUpdate,
     handleToggleVisibility,
     loadInvitations,
-    handleCopyGuestUrl,
     handleShare,
     getGuestUrl,
     isDeleting,
@@ -367,11 +366,10 @@ function CarouselWrapper({
           if (invite?.hasAudienceGroups) setVisibilityTarget(invite);
           else void handleToggleVisibility(folderId, nextVisible);
         }}
-        onCopyUrl={(folderId, option) => {
+        onOpenLinkShare={(folderId, option) => {
           const invite = invites.find(item => item.folderId === folderId);
           if (!invite) return;
 
-          void handleCopyGuestUrl(folderId, option.url);
           setLinkShare({
             url: option.url,
             recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,

@@ -66,11 +66,7 @@ function useDashboardInvitations(
   options: UseDashboardInvitationsOptions = {}
 ) {
   const router = useRouter();
-  const {
-    success: successToast,
-    error: errorToast,
-    info: infoToast,
-  } = useToast();
+  const { success: successToast, error: errorToast } = useToast();
   const loadOnMount = options.loadOnMount ?? initialInvites.length === 0;
   const normalizedInitialInvites = normalizeInvites(initialInvites);
 
@@ -717,27 +713,6 @@ function useDashboardInvitations(
     [router]
   );
 
-  const handleCopyGuestUrl = useCallback(
-    async (folderId: string, audienceUrl?: string) => {
-      const finalUrl =
-        audienceUrl ?? resolveGuestUrl(invitationResults[folderId] ?? null);
-      if (!finalUrl) return;
-
-      try {
-        const invite = invites.find(item => item.folderId === folderId);
-        if (!audienceUrl && invite && !invite.published) {
-          infoToast('현재 초대장은 비공개 상태입니다.');
-        }
-        await navigator.clipboard.writeText(finalUrl);
-        successToast('복사가 완료되었어요!');
-      } catch (err) {
-        console.error(err);
-        errorToast('링크 복사에 실패했습니다.');
-      }
-    },
-    [invitationResults, invites, successToast, errorToast, infoToast]
-  );
-
   const handleShare = useCallback(
     async (
       folderId: string,
@@ -824,7 +799,6 @@ function useDashboardInvitations(
     handleDelete,
     handleToggleVisibility,
     handleUpdate,
-    handleCopyGuestUrl,
     handleShare,
     loadShareData,
     getGuestUrl,
