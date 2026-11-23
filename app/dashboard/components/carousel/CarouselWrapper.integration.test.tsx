@@ -6,9 +6,9 @@ import {
   waitFor,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { toDataURL } from 'qrcode';
 
 import type { InviteListItem } from '@/app/dashboard/types';
+import { toDataURL } from '@/components/molecules/link-share/invitationQr';
 import {
   parsePreviewSnapshot,
   PREVIEW_MESSAGE,
@@ -31,7 +31,9 @@ import {
   workKakaoCard,
 } from './fixtures/shareAudiences';
 
-jest.mock('qrcode', () => ({ toDataURL: jest.fn() }));
+jest.mock('@/components/molecules/link-share/invitationQr', () => ({
+  toDataURL: jest.fn(),
+}));
 
 const mockRouter = { push: jest.fn(), replace: jest.fn(), refresh: jest.fn() };
 jest.mock('next/navigation', () => ({ useRouter: () => mockRouter }));
