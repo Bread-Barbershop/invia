@@ -1,12 +1,12 @@
 'use client';
 
-import type { CSSProperties } from 'react';
-
 import { usePrefersReducedMotion } from '@/components/organisms/gallery/hooks/usePrefersReducedMotion';
 import type {
   AmbientScope,
   ResolvedInvitationEffects,
 } from '@/shared/utils/invitationEffects';
+
+import type { CSSProperties } from 'react';
 
 import './visualEffects.css';
 

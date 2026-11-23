@@ -239,7 +239,9 @@ describe('GuestRenderer', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
-    expect(document.querySelector('.invia-effect-confetti')).toBeInTheDocument();
+    expect(
+      document.querySelector('.invia-effect-confetti')
+    ).toBeInTheDocument();
   });
 
   it('예전 축하 효과가 켜져 있어도 배경 효과 선택에 따라 종이 컨페티를 표시한다', () => {
@@ -260,7 +262,9 @@ describe('GuestRenderer', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
-    expect(document.querySelector('.invia-effect-confetti')).toBeInTheDocument();
+    expect(
+      document.querySelector('.invia-effect-confetti')
+    ).toBeInTheDocument();
 
     rerender(
       <GuestRenderer

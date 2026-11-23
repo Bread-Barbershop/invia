@@ -61,7 +61,9 @@ describe('일괄 편집 즉시 반영', () => {
     expect(effectsHeading.closest('details')).toContainElement(scroll);
     expect(opening).toHaveTextContent('바로 시작');
     expect(screen.queryByText('축하 효과')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '처음부터 보기' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: '처음부터 보기' })
+    ).toBeDisabled();
   });
 
   it('별도 블록을 추가하지 않고 오프닝을 하객 미리보기에 전달한다', () => {
