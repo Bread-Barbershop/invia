@@ -57,7 +57,7 @@ export default function HeaderSupportersButton({
         {...backdropDismiss}
         id={dialogId}
         aria-labelledby={titleId}
-        className="fixed inset-0 m-auto max-h-[calc(100dvh_-_2rem)] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border-0 bg-white p-6 text-text-plain shadow-xl backdrop:bg-black/40"
+        className="group/font-providers fixed inset-0 m-auto max-h-[calc(100dvh_-_2rem)] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl border-0 bg-white p-6 text-text-plain shadow-xl backdrop:bg-black/40"
       >
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 id={titleId} className="text-2xl font-bold">
@@ -76,7 +76,10 @@ export default function HeaderSupportersButton({
 
         <ul className="grid grid-cols-2 gap-3 py-2 sm:gap-6">
           {fontProviders.map(provider => (
-            <li key={provider.name} className="min-w-0">
+            <li
+              key={provider.name}
+              className="min-w-0 not-first:[--provider-fade-delay:80ms] motion-safe:group-open/font-providers:animate-[fade-in_var(--duration-fade)_ease-out_var(--provider-fade-delay,0ms)_both]"
+            >
               <a
                 href={provider.licenseUrl}
                 target="_blank"
