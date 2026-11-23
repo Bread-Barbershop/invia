@@ -51,11 +51,10 @@ export function LinkShareModal({
 
     async function generateQr() {
       try {
-        const { toDataURL } = await import('qrcode');
+        const { toDataURL } = await import('./invitationQr');
         const dataUrl = await toDataURL(shareUrl, {
           width: 1024,
           margin: 4,
-          errorCorrectionLevel: 'M',
         });
 
         if (!cancelled) setQrResult({ url: shareUrl, attempt, dataUrl });
