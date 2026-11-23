@@ -86,30 +86,38 @@ function PopupOptions({
           </li>
         )}
 
-        {options.map((text, index) => (
-          <li
-            key={`${text}-${index}`}
-            className={cn(
-              'flex h-9 items-center justify-center gap-2.5 p-0',
-              listClassName
-            )}
-          >
-            <div className={cn('flex shrink-0 items-center', radioClassName)}>
-              <Radio
-                name={radioName}
-                value={text}
-                checked={currentSelectedText === text}
-                onChange={handleSelect}
-              />
-            </div>
-
-            <PopupText
-              text={text}
-              className={cn('flex-1', textClassName)}
-              twoLineEllipsis={twoLineEllipsis}
-            />
-          </li>
-        ))}
+        {options.map((text, index) => {
+          const inputId = `${autoName}-option-${index}`;
+          return (
+            <li
+              key={`${text}-${index}`}
+              className={cn(
+                'relative flex h-9 items-center justify-center gap-2.5 p-0 has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-primary',
+                listClassName
+              )}
+            >
+              <div className={cn('flex shrink-0 items-center', radioClassName)}>
+                <Radio
+                  id={inputId}
+                  name={radioName}
+                  value={text}
+                  checked={currentSelectedText === text}
+                  onChange={handleSelect}
+                />
+              </div>
+              <label
+                htmlFor={inputId}
+                className="min-w-0 flex-1 cursor-pointer before:absolute before:inset-0"
+              >
+                <PopupText
+                  text={text}
+                  className={textClassName}
+                  twoLineEllipsis={twoLineEllipsis}
+                />
+              </label>
+            </li>
+          );
+        })}
       </ul>
     </Popup>
   );
