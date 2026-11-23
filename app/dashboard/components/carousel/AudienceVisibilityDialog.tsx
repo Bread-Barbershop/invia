@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { InviteListItem } from '@/app/dashboard/types';
+import { TOGGLE_TRACK } from '@/components/atoms/toggle-track/ToggleTrack.style';
 import type { AudienceVisibilityOptions } from '@/features/invitation/audiences/visibility';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 
@@ -22,13 +23,16 @@ function PublicSwitch({
   disabled: boolean;
   onChange: () => void;
 }) {
+  const { width, height, knobSize, knobTravel, knobShadow, on, off } =
+    TOGGLE_TRACK;
+  const colors = checked ? on : off;
+
   return (
-    <label className="flex min-h-11 items-center justify-between gap-4 py-2">
+    <label
+      className={`flex min-h-11 items-center justify-between gap-4 py-2 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+    >
       <span className="min-w-0 break-words text-sm font-medium">{name}</span>
-      <span className="flex shrink-0 items-center gap-2">
-        <span aria-hidden="true" className="text-xs text-text-secondary">
-          {checked ? '공개' : '비공개'}
-        </span>
+      <span className="flex shrink-0 items-center">
         <input
           type="checkbox"
           role="switch"
@@ -40,8 +44,36 @@ function PublicSwitch({
         />
         <span
           aria-hidden="true"
-          className="relative h-6 w-11 rounded-full bg-neutral-400 transition-colors after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:bg-blue-700 peer-checked:after:translate-x-5 peer-disabled:opacity-50 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 motion-reduce:transition-none"
-        />
+          className="relative overflow-hidden rounded-full border peer-disabled:opacity-50 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary motion-safe:transition-[background-color,border-color,box-shadow] motion-safe:duration-200"
+          style={{
+            width,
+            height,
+            borderColor: colors.borderColor,
+            backgroundColor: colors.backgroundColor,
+            boxShadow: colors.shadow,
+          }}
+        >
+          <span
+            className="absolute top-px left-px z-10 rounded-full border border-white/25 motion-safe:transition-[transform,background-color] motion-safe:duration-200 motion-safe:ease-out"
+            style={{
+              width: knobSize,
+              height: knobSize,
+              backgroundColor: colors.knobColor,
+              boxShadow: knobShadow,
+              transform: `translateX(${checked ? knobTravel : 0}px)`,
+            }}
+          />
+          <span
+            className={`absolute top-px grid place-items-center font-pretendard text-xs leading-none font-medium ${checked ? 'left-px' : 'right-px'}`}
+            style={{
+              width: knobTravel,
+              height: knobSize,
+              color: colors.labelColor,
+            }}
+          >
+            {checked ? '공개' : '비공개'}
+          </span>
+        </span>
       </span>
     </label>
   );
