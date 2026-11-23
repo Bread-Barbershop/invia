@@ -46,6 +46,7 @@ type UseDashboardInvitationsOptions = {
 };
 type ShareUrlResponse = {
   ok: boolean;
+  visibility?: 'private' | 'pending';
   data?: KakaoShareData;
   error?: string;
 };
@@ -207,7 +208,9 @@ function useDashboardInvitations(
       const versions = listVersionsRef.current;
       if (version < versions.applied) return false;
       versions.applied = version;
-      versions.folderIds = new Set(loadedInvites.map(invite => invite.folderId));
+      versions.folderIds = new Set(
+        loadedInvites.map(invite => invite.folderId)
+      );
 
       const clonedFolderIds = clonedFolderIdsRef.current;
       for (const folderId of clonedFolderIds) {
@@ -799,7 +802,7 @@ function useDashboardInvitations(
 
       try {
         const invite = invites.find(item => item.folderId === folderId);
-        if (invite && !invite.published) {
+        if (!audienceUrl && invite && !invite.published) {
           infoToast('현재 초대장은 비공개 상태입니다.');
         }
         await navigator.clipboard.writeText(finalUrl);
@@ -815,7 +818,7 @@ function useDashboardInvitations(
   const loadShareData = useCallback(
     async (folderId: string, signal?: AbortSignal) => {
       const res = await fetch(
-        `/api/drive/shareUrl?invitationFolderId=${encodeURIComponent(folderId)}`,
+        `/api/drive/shareUrl?invitationFolderId=${encodeURIComponent(folderId)}&intent=share`,
         {
           method: 'GET',
           cache: 'no-store',
@@ -827,6 +830,12 @@ function useDashboardInvitations(
         .json()
         .catch(() => null)) as ShareUrlResponse | null;
 
+      if (
+        res.status === 409 &&
+        (payload?.visibility === 'private' || payload?.visibility === 'pending')
+      ) {
+        return payload.visibility;
+      }
       if (!res.ok || payload?.ok === false || !payload?.data) {
         if (payload?.error === 'share data not found in meta.json') {
           throw new Error('이 초대장에 저장된 카카오톡 공유 정보가 없어요.');
@@ -840,19 +849,20 @@ function useDashboardInvitations(
   );
 
   const handleShare = useCallback(
-    async (folderId: string, audienceFolderId: string, signal: AbortSignal) => {
+    async (
+      folderId: string,
+      audienceFolderId: string,
+      signal: AbortSignal
+    ): Promise<'private' | 'pending' | void> => {
       if (!folderId) return;
       if (shareBusy[folderId]) return;
-
-      const invite = invites.find(item => item.folderId === folderId);
-      if (invite && !invite.published) {
-        infoToast('현재 초대장은 비공개 상태입니다.');
-      }
 
       setShareBusy(prev => ({ ...prev, [folderId]: true }));
       try {
         const shareData = await loadShareData(audienceFolderId, signal);
-        if (!signal.aborted) shareInvitationWithKakao(shareData);
+        if (signal.aborted) return;
+        if (typeof shareData === 'string') return shareData;
+        shareInvitationWithKakao(shareData);
       } catch (err) {
         if (signal.aborted) return;
         console.error(err);
@@ -865,7 +875,7 @@ function useDashboardInvitations(
         setShareBusy(prev => ({ ...prev, [folderId]: false }));
       }
     },
-    [invites, loadShareData, shareBusy, setShareBusy, errorToast, infoToast]
+    [loadShareData, shareBusy, setShareBusy, errorToast]
   );
 
   const getGuestUrl = useCallback(

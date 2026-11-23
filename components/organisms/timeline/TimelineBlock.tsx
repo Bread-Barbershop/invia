@@ -1,5 +1,8 @@
 'use client';
 
+import { useCallback, useRef, useState } from 'react';
+
+import Confirm from '@/components/molecules/confirm/Confirm';
 import { NavigationBar } from '@/components/molecules/navigation-bar/NavigationBar';
 import { SortableEditorRow } from '@/features/DndKit/Sort/SortableEditorRow';
 import SortableWrapper from '@/features/DndKit/Sort/SortableWrapper';
@@ -18,12 +21,15 @@ export function TimelineBlock({
   id: string;
 }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
+  const [showPresetConfirm, setShowPresetConfirm] = useState(false);
+  const confirmRef = useRef<HTMLDivElement>(null);
+  const closePresetConfirm = useCallback(() => setShowPresetConfirm(false), []);
   const items = normalizeTimelineItems(blockInfo.props.items);
   const changeItem = (key: string, name: 'time' | 'title' | 'description', value: string) =>
     updateBlock(id, { items: items.map(item => item.id === key ? { ...item, [name]: value } : item) });
   const applyPreset = () => {
-    if (!window.confirm('현재 식순을 선택한 행사 유형의 예시 식순으로 교체할까요?')) return;
     updateBlock(id, { items: getTimelinePreset(blockInfo.type) });
+    closePresetConfirm();
   };
 
   return (
@@ -41,11 +47,25 @@ export function TimelineBlock({
         </label>
         <button
           type="button"
-          onClick={applyPreset}
+          aria-haspopup="dialog"
+          onClick={() => setShowPresetConfirm(true)}
           className="rounded-md border border-border-divider px-3 py-2 text-xs text-text-primary hover:bg-[#FAFAFB]"
         >
           {blockInfo.type === 'wedding' ? '결혼식' : blockInfo.type === 'firstBirthday' ? '돌잔치' : blockInfo.type === 'seminar' ? '세미나' : '기본'} 식순 예시 적용
         </button>
+        {showPresetConfirm && (
+          <Confirm
+            ref={confirmRef}
+            message="현재 식순을 예시 식순으로 교체할까요?"
+            confirmText="적용하기"
+            cancelText="취소"
+            variant="white"
+            yPosition="center"
+            onConfirm={applyPreset}
+            onCancel={closePresetConfirm}
+            onClose={closePresetConfirm}
+          />
+        )}
         <SortableWrapper
           vertical
           items={items}
