@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import type { InviteListItem } from '@/app/dashboard/types';
+import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
 import {
   buildAudienceGuestUrl,
   type AudienceGroup,
@@ -22,6 +23,7 @@ import type {
 } from '../../carouselTypes';
 
 type ShareChannel = 'link' | 'kakao';
+type ShareGroup = Omit<ShareOption, 'downloadName'>;
 const LOAD_ERROR = '공유할 하객 그룹을 불러오지 못했어요.';
 const statusLabels = {
   public: '공개',
@@ -32,7 +34,7 @@ const statusLabels = {
 async function loadShareOptions(
   folderId: string,
   signal: AbortSignal
-): Promise<ShareOption[]> {
+): Promise<ShareGroup[]> {
   const params = new URLSearchParams({ folderId, view: 'share-options' });
   const response = await fetch(`/api/drive/invitationAudiences?${params}`, {
     cache: 'no-store',
@@ -87,10 +89,22 @@ export function useAudienceShare({
   );
   const [result, setResult] = useState<{
     request: typeof request;
-    options?: ShareOption[];
+    options?: ShareGroup[];
     error?: string;
   } | null>(null);
-  const options = result?.request === request ? result.options : undefined;
+  const groups = result?.request === request ? result.options : undefined;
+  const eventTitle = invite?.displayTitle || invite?.name || '초대장';
+  const options = useMemo(
+    () =>
+      groups?.map(group => ({
+        ...group,
+        downloadName: qrDownloadName(
+          eventTitle,
+          groups.length > 1 ? group.name : undefined
+        ),
+      })),
+    [groups, eventTitle]
+  );
   const error = result?.request === request ? result.error : undefined;
   const dialog = useRef<HTMLDialogElement>(null);
   const [channel, setChannel] = useState<ShareChannel>('link');

@@ -16,6 +16,7 @@ export type ShareOption = {
   name: string;
   url: string;
   visibility: GroupShareVisibility;
+  downloadName: string;
 };
 
 export type ShareAudienceLink = (folderId: string, option: ShareOption) => void;
