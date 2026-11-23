@@ -138,11 +138,11 @@ describe('SaveModal', () => {
     expect(
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+    await user.click(screen.getByRole('button', { name: '공유하기' }));
+    expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
       'download',
       '민서·지훈 결혼식 - 가족용 QR.png'
     );
-    await user.click(screen.getByRole('button', { name: '공유하기' }));
     expect(
       screen.getByRole('button', { name: '카카오톡으로 보내기' })
     ).toBeEnabled();

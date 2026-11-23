@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { QR_DATA_URL, SHARE_URL } from './fixtures/shareLink';
@@ -8,11 +8,22 @@ import { LinkShareModal } from './LinkShareModal';
 jest.mock('./invitationQr', () => ({ toDataURL: jest.fn() }));
 
 const mockToDataURL = toDataURL as jest.Mock;
+const originalClipboardItem = Object.getOwnPropertyDescriptor(window, 'ClipboardItem');
+
+function setClipboardItem(value: unknown) {
+  Object.defineProperty(window, 'ClipboardItem', { configurable: true, value });
+}
 
 describe('LinkShareModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockToDataURL.mockResolvedValue(QR_DATA_URL);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+    if (originalClipboardItem)
+      Object.defineProperty(window, 'ClipboardItem', originalClipboardItem);
+    else Reflect.deleteProperty(window, 'ClipboardItem');
   });
 
   it('동일한 초대장 URL의 링크와 저장 가능한 QR을 함께 표시한다', async () => {
@@ -28,14 +39,68 @@ describe('LinkShareModal', () => {
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
     ).toHaveAttribute('src', QR_DATA_URL);
     expect(mockToDataURL).toHaveBeenCalledWith(SHARE_URL);
-    expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+    fireEvent.click(screen.getByRole('button', { name: '공유하기' }));
+    expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
       'href',
       QR_DATA_URL
     );
-    expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
       'download',
       'invitation-qr.png'
     );
+  });
+
+  it('접힌 상태와 펼친 메뉴에서 같은 PNG를 복사하고 진행 중 중복 복사를 막는다', async () => {
+    const user = userEvent.setup();
+    let finishCopy!: () => void;
+    const write = jest.spyOn(navigator.clipboard, 'write')
+      .mockImplementationOnce(() => new Promise(resolve => { finishCopy = resolve; }))
+      .mockResolvedValue(undefined);
+    const item = jest.fn();
+    setClipboardItem(item);
+    render(<LinkShareModal url={SHARE_URL} onClose={jest.fn()} />);
+    await screen.findByRole('img', { name: '초대장 공유 QR 코드' });
+    const quickCopy = screen.getByRole('button', { name: 'QR 복사하기' });
+
+    await user.click(quickCopy);
+    await user.click(screen.getByRole('button', { name: '공유하기' }));
+    const menuCopy = screen.getByRole('button', { name: 'QR 이미지 복사' });
+    expect(quickCopy).toBeDisabled();
+    expect(menuCopy).toBeDisabled();
+    expect(write).toHaveBeenCalledTimes(1);
+    await act(async () => finishCopy());
+    expect(screen.getByText('QR 이미지를 복사했어요.')).toBeVisible();
+    await user.click(menuCopy);
+
+    expect(write).toHaveBeenCalledTimes(2);
+    const files = item.mock.calls.map(([input]) => input['image/png'] as Blob);
+    for (const file of files) {
+      expect(file.type).toBe('image/png');
+      const reader = new FileReader();
+      const contents = new Promise(resolve => {
+        reader.onload = () => resolve(reader.result);
+      });
+      reader.readAsDataURL(file);
+      await expect(contents).resolves.toBe(QR_DATA_URL);
+    }
+  });
+
+  it.each([false, true])('PNG 복사를 완료할 수 없으면 메뉴의 저장 경로를 안내한다 (%s)', async supported => {
+    const user = userEvent.setup();
+    jest.spyOn(navigator.clipboard, 'write').mockRejectedValue(
+      new DOMException('권한 없음', 'NotAllowedError')
+    );
+    setClipboardItem(supported ? jest.fn() : undefined);
+    render(<LinkShareModal url={SHARE_URL} onClose={jest.fn()} />);
+    await screen.findByRole('img', { name: '초대장 공유 QR 코드' });
+
+    const copy = screen.getByRole('button', { name: 'QR 복사하기' });
+    await user.click(copy);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('공유하기를 열어 QR 이미지 저장을 눌러 주세요.');
+    expect(copy).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: '공유하기' }));
+    expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute('href', QR_DATA_URL);
   });
 
   it('상대 경로도 스캔 가능한 절대 URL로 변환해 복사하고 QR을 만든다', async () => {
@@ -48,6 +113,7 @@ describe('LinkShareModal', () => {
 
     expect(writeText).toHaveBeenCalledWith(absoluteUrl);
     expect(mockToDataURL).toHaveBeenCalledWith(absoluteUrl);
+    expect(screen.getByRole('button', { name: '복사 완료' })).toBeVisible();
     expect(screen.getByText('링크를 복사했어요.')).toBeInTheDocument();
   });
 
@@ -78,7 +144,7 @@ describe('LinkShareModal', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'QR을 만들지 못했어요.'
     );
-    expect(screen.getByRole('button', { name: 'QR 저장하기' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'QR 복사하기' })).toBeDisabled();
     await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
     expect(writeText).toHaveBeenCalledWith(SHARE_URL);
 
