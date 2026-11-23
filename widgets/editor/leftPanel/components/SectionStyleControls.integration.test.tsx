@@ -63,6 +63,17 @@ describe('템플릿과 추가 블록의 공통 카드 디자인', () => {
   beforeEach(() => useEditorStore.getState().reset());
   afterEach(() => act(() => useEditorStore.getState().reset()));
 
+  it('전체 스타일에서 기본 카드 스타일 뒤에 초대장 연출을 표시한다', () => {
+    render(<BulkEdit />);
+
+    const cardStyle = screen.getByText('기본 카드 스타일');
+    const effects = screen.getByText('초대장 연출');
+
+    expect(cardStyle.compareDocumentPosition(effects)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
   it('공지사항 편집 헤더와 항목추가 아래에서 제목보다 먼저 카드 스타일과 등장 효과를 편집한다', async () => {
     const user = userEvent.setup();
     const editor = useEditorStore.getState();
