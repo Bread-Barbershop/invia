@@ -80,7 +80,7 @@ describe('초대장 카드 미리보기', () => {
     await user.click(card);
     expect(document.body.style.overflow).toBe('hidden');
     const closeButton = screen.getByRole('button', { name: '미리보기 닫기' });
-    expect(closeButton).toHaveTextContent('닫기');
+    expect(closeButton.textContent).toBe('');
     await user.click(closeButton);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(card).toHaveFocus();
