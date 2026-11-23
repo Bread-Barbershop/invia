@@ -1,17 +1,18 @@
 import { toCanvas } from 'qrcode';
 
-export async function toDataURL(
-  url: string,
-  options: { width: number; margin: number }
-): Promise<string> {
-  const canvas = await toCanvas(url, { ...options, errorCorrectionLevel: 'H' });
+async function renderCanvas(url: string) {
+  const canvas = await toCanvas(url, {
+    width: 1024,
+    margin: 4,
+    errorCorrectionLevel: 'H',
+  });
   const favicon = new Image();
   favicon.src = '/favicon.ico';
   try {
     await favicon.decode();
   } catch {
     // Keep the invitation scannable if the decorative image is unavailable.
-    return canvas.toDataURL('image/png');
+    return canvas;
   }
 
   const context = canvas.getContext('2d');
@@ -34,5 +35,21 @@ export async function toDataURL(
     iconSize,
     iconSize
   );
-  return canvas.toDataURL('image/png');
+  return canvas;
+}
+
+export async function toDataURL(url: string): Promise<string> {
+  return (await renderCanvas(url)).toDataURL('image/png');
+}
+
+export async function toPngBytes(url: string): Promise<Uint8Array> {
+  const canvas = await renderCanvas(url);
+  const png = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      blob =>
+        blob ? resolve(blob) : reject(new Error('QR PNG를 만들 수 없어요.')),
+      'image/png'
+    );
+  });
+  return new Uint8Array(await png.arrayBuffer());
 }

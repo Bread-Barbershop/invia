@@ -8,7 +8,6 @@ import { InviteListItem } from '@/app/dashboard/types';
 import { getInvitationShowcaseItem } from '@/app/dashboard/utils/getInvitationShowcaseItem';
 import Confirm from '@/components/molecules/confirm/Confirm';
 import { LinkShareModal } from '@/components/molecules/link-share/LinkShareModal';
-import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
 
 import DashboardInvitationPreviewModal from '../preview/DashboardInvitationPreviewModal';
 
@@ -365,7 +364,7 @@ function CarouselWrapper({
           if (invite?.hasAudienceGroups) setVisibilityTarget(invite);
           else void handleToggleVisibility(folderId, nextVisible);
         }}
-        onCopyUrl={(folderId, option, hasMultipleAudiences) => {
+        onCopyUrl={(folderId, option) => {
           const invite = invites.find(item => item.folderId === folderId);
           if (!invite) return;
 
@@ -373,10 +372,7 @@ function CarouselWrapper({
           setLinkShare({
             url: option.url,
             recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,
-            downloadName: qrDownloadName(
-              invite.displayTitle || invite.name,
-              hasMultipleAudiences ? option.name : undefined
-            ),
+            downloadName: option.downloadName,
             notice:
               option.visibility === 'private'
                 ? '비공개 초대장이에요. 공개로 변경하면 링크와 QR로 접속할 수 있어요.'

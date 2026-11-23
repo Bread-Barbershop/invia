@@ -9,11 +9,14 @@ import {
 } from 'react';
 
 import type { InviteListItem } from '@/app/dashboard/types';
+import { groupQrDownloadNames } from '@/components/molecules/link-share/qrDownloadName';
 import {
   buildAudienceGuestUrl,
   type AudienceGroup,
 } from '@/features/invitation/audiences/model';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
+
+import AudienceQrDownload from './AudienceQrDownload';
 
 import type {
   ShareAudienceLink,
@@ -22,6 +25,7 @@ import type {
 } from '../../carouselTypes';
 
 type ShareChannel = 'link' | 'kakao';
+type ShareGroup = Omit<ShareOption, 'downloadName'>;
 const LOAD_ERROR = '공유할 하객 그룹을 불러오지 못했어요.';
 const statusLabels = {
   public: '공개',
@@ -32,7 +36,7 @@ const statusLabels = {
 async function loadShareOptions(
   folderId: string,
   signal: AbortSignal
-): Promise<ShareOption[]> {
+): Promise<ShareGroup[]> {
   const params = new URLSearchParams({ folderId, view: 'share-options' });
   const response = await fetch(`/api/drive/invitationAudiences?${params}`, {
     cache: 'no-store',
@@ -87,13 +91,25 @@ export function useAudienceShare({
   );
   const [result, setResult] = useState<{
     request: typeof request;
-    options?: ShareOption[];
+    options?: ShareGroup[];
     error?: string;
   } | null>(null);
-  const options = result?.request === request ? result.options : undefined;
+  const groups = result?.request === request ? result.options : undefined;
+  const eventTitle = invite?.displayTitle || invite?.name || '초대장';
+  const options = useMemo(() => {
+    if (!groups) return;
+    const names = groupQrDownloadNames(
+      eventTitle,
+      groups.map(group => group.name)
+    );
+    return groups.map((group, index) => ({
+      ...group,
+      downloadName: names[index],
+    }));
+  }, [groups, eventTitle]);
   const error = result?.request === request ? result.error : undefined;
   const dialog = useRef<HTMLDialogElement>(null);
-  const [channel, setChannel] = useState<ShareChannel>('link');
+  const [channel, setChannel] = useState<ShareChannel | null>(null);
   const pendingKakao = useRef<AbortController | null>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
   const titleId = useId();
@@ -133,6 +149,7 @@ export function useAudienceShare({
   }, [enabled, request]);
 
   function closePicker() {
+    setChannel(null);
     dialog.current?.close();
     trigger.current?.focus({ preventScroll: true });
   }
@@ -145,7 +162,7 @@ export function useAudienceShare({
   function share(option: ShareOption, via: ShareChannel) {
     if (!invite) return;
     if (via === 'link') {
-      onCopyUrl?.(invite.folderId, option, (options?.length ?? 0) > 1);
+      onCopyUrl?.(invite.folderId, option);
       return;
     }
     if (!onKakao || pendingKakao.current) return;
@@ -235,7 +252,7 @@ export function useAudienceShare({
                 className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border border-neutral-200 px-4 py-3 text-left text-sm font-semibold hover:bg-neutral-50 focus-visible:outline-2 disabled:opacity-50"
                 onClick={() => {
                   closePicker();
-                  share(option, channel);
+                  if (channel) share(option, channel);
                 }}
               >
                 <span className="min-w-0 break-words">{option.name}</span>
@@ -254,6 +271,13 @@ export function useAudienceShare({
             </li>
           ))}
         </ul>
+        {channel === 'link' && (
+          <AudienceQrDownload
+            key={eventTitle}
+            eventTitle={eventTitle}
+            options={options}
+          />
+        )}
         <button
           type="button"
           onClick={closePicker}

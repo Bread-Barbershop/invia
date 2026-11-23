@@ -16,13 +16,10 @@ export type ShareOption = {
   name: string;
   url: string;
   visibility: GroupShareVisibility;
+  downloadName: string;
 };
 
-export type ShareAudienceLink = (
-  folderId: string,
-  option: ShareOption,
-  hasMultipleAudiences: boolean
-) => void;
+export type ShareAudienceLink = (folderId: string, option: ShareOption) => void;
 
 export type ShareAudienceWithKakao = (
   rootFolderId: string,

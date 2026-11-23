@@ -27,10 +27,7 @@ describe('LinkShareModal', () => {
     expect(
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
     ).toHaveAttribute('src', QR_DATA_URL);
-    expect(mockToDataURL).toHaveBeenCalledWith(
-      SHARE_URL,
-      expect.objectContaining({ width: 1024, margin: 4 })
-    );
+    expect(mockToDataURL).toHaveBeenCalledWith(SHARE_URL);
     expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
       'href',
       QR_DATA_URL
@@ -50,7 +47,7 @@ describe('LinkShareModal', () => {
     await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
 
     expect(writeText).toHaveBeenCalledWith(absoluteUrl);
-    expect(mockToDataURL).toHaveBeenCalledWith(absoluteUrl, expect.any(Object));
+    expect(mockToDataURL).toHaveBeenCalledWith(absoluteUrl);
     expect(screen.getByText('링크를 복사했어요.')).toBeInTheDocument();
   });
 
