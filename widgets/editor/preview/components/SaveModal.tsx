@@ -327,6 +327,11 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
         <LinkShareModal
           url={pendingInvitation.guestUrl}
           downloadName={pendingInvitation.qrDownloadName}
+          kakaoFolderId={pendingInvitation.invitationFolderId}
+          allowSending={
+            pendingInvitation.published !== false &&
+            pendingInvitation.ready !== false
+          }
           notice={
             pendingInvitation.published === false
               ? '비공개 초대장이에요. 대시보드에서 공개로 변경하면 링크와 QR로 접속할 수 있어요.'

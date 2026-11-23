@@ -830,6 +830,61 @@ describe('대시보드 초대장', () => {
       return button;
     }
 
+    it.each([true, false])(
+      '직장용 QR 공유창에서 직장용의 최신 공개 상태(%s)를 확인해 카카오톡으로 보낸다',
+      async isPublic => {
+        const user = userEvent.setup();
+        mockFetch
+          .mockResolvedValueOnce(shareAudienceResponse([baseGroup, workGroup]))
+          .mockResolvedValueOnce(
+            isPublic
+              ? {
+                  ok: true,
+                  json: async () => ({ ok: true, data: workKakaoCard }),
+                }
+              : {
+                  ok: false,
+                  status: 409,
+                  json: async () => ({ ok: false, visibility: 'private' }),
+                }
+          );
+        showKakaoCard(false);
+        await user.click(
+          await screen.findByRole('button', { name: 'URL 링크 공유하기' })
+        );
+        await user.click(screen.getByRole('button', { name: '직장용' }));
+        await user.click(screen.getByRole('button', { name: '공유하기' }));
+        await user.click(
+          screen.getByRole('button', {
+            name: '카카오톡으로 초대장 링크 보내기',
+          })
+        );
+        expect(mockFetch).toHaveBeenLastCalledWith(
+          '/api/drive/shareUrl?invitationFolderId=work-folder&intent=share',
+          expect.anything()
+        );
+        if (isPublic) {
+          expect(sendDefault).toHaveBeenCalledWith(
+            expect.objectContaining({
+              content: expect.objectContaining({
+                title: workKakaoCard.title,
+                link: expect.objectContaining({
+                  mobileWebUrl: workKakaoCard.invitationUrl,
+                }),
+              }),
+            })
+          );
+        } else {
+          expect(
+            await screen.findByText(
+              '공개 상태를 확인한 뒤 카카오톡으로 보내 주세요.'
+            )
+          ).toBeVisible();
+          expect(sendDefault).not.toHaveBeenCalled();
+        }
+      }
+    );
+
     it('기본 공유 문구가 없어도 직장용을 고르면 직장용 카드와 주소를 카카오에 전달한다', async () => {
       const user = userEvent.setup();
       const copy = jest.spyOn(navigator.clipboard, 'writeText');

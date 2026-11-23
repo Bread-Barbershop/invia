@@ -141,6 +141,8 @@ function CarouselWrapper({
     url: string;
     recipient: string;
     downloadName: string;
+    kakaoFolderId?: string;
+    allowSending: boolean;
     notice?: string;
   } | null>(null);
   const closeLinkShare = useCallback(() => setLinkShare(null), []);
@@ -373,6 +375,11 @@ function CarouselWrapper({
             url: option.url,
             recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,
             downloadName: option.downloadName,
+            kakaoFolderId:
+              option.folderId !== folderId || invite.hasKakaoShareData
+                ? option.folderId
+                : undefined,
+            allowSending: option.visibility === 'public',
             notice:
               option.visibility === 'private'
                 ? '비공개 초대장이에요. 공개로 변경하면 링크와 QR로 접속할 수 있어요.'
@@ -402,6 +409,8 @@ function CarouselWrapper({
           url={linkShare.url}
           recipient={linkShare.recipient}
           downloadName={linkShare.downloadName}
+          kakaoFolderId={linkShare.kakaoFolderId}
+          allowSending={linkShare.allowSending}
           notice={linkShare.notice}
           onClose={closeLinkShare}
         />

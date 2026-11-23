@@ -132,6 +132,10 @@ describe('SaveModal', () => {
       'download',
       '민서·지훈 결혼식 - 가족용 QR.png'
     );
+    await user.click(screen.getByRole('button', { name: '공유하기' }));
+    expect(
+      screen.getByRole('button', { name: '카카오톡으로 초대장 링크 보내기' })
+    ).toBeEnabled();
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(
       screen.getByRole('button', { name: '다시 수정하기' })

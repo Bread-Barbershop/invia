@@ -11,10 +11,14 @@ import {
   trapFocus,
 } from '@/shared/utils/focusTrap';
 
+import { QrShareActions } from './QrShareActions';
+
 type LinkShareModalProps = {
   url: string;
   recipient?: string;
   downloadName?: string;
+  kakaoFolderId?: string;
+  allowSending?: boolean;
   notice?: string;
   onClose: () => void;
 };
@@ -29,6 +33,8 @@ export function LinkShareModal({
   url,
   recipient,
   downloadName = 'invitation-qr.png',
+  kakaoFolderId,
+  allowSending = true,
   notice,
   onClose,
 }: LinkShareModalProps) {
@@ -174,7 +180,7 @@ export function LinkShareModal({
               type="button"
               onClick={handleCopy}
               disabled={copyStatus === 'copying'}
-              className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-lg bg-black text-sm font-semibold text-white hover:bg-[#202020] disabled:cursor-wait disabled:opacity-60"
+              className="flex h-11 flex-1 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50 disabled:cursor-wait disabled:opacity-60"
             >
               {copyStatus === 'copied' ? '복사 완료' : '링크 복사하기'}
             </button>
@@ -206,6 +212,13 @@ export function LinkShareModal({
               링크를 복사하지 못했어요. 위 링크를 직접 복사해 주세요.
             </p>
           )}
+          <QrShareActions
+            key={shareUrl}
+            dataUrl={currentQr?.dataUrl}
+            filename={downloadName}
+            kakaoFolderId={kakaoFolderId}
+            allowSending={allowSending}
+          />
         </div>
         <button
           type="button"
