@@ -321,8 +321,6 @@ export default function InvitationAudiencesDialog({
     }
   }
 
-  const exampleSlug = slug.trim() || 'family';
-
   return createPortal(
     <dialog
       ref={dialogRef}
@@ -538,19 +536,7 @@ export default function InvitationAudiencesDialog({
                 <p id={slugHelpId} className="text-xs text-neutral-600">
                   영문 소문자로 시작하고 숫자와 하이픈도 쓸 수 있어요.
                 </p>
-                <div className="flex min-w-0 items-center justify-end gap-3">
-                  {!validateAudienceSlug(exampleSlug) && (
-                    <output
-                      aria-label="그룹 링크 안내"
-                      className="mr-auto min-w-0 break-words text-xs text-neutral-600"
-                    >
-                      기본 링크 뒤에{' '}
-                      <strong className="break-all font-semibold text-text-primary">
-                        ?to={exampleSlug}
-                      </strong>
-                      가 붙어요.
-                    </output>
-                  )}
+                <div className="flex justify-end">
                   <button className={PRIMARY_BUTTON} type="submit">
                     <Plus size={16} aria-hidden="true" />
                     추가
