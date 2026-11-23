@@ -37,6 +37,7 @@ import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
 import { MainPosterPreview } from '@/widgets/mainPoster/components/MainPosterPreview';
 
 import { SortablePreviewBlock } from './components/SortablePreviewBlock';
+import styles from './Preview.module.css';
 import { previewTitleVariants } from './previewTitle.style';
 
 const blockLabels = new Map(
@@ -243,6 +244,7 @@ function Preview() {
               >
                 {visibleBlocks.map(comp => {
                   const registryItem = blockRegistry[comp.component];
+                  const selected = selectedId === comp.id;
                   const animationType =
                     getBlockEntrance(comp.component, comp.props) ??
                     scrollAnimation.animationType;
@@ -260,7 +262,7 @@ function Preview() {
                       key={comp.id}
                       id={comp.id}
                       label={blockLabels.get(comp.component) ?? '블록'}
-                      selected={selectedId === comp.id}
+                      selected={selected}
                       backgroundColor={backgroundColor}
                       registerNode={el => {
                         blockRefs.current[comp.id] = el;
@@ -274,7 +276,13 @@ function Preview() {
                         key={`${scrollAnimation.animationDurationMs}-${scrollAnimation.animationEasing}-${animationType}-${scrollAnimation.triggerMode}`}
                         {...scrollAnimation}
                         animationType={activeDragId ? 'none' : animationType}
-                        className={activeDragId ? 'transition-none' : undefined}
+                        className={
+                          activeDragId
+                            ? 'transition-none'
+                            : selected
+                              ? styles.selectedBlock
+                              : undefined
+                        }
                       >
                         <InvitationChapter
                           component={comp.component}
@@ -284,7 +292,7 @@ function Preview() {
                         >
                           <View
                             blockInfo={comp}
-                            className={`${selectedId === comp.id ? 'ring-1 ring-inset ring-primary' : ''}`}
+                            className=""
                             titleClassName={previewTitleVariants({
                               variant: comp.type,
                             })}
