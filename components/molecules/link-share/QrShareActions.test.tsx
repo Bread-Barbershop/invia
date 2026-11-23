@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { QR_DATA_URL } from './fixtures/shareLink';
 import { QrShareActions } from './QrShareActions';
@@ -19,6 +19,7 @@ function openActions(
   allowSending = true,
   url = 'https://invia.example/i/wedding?to=family'
 ) {
+  const copyQr = jest.fn();
   render(
     <QrShareActions
       dataUrl={QR_DATA_URL}
@@ -26,9 +27,12 @@ function openActions(
       url={url}
       shareFolderId="family"
       allowSending={allowSending}
+      onCopyQr={copyQr}
+      copyDisabled={false}
     />
   );
   fireEvent.click(screen.getByRole('button', { name: '공유하기' }));
+  return copyQr;
 }
 
 const message = '민서 & 지훈 💐 초대합니다.';
@@ -45,83 +49,33 @@ afterEach(() => {
   while (restore.length) restore.pop()?.();
 });
 
-it('복사한 PNG와 기기 공유창으로 전달한 파일은 화면의 QR과 이름 및 내용이 같다', async () => {
-  const share = jest.fn().mockResolvedValue(undefined);
-  const write = jest.fn().mockResolvedValue(undefined);
-  const item = jest.fn();
-  setApi(navigator, 'clipboard', { write });
-  setApi(window, 'ClipboardItem', item);
-  setApi(navigator, 'canShare', () => true);
-  setApi(navigator, 'share', share);
-  openActions();
-  fireEvent.click(screen.getByRole('button', { name: 'QR 이미지 복사' }));
-  expect(await screen.findByText(/채팅창에 붙여넣어/)).toBeVisible();
-  expect(write).toHaveBeenCalledWith([item.mock.instances[0]]);
-  fireEvent.click(screen.getByRole('button', { name: 'QR 이미지 보내기' }));
-  const file = share.mock.calls[0][0].files[0];
-  expect(file).toBe(item.mock.calls[0][0]['image/png']);
-  expect(file.name).toBe(filename);
-  expect(file.type).toBe('image/png');
-  const reader = new FileReader();
-  const contents = new Promise(resolve => {
-    reader.onload = () => resolve(reader.result);
-  });
-  reader.readAsDataURL(file);
-  await expect(contents).resolves.toBe(QR_DATA_URL);
+it('펼친 메뉴에서 카카오톡, 문자, QR 복사와 PNG 저장을 차례로 제공한다', async () => {
+  const copyQr = openActions();
+  const kakao = screen.getByRole('button', { name: '카카오톡으로 보내기' });
+  const sms = await screen.findByRole('link', { name: '문자로 보내기' });
+  const copy = screen.getByRole('button', { name: 'QR 이미지 복사' });
+  const save = screen.getByRole('link', { name: 'QR 이미지 저장' });
+
+  expect(kakao.compareDocumentPosition(sms)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(sms.compareDocumentPosition(copy)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  expect(copy.compareDocumentPosition(save)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  fireEvent.click(copy);
+  expect(copyQr).toHaveBeenCalledTimes(1);
+  expect(save).toHaveAttribute('href', QR_DATA_URL);
+  expect(save).toHaveAttribute('download', filename);
 });
 
-it('이미지 복사 권한이 거절되면 PNG를 저장해서 첨부할 수 있도록 안내한다', async () => {
-  setApi(navigator, 'clipboard', {
-    write: jest
-      .fn()
-      .mockRejectedValue(new DOMException('거부', 'NotAllowedError')),
-  });
-  setApi(window, 'ClipboardItem', jest.fn());
-  openActions();
-  fireEvent.click(screen.getByRole('button', { name: 'QR 이미지 복사' }));
-  expect(await screen.findByText(/저장한 뒤 첨부/)).toBeVisible();
-  expect(screen.getByRole('button', { name: 'QR 이미지 복사' })).toBeEnabled();
-});
-
-it('공유창을 취소하면 오류 없이 다시 열 수 있다', async () => {
-  const share = jest
-    .fn()
-    .mockRejectedValueOnce(new DOMException('취소', 'AbortError'))
-    .mockResolvedValue(undefined);
-  setApi(navigator, 'canShare', () => true);
-  setApi(navigator, 'share', share);
-  openActions();
-  const button = screen.getByRole('button', { name: 'QR 이미지 보내기' });
-  fireEvent.click(button);
-  await waitFor(() => expect(button).toBeEnabled());
-  expect(screen.queryByText(/저장한 뒤 첨부/)).not.toBeInTheDocument();
-  fireEvent.click(button);
-  await waitFor(() => expect(share).toHaveBeenCalledTimes(2));
-});
-
-it('PNG 공유나 복사가 불가능한 브라우저에서는 저장 후 첨부를 안내한다', () => {
-  setApi(navigator, 'share', jest.fn());
-  setApi(navigator, 'canShare', () => false);
-  setApi(window, 'ClipboardItem', undefined);
-  openActions();
-  expect(screen.queryByRole('button', { name: 'QR 이미지 보내기' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'QR 이미지 복사' })).toBeNull();
-  expect(screen.getByText(/원하는 앱에 첨부/)).toBeVisible();
-});
-
-it('비공개 그룹은 카카오톡과 앱 전송을 막고 QR 복사를 허용한다', () => {
-  setApi(navigator, 'share', jest.fn());
-  setApi(navigator, 'canShare', () => true);
-  setApi(navigator, 'clipboard', { write: jest.fn() });
-  setApi(window, 'ClipboardItem', jest.fn());
+it('비공개 그룹은 전송을 막고 QR 복사와 저장을 허용한다', () => {
   openActions(false);
+
   expect(screen.getByRole('button', { name: /문자로 보내기/ })).toBeDisabled();
   expect(prepareSms).not.toHaveBeenCalled();
   expect(screen.getByRole('button', { name: /카카오톡으로/ })).toBeDisabled();
-  expect(
-    screen.getByRole('button', { name: 'QR 이미지 보내기' })
-  ).toBeDisabled();
   expect(screen.getByRole('button', { name: 'QR 이미지 복사' })).toBeEnabled();
+  expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
+    'download',
+    filename
+  );
 });
 
 it.each([

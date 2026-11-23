@@ -723,10 +723,10 @@ describe('대시보드 초대장', () => {
           await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
         ).toBeVisible();
         expect(toDataURL).toHaveBeenCalledWith(url);
-        expect(
-          screen.getByRole('link', { name: 'QR 저장하기' })
-        ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
         await user.click(screen.getByRole('button', { name: '공유하기' }));
+        expect(
+          screen.getByRole('link', { name: 'QR 이미지 저장' })
+        ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
         if (name === '가족용') {
           const sms = await screen.findByRole('link', { name: '문자로 보내기' });
           expect(mockFetch).toHaveBeenLastCalledWith('/api/drive/shareUrl?invitationFolderId=family-folder&intent=sms', expect.anything());
@@ -800,7 +800,8 @@ describe('대시보드 초대장', () => {
       expect(
         screen.queryByRole('button', { name: /한 번에 받기/ })
       ).not.toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+      await user.click(screen.getByRole('button', { name: '공유하기' }));
+      expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
         'download',
         '민서·지훈 결혼식 QR.png'
       );
