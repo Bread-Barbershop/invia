@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
+import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
 import {
   saveInvitationFlow,
@@ -14,6 +15,10 @@ import {
   useEditorStore,
 } from '@/shared/store/editorStore/useEditorStore';
 import { getFileKey } from '@/shared/utils/fileUtils';
+import {
+  customShareTitle,
+  titleFromSavedInvitation,
+} from '@/shared/utils/invitationTitle';
 import { useFabricContext } from '@/widgets/mainPoster/context/FabricContext';
 
 const SAVE_PROGRESS_MESSAGES: Record<SaveProgressStep, string> = {
@@ -44,11 +49,12 @@ const MIN_SAVE_PROGRESS_MESSAGE_MS = 2000;
 
 type SavedEditorInvitation = DashboardPendingInvitation & {
   audienceSlug?: string;
+  qrDownloadName: string;
 };
 
 type UploadOptions = { preserveVisibility?: boolean };
 
-export const useInvitationUpload = () => {
+export const useInvitationUpload = (audienceName?: string) => {
   const editorData = useEditorStore(useShallow(selectUploadData));
   const {
     hashFiles,
@@ -190,6 +196,14 @@ export const useInvitationUpload = () => {
     editorData.setAudioFolderId(saveResult.folders.audioFolderId);
     editorData.setInvitationFolderId(saveResult.folders.invitationFolderId);
     const savedInvitation: SavedEditorInvitation = {
+      qrDownloadName: qrDownloadName(
+        customShareTitle(editorData.shareUrl?.title) ||
+          titleFromSavedInvitation({
+            shareUrl: editorData.shareUrl,
+            blocks: editorData.block,
+          }),
+        audienceName || saveResult.audienceSlug
+      ),
       invitationFolderId: saveResult.folders.invitationFolderId,
       invitationUuid: saveResult.invitationUuid,
       audienceSlug: saveResult.audienceSlug,

@@ -73,6 +73,17 @@ describe('템플릿 사진을 남겨 편집한 갤러리 저장', () => {
     );
   });
 
+  it('편집기에서 저장한 초대장의 제목과 현재 하객 이름으로 QR 파일명을 준비한다', async () => {
+    useEditorStore.getState().updateShareUrl({ urlTitle: '민서·지훈 결혼식' });
+    const { result } = renderHook(() => useInvitationUpload('가족용'));
+    await act(async () => {
+      await result.current.handleUpload();
+    });
+    expect(result.current.pendingInvitation?.qrDownloadName).toBe(
+      '민서·지훈 결혼식 - 가족용 QR.png'
+    );
+  });
+
   async function setGallery(images: (File | string)[]) {
     const template = await createInvitationTemplate('showcase-18');
     const gallery = template.blocks.find(

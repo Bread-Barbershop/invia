@@ -14,6 +14,7 @@ import {
 type LinkShareModalProps = {
   url: string;
   recipient?: string;
+  downloadName?: string;
   notice?: string;
   onClose: () => void;
 };
@@ -27,6 +28,7 @@ type QrResult = {
 export function LinkShareModal({
   url,
   recipient,
+  downloadName = 'invitation-qr.png',
   notice,
   onClose,
 }: LinkShareModalProps) {
@@ -182,7 +184,7 @@ export function LinkShareModal({
             {currentQr?.dataUrl ? (
               <a
                 href={currentQr.dataUrl}
-                download="invitation-qr.png"
+                download={downloadName}
                 className="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-200 text-sm font-semibold hover:bg-gray-50"
               >
                 QR 저장하기

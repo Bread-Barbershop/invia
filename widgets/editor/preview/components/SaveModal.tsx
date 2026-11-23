@@ -16,7 +16,9 @@ import { SaveLottie } from './SaveLottie';
 interface Props {
   isLoading: boolean;
   isFail: boolean;
-  pendingInvitation: DashboardPendingInvitation | null;
+  pendingInvitation:
+    | (DashboardPendingInvitation & { qrDownloadName?: string })
+    | null;
   skipDashboardHandoff?: boolean;
   loadingMessage: string;
   photoProgress?: PhotoUploadProgress;
@@ -324,6 +326,7 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
       return (
         <LinkShareModal
           url={pendingInvitation.guestUrl}
+          downloadName={pendingInvitation.qrDownloadName}
           notice={
             pendingInvitation.published === false
               ? '비공개 초대장이에요. 대시보드에서 공개로 변경하면 링크와 QR로 접속할 수 있어요.'

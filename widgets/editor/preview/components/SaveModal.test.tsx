@@ -112,6 +112,7 @@ describe('SaveModal', () => {
           invitationUuid: 'invitation-uuid',
           dataJsonFileId: 'data-json-file-id',
           guestUrl: SHARE_URL,
+          qrDownloadName: '민서·지훈 결혼식 - 가족용 QR.png',
           published: true,
           ready: true,
           createdAt: new Date(0).toISOString(),
@@ -127,6 +128,10 @@ describe('SaveModal', () => {
     expect(
       await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
     ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'QR 저장하기' })).toHaveAttribute(
+      'download',
+      '민서·지훈 결혼식 - 가족용 QR.png'
+    );
     await user.click(screen.getByRole('button', { name: '닫기' }));
     expect(
       screen.getByRole('button', { name: '다시 수정하기' })

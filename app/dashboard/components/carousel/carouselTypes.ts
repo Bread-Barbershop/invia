@@ -18,7 +18,11 @@ export type ShareOption = {
   visibility: GroupShareVisibility;
 };
 
-export type ShareAudienceLink = (folderId: string, option: ShareOption) => void;
+export type ShareAudienceLink = (
+  folderId: string,
+  option: ShareOption,
+  hasMultipleAudiences: boolean
+) => void;
 
 export type ShareAudienceWithKakao = (
   rootFolderId: string,

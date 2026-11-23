@@ -8,6 +8,7 @@ import { InviteListItem } from '@/app/dashboard/types';
 import { getInvitationShowcaseItem } from '@/app/dashboard/utils/getInvitationShowcaseItem';
 import Confirm from '@/components/molecules/confirm/Confirm';
 import { LinkShareModal } from '@/components/molecules/link-share/LinkShareModal';
+import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
 
 import DashboardInvitationPreviewModal from '../preview/DashboardInvitationPreviewModal';
 
@@ -140,6 +141,7 @@ function CarouselWrapper({
   const [linkShare, setLinkShare] = useState<{
     url: string;
     recipient: string;
+    downloadName: string;
     notice?: string;
   } | null>(null);
   const closeLinkShare = useCallback(() => setLinkShare(null), []);
@@ -363,7 +365,7 @@ function CarouselWrapper({
           if (invite?.hasAudienceGroups) setVisibilityTarget(invite);
           else void handleToggleVisibility(folderId, nextVisible);
         }}
-        onCopyUrl={(folderId, option) => {
+        onCopyUrl={(folderId, option, hasMultipleAudiences) => {
           const invite = invites.find(item => item.folderId === folderId);
           if (!invite) return;
 
@@ -371,6 +373,10 @@ function CarouselWrapper({
           setLinkShare({
             url: option.url,
             recipient: `${invite.displayTitle ?? invite.name} · ${option.name}`,
+            downloadName: qrDownloadName(
+              invite.displayTitle || invite.name,
+              hasMultipleAudiences ? option.name : undefined
+            ),
             notice:
               option.visibility === 'private'
                 ? '비공개 초대장이에요. 공개로 변경하면 링크와 QR로 접속할 수 있어요.'
@@ -399,6 +405,7 @@ function CarouselWrapper({
         <LinkShareModal
           url={linkShare.url}
           recipient={linkShare.recipient}
+          downloadName={linkShare.downloadName}
           notice={linkShare.notice}
           onClose={closeLinkShare}
         />
