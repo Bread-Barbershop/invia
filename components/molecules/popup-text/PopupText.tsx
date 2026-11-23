@@ -14,13 +14,13 @@ export const PopupText = ({
   twoLineEllipsis = false,
 }: PopupTextProps) => {
   return (
-    <div
+    <span
       className={cn(
         'flex h-9 items-center overflow-hidden rounded-xl bg-bg-sub px-4 py-0 text-sm',
         className
       )}
     >
-      <p
+      <span
         className={cn(
           twoLineEllipsis
             ? 'line-clamp-2 overflow-hidden whitespace-normal'
@@ -28,7 +28,7 @@ export const PopupText = ({
         )}
       >
         {text}
-      </p>
-    </div>
+      </span>
+    </span>
   );
 };

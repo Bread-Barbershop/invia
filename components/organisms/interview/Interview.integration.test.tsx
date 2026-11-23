@@ -90,7 +90,7 @@ beforeEach(() => useEditorStore.getState().reset());
 it('빈 항목을 추가하면 안내는 편집기에만 보이고, 직접 쓴 답변을 하객이 펼칠 수 있다', async () => {
   const guest = showInterview();
   fireEvent.click(screen.getByRole('button', { name: '예시보기' }));
-  fireEvent.click(screen.getByDisplayValue('빈 항목 추가'));
+  fireEvent.click(screen.getByText('빈 항목 추가'));
   const block = useEditorStore.getState().block[0] as EditorBlock<'interview'>;
   expect(block.props.questions).toHaveLength(2);
   expect(block.props.questions?.[1].answer).toEqual({
