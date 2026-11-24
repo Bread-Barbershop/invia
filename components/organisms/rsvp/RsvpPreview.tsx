@@ -8,7 +8,6 @@ import type { HTMLAttributes } from 'react';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   blockInfo: EditorBlock<'rsvp'>;
-  isGuestPage?: boolean;
   titleClassName?: string;
 }
 
@@ -16,7 +15,6 @@ export function RsvpPreview({
   blockInfo,
   className = '',
   titleClassName,
-  isGuestPage = false,
   ...rest
 }: Props) {
   const { title, description, formUrl, buttonText } = blockInfo.props;
@@ -36,7 +34,7 @@ export function RsvpPreview({
             {description}
           </p>
         )}
-        {url ? (
+        {url && (
           <a
             href={url}
             rel="noopener noreferrer"
@@ -45,12 +43,6 @@ export function RsvpPreview({
           >
             {buttonText || '참석 여부 응답하기'}
           </a>
-        ) : (
-          !isGuestPage && (
-            <p className="text-xs text-text-tertiary">
-              구글 설문 응답 링크를 등록하면 버튼이 표시됩니다.
-            </p>
-          )
         )}
         {url && (
           <p className="text-center text-[11px] leading-relaxed text-text-tertiary">

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 
@@ -78,34 +78,26 @@ describe('RSVP 게스트 페이지 통합 렌더링', () => {
     jest.clearAllMocks();
   });
 
-  it.each(['/guest/id', '/i/yaKg'])(
-    '공개 경로 %s에서 빈 응답 안내를 숨긴다',
-    async pathname => {
-      mockUsePathname.mockReturnValue(pathname);
-
-      render(<GuestRenderer blocks={[emptyRsvpBlock]} bulkData={bulkData} />);
-
-      await waitFor(() => {
-        expect(
-          screen.queryByText(
-            '구글 설문 응답 링크를 등록하면 버튼이 표시됩니다.'
-          )
-        ).not.toBeInTheDocument();
-        expect(screen.getByText('참석 여부 안내')).toBeInTheDocument();
-      });
-    }
-  );
-
-  it('대시보드 미리보기에서는 빈 응답 안내를 유지한다', async () => {
-    mockUsePathname.mockReturnValue('/dashboard/invitation/editor');
-
+  it.each(['/guest/id', '/i/yaKg'])('공개 경로 %s에서는 링크가 없는 블록 전체를 숨긴다', pathname => {
+    mockUsePathname.mockReturnValue(pathname);
     render(<GuestRenderer blocks={[emptyRsvpBlock]} bulkData={bulkData} />);
+    expect(screen.queryByText('참석 여부 안내')).not.toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('구글 설문 응답 링크를 등록하면 버튼이 표시됩니다.')
-      ).toBeInTheDocument();
-      expect(screen.getByText('참석 여부 안내')).toBeInTheDocument();
-    });
+  it('하객 미리보기에서 응답자용 링크를 입력하면 블록을 표시한다', async () => {
+    mockUsePathname.mockReturnValue('/preview/invitation');
+    const { rerender } = render(<GuestRenderer isGuestPage blocks={[emptyRsvpBlock]} bulkData={bulkData} />);
+    expect(screen.queryByText('참석 여부 안내')).not.toBeInTheDocument();
+
+    const formUrl = 'https://forms.gle/sample';
+    const block = { ...emptyRsvpBlock, props: { ...emptyRsvpBlock.props, formUrl } };
+    rerender(<GuestRenderer isGuestPage blocks={[block]} bulkData={bulkData} />);
+    expect(await screen.findByRole('link', { name: '참석 여부 응답하기' })).toHaveAttribute('href', formUrl);
+  });
+
+  it('편집 화면에는 링크가 없어도 편집할 제목이 남는다', async () => {
+    mockUsePathname.mockReturnValue('/editor');
+    render(<GuestRenderer blocks={[emptyRsvpBlock]} bulkData={bulkData} />);
+    expect(await screen.findByText('참석 여부 안내')).toBeInTheDocument();
   });
 });
