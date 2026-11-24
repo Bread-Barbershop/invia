@@ -9,6 +9,15 @@ import {
 } from '@/shared/utils/editorShortcutGuard';
 import { useFabricContext } from '@/widgets/mainPoster/context/FabricContext';
 
+import { isTextboxObject } from '../utils/fabricUtils';
+
+const arrowOffsets: Partial<Record<string, readonly [number, number]>> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+};
+
 export const useKeyboardEvents = (
   canvas: Canvas | null,
   isMouseInCanvasRef: RefObject<boolean>
@@ -44,6 +53,25 @@ export const useKeyboardEvents = (
       if (!isMouseInCanvasRef.current && !hasActiveObj) return;
 
       const mod = e.ctrlKey || e.metaKey;
+
+      const offset = arrowOffsets[e.key];
+      if (offset) {
+        const text = canvas.getActiveObject();
+        if (
+          shouldIgnoreEditorShortcut(e) ||
+          (e.target !== document.body && e.target !== canvas.upperCanvasEl) ||
+          useEditorStore.getState().selectedId !== 'mainPoster' ||
+          !isTextboxObject(text) || text.isEditing ||
+          (offset[0] && text.lockMovementX) || (offset[1] && text.lockMovementY)
+        ) return;
+
+        e.preventDefault();
+        text.set({ left: text.left + offset[0], top: text.top + offset[1] });
+        text.setCoords();
+        canvas.requestRenderAll();
+        canvas.fire('object:modified', { target: text, action: 'drag' });
+        return;
+      }
 
       if (mod && e.code === 'KeyC') {
         const activeObj = canvas.getActiveObject();

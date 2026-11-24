@@ -30,6 +30,7 @@ type EditorCalloutOffset = {
 
 type EditorCalloutProps = {
   targetRef: RefObject<HTMLElement | null>;
+  avoidRef?: RefObject<HTMLElement | null>;
   children?: ReactNode;
   text?: string;
   open?: boolean;
@@ -95,6 +96,7 @@ const subscribeResize = (callback: () => void) => {
 
 function EditorCallout({
   targetRef,
+  avoidRef,
   children,
   text,
   open = true,
@@ -126,7 +128,7 @@ function EditorCallout({
   });
 
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || !mounted || !isDesktop) return;
 
     const updatePosition = () => {
       const target = targetRef.current;
@@ -197,19 +199,35 @@ function EditorCallout({
         };
       }
 
+      const maxLeft = window.innerWidth - bubbleRect.width - VIEWPORT_GAP;
+      const maxTop = window.innerHeight - bubbleRect.height - VIEWPORT_GAP;
+      let left = clamp(nextLeft, VIEWPORT_GAP, maxLeft);
+      let top = clamp(nextTop, VIEWPORT_GAP, maxTop);
+      const avoidRect = avoidRef?.current?.getBoundingClientRect();
+      if (
+        avoidRect &&
+        left < avoidRect.right + VIEWPORT_GAP &&
+        left + bubbleRect.width > avoidRect.left - VIEWPORT_GAP &&
+        top < avoidRect.bottom + VIEWPORT_GAP &&
+        top + bubbleRect.height > avoidRect.top - VIEWPORT_GAP
+      ) {
+        const below = avoidRect.bottom + VIEWPORT_GAP;
+        if (below <= maxTop) {
+          top = below;
+        } else {
+          left = clamp(
+            avoidRect.left - bubbleRect.width - VIEWPORT_GAP,
+            VIEWPORT_GAP,
+            maxLeft
+          );
+        }
+      }
+
       setArrowStyle(nextArrowStyle);
       setStyle({
         position: 'fixed',
-        left: clamp(
-          nextLeft,
-          VIEWPORT_GAP,
-          window.innerWidth - bubbleRect.width - VIEWPORT_GAP
-        ),
-        top: clamp(
-          nextTop,
-          VIEWPORT_GAP,
-          window.innerHeight - bubbleRect.height - VIEWPORT_GAP
-        ),
+        left,
+        top,
         visibility: 'visible',
         zIndex,
       });
@@ -222,6 +240,7 @@ function EditorCallout({
 
     const resizeObserver = new ResizeObserver(updatePosition);
     if (targetRef.current) resizeObserver.observe(targetRef.current);
+    if (avoidRef?.current) resizeObserver.observe(avoidRef.current);
     if (bubbleRef.current) resizeObserver.observe(bubbleRef.current);
 
     return () => {
@@ -229,7 +248,18 @@ function EditorCallout({
       window.removeEventListener('scroll', updatePosition, true);
       resizeObserver.disconnect();
     };
-  }, [arrowOffset, arrowSide, offset, open, targetAnchor, targetRef, zIndex]);
+  }, [
+    arrowOffset,
+    arrowSide,
+    avoidRef,
+    isDesktop,
+    mounted,
+    offset,
+    open,
+    targetAnchor,
+    targetRef,
+    zIndex,
+  ]);
 
   if (!mounted || !isDesktop || typeof document === 'undefined') return null;
 

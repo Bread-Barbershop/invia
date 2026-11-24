@@ -3,7 +3,31 @@ import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
 
 export function customShareTitle(value: unknown) {
   const title = typeof value === 'string' ? value.trim() : '';
-  return title === DEFAULT_TITLE ? '' : title;
+  return title === DEFAULT_TITLE || title === '소중한 분들을 초대합니다.' ? '' : title;
+}
+
+export function eventNameFromBlocks(blocks: unknown): string {
+  if (!Array.isArray(blocks)) return '';
+  for (const block of blocks) {
+    if (block?.component !== 'closingComment') continue;
+    const name = block.props?.eventName;
+    if (typeof name === 'string' && name.trim()) return name.trim();
+  }
+  return '';
+}
+
+/** Only suggest the event name when the author left both sharing titles empty. */
+export function eventShareFallback(
+  share: { title?: string; urlTitle?: string; titleFormat?: string } | undefined,
+  blocks: unknown
+) {
+  const hasTitle = (value?: string) => {
+    const title = value?.trim();
+    return title && (share?.titleFormat === 'raw' || title !== DEFAULT_TITLE);
+  };
+  return hasTitle(share?.title) || hasTitle(share?.urlTitle)
+    ? ''
+    : eventNameFromBlocks(blocks);
 }
 
 export function titleFromSavedInvitation(data: unknown) {
@@ -15,6 +39,8 @@ export function titleFromSavedInvitation(data: unknown) {
     if (title) return title;
   }
 
+  const eventName = eventNameFromBlocks(data.blocks);
+  if (eventName) return eventName;
   if (!Array.isArray(data.blocks)) return '';
   for (const block of data.blocks) {
     if (!isJsonRecord(block) || !isJsonRecord(block.props)) continue;

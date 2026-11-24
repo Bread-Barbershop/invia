@@ -86,6 +86,27 @@ describe('캔버스 키보드 단축키', () => {
     );
   });
 
+  it('선택한 텍스트를 방향키로 옮기고 편집 중이거나 잠긴 축은 유지한다', () => {
+    act(() => useEditorStore.getState().selectedBlock('mainPoster'));
+    const text = {
+      type: 'textbox', getSelectionStyles: jest.fn(), left: 100, top: 50,
+      isEditing: false, lockMovementX: false, lockMovementY: true,
+      set: jest.fn(), setCoords: jest.fn(),
+    };
+    const canvas = {
+      getActiveObjects: () => [text], getActiveObject: () => text,
+      requestRenderAll: jest.fn(), fire: jest.fn(),
+    } as unknown as Canvas;
+    renderHook(() => useKeyboardEvents(canvas, { current: true }));
+    fireEvent.keyDown(document.body, { key: 'ArrowRight' });
+    expect(text.set).toHaveBeenCalledWith({ left: 101, top: 50 });
+    expect(canvas.fire).toHaveBeenCalledWith('object:modified', { target: text, action: 'drag' });
+    fireEvent.keyDown(document.body, { key: 'ArrowDown' });
+    text.isEditing = true;
+    fireEvent.keyDown(document.body, { key: 'ArrowLeft' });
+    expect(text.set).toHaveBeenCalledTimes(1);
+  });
+
   it('드롭다운에 포커스가 있으면 포스터 실행 취소 단축키를 무시한다', () => {
     const canvas = {
       getActiveObjects: () => [],

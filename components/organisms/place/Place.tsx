@@ -27,6 +27,7 @@ import { sanitizeEnglishTitleInput } from '@/shared/utils/stringUtils';
 import { Popup } from '../popup/Popup';
 
 import { NaverMapScript } from './NaverMapScript';
+import { hasPlaceCoordinates } from './placeCoordinates';
 import { PlaceMap } from './PlaceMap';
 interface Props {
   blockInfo: EditorBlock<'place'>;
@@ -287,7 +288,7 @@ export function Place({ blockInfo, id }: Props) {
         </section>
         {openMap && (
           <div className="flex w-full flex-col gap-1">
-            {isScriptLoaded && Number.isFinite(lng) && Number.isFinite(lat) && (
+            {isScriptLoaded && hasPlaceCoordinates(lng, lat) && (
               <PlaceMap lng={lng} lat={lat} locked={Boolean(mapLocked)} />
             )}
           </div>

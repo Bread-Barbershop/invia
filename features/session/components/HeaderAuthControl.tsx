@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 
+import { usePublicSession } from '@/features/session/components/PublicSessionProvider';
 import { useAuthGate } from '@/features/session/hooks/useAuthGate';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -14,7 +15,7 @@ import PrivacyNoticeModal from './PrivacyNoticeModal';
 import type { MouseEvent } from 'react';
 
 type HeaderAuthControlProps = {
-  initialIsLoggedIn: boolean;
+  initialIsLoggedIn?: boolean;
 };
 
 const HEADER_ACTION_CLASS =
@@ -22,6 +23,7 @@ const HEADER_ACTION_CLASS =
 
 function HeaderAuthControl({ initialIsLoggedIn }: HeaderAuthControlProps) {
   const router = useRouter();
+  const publicSession = usePublicSession();
   const {
     isLoggedIn,
     isBusy,
@@ -96,6 +98,23 @@ function HeaderAuthControl({ initialIsLoggedIn }: HeaderAuthControlProps) {
 
     await logout();
   };
+
+  if (publicSession && publicSession.isLoggedIn === null) {
+    return (
+      <>
+        <HeaderSupportersButton className={HEADER_ACTION_CLASS} />
+        {publicSession.failed && (
+          <button
+            type="button"
+            onClick={() => void publicSession.checkSession()}
+            className={HEADER_ACTION_CLASS}
+          >
+            다시 시도
+          </button>
+        )}
+      </>
+    );
+  }
 
   if (isLoggedIn) {
     return (

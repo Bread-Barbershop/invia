@@ -368,7 +368,7 @@ function PolicySectionCard({
 
 export default function Policy() {
   return (
-    <DashboardShell>
+    <DashboardShell publicPage>
       <article className="w-full px-5 pb-16 pt-12 text-[#171717] sm:px-8 lg:px-12 lg:pb-20 lg:pt-16">
         <div className="mx-auto max-w-6xl">
           <section className="grid gap-8 border-b border-black/15 pb-10 lg:grid-cols-[1fr_360px] lg:items-end lg:gap-16 lg:pb-14">

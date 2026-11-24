@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
+import { rememberSavedAudioFile } from '@/features/invitation/save/savedAudioFiles';
 import { updateFileToDrive } from '@/features/invitation/save/updateFileToDrive';
 import { uploadFileToDrive } from '@/features/invitation/save/uploadFileToDrive';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -34,7 +35,16 @@ function EditorSaveButton() {
 const originalFetch = global.fetch;
 const tick = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
 
-describe('모두 저장하기 사진 진행률', () => {
+describe('모두 저장하기 진행 단계', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.mocked(uploadFileToDrive).mockReset();
+    jest.mocked(updateFileToDrive).mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return { name: 'data.json', fileId: 'data' };
+    });
+  });
+
   afterEach(() => {
     global.fetch = originalFetch;
     act(() => {
@@ -44,9 +54,13 @@ describe('모두 저장하기 사진 진행률', () => {
     jest.useRealTimers();
   });
 
-  it('새 사진만 세고 재시도 성공 후 음원 저장 단계로 넘어간다', async () => {
-    jest.useFakeTimers();
-    global.fetch = jest.fn(mockBgmSaveApi);
+  it('새 사진과 음원을 전송하는 시점에 문구를 바꾸고 사진 수량을 별도로 표시한다', async () => {
+    global.fetch = jest.fn(async (input, init) => {
+      if (input === '/api/drive/saveInvitation') {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      return mockBgmSaveApi(input, init);
+    });
     const cached = new File([], 'saved.jpg');
     const fast = new File([], 'fast.jpg');
     const slow = new File([], 'slow.jpg');
@@ -57,7 +71,7 @@ describe('모두 저장하기 사진 진행률', () => {
       images: [{ id: 'gallery', file }],
       hashFiles: [`${await getFileKey(cached, 'gallery')}::saved-id`],
     });
-    useBgmStore.setState({ userFile: audio });
+    useBgmStore.setState({ userFile: audio, selectedBgmId: 'user-bgm' });
     let failOnce = true;
     const upload = jest
       .mocked(uploadFileToDrive)
@@ -71,22 +85,29 @@ describe('모두 저장하기 사진 진행률', () => {
         }
         return { fileId: item.name, name: item.name };
       });
-    jest
-      .mocked(updateFileToDrive)
-      .mockResolvedValue({ name: 'data.json', fileId: 'data' });
     render(<EditorSaveButton />);
 
     fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
     await tick(0);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '초대장을 저장할 준비를 하고 있어요.'
+    );
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+
+    await tick(50);
     const bar = screen.getByRole('progressbar', { name: '사진 업로드' });
     expect(bar).toHaveAttribute('max', '3');
     expect(bar).toHaveAttribute('value', '0');
-    await tick(2100);
-    expect(screen.getByRole('status')).toHaveTextContent(
-      '사진 업로드 중 · 3장 중 1장 완료'
-    );
+    expect(screen.getByText('사진을 업로드하는 중이에요.')).toBeInTheDocument();
+
+    await tick(100);
+    expect(screen.getByText('3장 중 1장 완료')).toBeInTheDocument();
     expect(bar).toHaveAttribute('value', '1');
-    await tick(900);
+    expect(bar).toHaveAttribute('aria-valuetext', '3장 중 1장 완료');
+    await tick(2900);
+    expect(
+      screen.getByText('사진을 다시 업로드하는 중이에요.')
+    ).toBeInTheDocument();
     expect(bar).toHaveAttribute('value', '2');
     expect(upload.mock.calls.map(([item]) => item)).toEqual([
       fast,
@@ -95,9 +116,43 @@ describe('모두 저장하기 사진 진행률', () => {
       retry,
     ]);
     await tick(100);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '배경음악을 업로드하는 중이에요.'
+    );
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByText(/3장 중/)).not.toBeInTheDocument();
     expect(upload).toHaveBeenLastCalledWith(audio, 'invitation-audio', 'test');
+    await tick(100);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '마지막으로 초대장을 저장하는 중이에요.'
+    );
+    expect(
+      screen.queryByText('배경음악을 업로드하는 중이에요.')
+    ).not.toBeInTheDocument();
     await tick(100);
     expect(screen.getByText('성공적으로 저장되었습니다!')).toBeInTheDocument();
   });
+
+  it.each([null, 'user-bgm'])(
+    '선택 상태가 %s이고 전송할 음원이 없으면 바로 초대장을 저장한다',
+    async selectedBgmId => {
+      global.fetch = jest.fn(mockBgmSaveApi);
+      const audio = new File([], 'music.mp3');
+      if (selectedBgmId === 'user-bgm') {
+        rememberSavedAudioFile(audio, 'invitation-audio', 'saved-audio');
+      }
+      useBgmStore.setState({ userFile: audio, selectedBgmId });
+      render(<EditorSaveButton />);
+
+      fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+      await tick(0);
+
+      expect(screen.getByRole('status')).toHaveTextContent(
+        '마지막으로 초대장을 저장하는 중이에요.'
+      );
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(uploadFileToDrive).not.toHaveBeenCalled();
+      await tick(100);
+    }
+  );
 });

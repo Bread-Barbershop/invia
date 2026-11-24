@@ -63,13 +63,12 @@ function SkeletonSideActions() {
 function SkeletonHeader() {
   return (
     <div
-      className="absolute left-0 top-0 flex items-center justify-between rounded-t-lg bg-white px-3"
+      className="absolute left-0 top-0 flex items-center justify-end rounded-t-lg bg-white px-3"
       style={{
         width: dashboardCarouselLayout.cardWidth,
         height: dashboardCarouselLayout.headerHeight,
       }}
     >
-      <div className="dashboard-skeleton-line h-2.5 w-18 rounded-full" />
       <div className="flex h-7 w-[72px] items-center rounded-full border border-[#E2E8F0] bg-[#F8FAFC] p-[1px]">
         <div className="h-6 w-6 -translate-y-px rounded-full bg-[#E2E8F0] shadow-[1px_2px_3px_rgb(15_23_42_/_18%),inset_0_1px_0_rgb(255_255_255_/_80%)]" />
       </div>

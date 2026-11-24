@@ -219,6 +219,7 @@ function normalizeShareUrl(
   }
 
   return {
+    ...(shareUrl.titleFormat === 'raw' && { titleFormat: 'raw' }),
     title: shareUrl.title,
     description: shareUrl.description,
     images: shareUrl.images,

@@ -24,7 +24,11 @@ import type { useInvitationUpload } from '../hooks/useInvitationUpload';
 
 type Upload = Pick<
   ReturnType<typeof useInvitationUpload>,
-  'handleUpload' | 'isLoading' | 'isCleaningUp' | 'loadingMessage'
+  'handleUpload'
+  | 'isLoading'
+  | 'isCleaningUp'
+  | 'loadingMessage'
+  | 'photoProgress'
 >;
 
 type Props = {
@@ -114,9 +118,13 @@ export default function InvitationAudiencesDialog({
     groupOptions.find(group => group.folderId === sourceFolderId) ??
     groupOptions[0];
   const busy = operation !== null || upload.isLoading || upload.isCleaningUp;
+  const photoProgress =
+    operation === 'saving' ? upload.photoProgress : undefined;
   const operationMessage =
     operation === 'saving'
-      ? upload.loadingMessage
+      ? upload.isCleaningUp
+        ? '사용하지 않는 파일을 정리하고 있어요.'
+        : upload.loadingMessage
       : operation === 'creating'
         ? '초대장을 복제하고 있어요.'
         : operation === 'opening'
@@ -586,7 +594,14 @@ export default function InvitationAudiencesDialog({
               aria-hidden="true"
               className="size-4 shrink-0 motion-safe:animate-spin"
             />
-            {operationMessage}
+            <span>
+              {operationMessage}
+              {photoProgress && (
+                <span className="block tabular-nums">
+                  {photoProgress.total}장 중 {photoProgress.completed}장 완료
+                </span>
+              )}
+            </span>
           </p>
         )}
         {error && (

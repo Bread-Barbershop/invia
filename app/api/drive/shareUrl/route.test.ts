@@ -83,6 +83,21 @@ describe('shareUrl route', () => {
     }
   );
 
+  it('카카오와 SMS에서 빈 공유 제목을 행사명으로 채운다', async () => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
+    (loadInvitationMeta as jest.Mock).mockResolvedValue({
+      payload: { published: true, dataJsonFileId: 'root', kakaoShare: { ...shareData, title: DEFAULT_TITLE } },
+    });
+    (downloadFiles as jest.Mock).mockResolvedValue({ bulkData: {}, blocks: [
+      { component: 'closingComment', props: { eventName: '연말 식탁' } },
+    ] });
+    const base = 'http://localhost/api/drive/shareUrl?invitationFolderId=root';
+    const kakao = await GET(new Request(base + '&intent=share'));
+    expect(await kakao.json()).toMatchObject({ data: { title: '연말 식탁' } });
+    const sms = await GET(new Request(base + '&intent=sms'));
+    expect(await sms.json()).toEqual({ message: '연말 식탁에 초대합니다.' });
+  });
+
   it('카카오 카드가 없는 공개 초대장은 저장된 행사명으로 문자 초안을 준비한다', async () => {
     jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
     (loadInvitationMeta as jest.Mock).mockResolvedValue({ payload: { dataJsonFileId: 'root', published: true } });
@@ -187,6 +202,7 @@ describe('shareUrl route', () => {
       payload: { dataJsonFileId: 'old-data', kakaoShare: shareData },
     });
     (downloadFiles as jest.Mock).mockImplementation(async id => ({
+      shareUrl: { titleFormat: 'raw', title: '', urlTitle: '가족용 링크 제목' },
       bulkData: id === 'current-group-data'
         ? { invitationPrivacy: { enabled: true, eventDate: '2000-01-01', fields: ['name'] } }
         : {},
@@ -346,6 +362,34 @@ describe('shareUrl route', () => {
     expect(loadInvitationMeta).toHaveBeenCalledWith('invitation-folder-id');
   });
 
+  it('예전에 저장한 기본 카카오 제목은 저장된 링크 제목으로 대체한다', async () => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
+    jest.mocked(loadInvitationMeta).mockResolvedValue({
+      metaFileId: 'meta-file-id',
+      payload: {
+        version: 1,
+        published: true,
+        guestUrl: '/guest/data-json-file-id',
+        dataJsonFileId: 'data-json-file-id',
+        kakaoShare: { ...shareData, title: DEFAULT_TITLE },
+        updatedAt: '2026-11-23T00:00:00Z',
+      },
+    });
+    (downloadFiles as jest.Mock).mockResolvedValue({
+      bulkData: {},
+      shareUrl: { title: DEFAULT_TITLE, urlTitle: '링크 제목' },
+    });
+
+    const response = await GET(
+      new Request(
+        'http://localhost/api/drive/shareUrl?invitationFolderId=root&intent=share'
+      )
+    );
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toMatchObject({ title: '링크 제목' });
+  });
+
   it('조회 시 kakaoShare URL이 루트 도메인이면 meta guestUrl로 보정한다', async () => {
     const rootShareData = {
       ...shareData,
@@ -457,12 +501,14 @@ describe('shareUrl route', () => {
         kakaoShare: {
           ...shareData,
           title: '김민준의 초대장',
+          titleInput: '김민준의 초대장',
           showLocationButton: true,
           locationInfo: { placeName: '장소', lat: 37, lng: 127 },
         },
       },
     });
     (downloadFiles as jest.Mock).mockResolvedValue({
+      shareUrl: { titleFormat: 'raw', title: '', urlTitle: '김민준의 초대장' },
       bulkData: {
         invitationPrivacy: {
           enabled: true,

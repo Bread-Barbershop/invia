@@ -4,19 +4,26 @@ import { useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
 
 import { INVITATION_TEMPLATES } from '@/shared/data/invitationTemplates/catalog';
 
+import GalleryCategoryTabs from './GalleryCategoryTabs';
 import GalleryTemplateGrid from './GalleryTemplateGrid';
 
 jest.mock('next/navigation', () => ({
+  usePathname: () => '/gallery',
   useSearchParams: jest.fn(),
 }));
 
-function renderGallery(category?: string, largePrintOnly = false) {
-  const searchParams = new URLSearchParams(category ? { category } : {});
-  if (largePrintOnly) searchParams.set('largePrint', '1');
+function renderGallery(category?: string, query?: string) {
+  const searchParams = new URLSearchParams(query);
+  if (category) searchParams.set('category', category);
   jest
     .mocked(useSearchParams)
     .mockReturnValue(searchParams as ReadonlyURLSearchParams);
-  render(<GalleryTemplateGrid />);
+  render(
+    <>
+      <GalleryCategoryTabs />
+      <GalleryTemplateGrid />
+    </>
+  );
 }
 
 describe('초대장 갤러리', () => {
@@ -72,16 +79,40 @@ describe('초대장 갤러리', () => {
     );
   });
 
-  it('큰 글씨 생일 디자인만 모아서 하객 미리보기 안에서도 같은 목록을 순환한다', async () => {
+  it('예전 큰 글씨 필터 링크에서도 카테고리의 모든 디자인을 탐색한다', async () => {
     const user = userEvent.setup();
-    renderGallery('birthday', true);
-    expect(screen.queryByRole('button', { name: '생신 꽃편지' })).toBeNull();
-    await user.click(screen.getByRole('button', { name: '팔순 가족 잔치' }));
+    renderGallery('birthday', 'largePrint=1');
+
+    expect(screen.getByRole('link', { name: '생일' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+    expect(
+      screen.queryByRole('checkbox', { name: '큰 글씨만 보기' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '생신 꽃편지' })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '칠순 감사연' }));
     await user.click(screen.getByRole('button', { name: '디자인 미리보기' }));
-    await user.click(screen.getByRole('button', { name: '다음 초대장' }));
-    expect(screen.getByTitle('칠순 감사연 초대장 내용')).toHaveAttribute(
+    await user.click(screen.getByRole('button', { name: '이전 초대장' }));
+    expect(screen.getByTitle('생신 꽃편지 초대장 내용')).toHaveAttribute(
       'src',
-      '/showcase/showcase-42'
+      '/showcase/showcase-41'
+    );
+  });
+
+  it('카테고리 링크에서 예전 필터를 제거하고 다른 검색 매개변수를 유지한다', () => {
+    renderGallery('birthday', 'category=birthday&largePrint=1&source=shared');
+
+    expect(screen.getByRole('link', { name: '세미나' })).toHaveAttribute(
+      'href',
+      '/gallery?category=seminar&source=shared'
+    );
+    expect(screen.getByRole('link', { name: '전체' })).toHaveAttribute(
+      'href',
+      '/gallery?source=shared'
     );
   });
 

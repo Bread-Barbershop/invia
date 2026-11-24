@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { qrDownloadName } from '@/components/molecules/link-share/qrDownloadName';
@@ -22,30 +22,11 @@ import {
 import { useFabricContext } from '@/widgets/mainPoster/context/FabricContext';
 
 const SAVE_PROGRESS_MESSAGES: Record<SaveProgressStep, string> = {
-  checkingContent: '소중한 내용을 확인하고 있어요',
-  organizingContent: '초대장에 담을 내용을 정리하고 있어요',
-  collectingText: '작성한 문구를 차근차근 담고 있어요',
-  loadingPhotos: '소중한 사진을 불러오고 있어요',
-  arrangingContent: '사진과 문구를 보기 좋게 배치하고 있어요',
-  polishingInvitation: '초대장의 전체 모습을 다듬고 있어요',
-  reviewingDetails: '작은 부분까지 꼼꼼하게 살펴보고 있어요',
-  checkingPresentation: '더 예쁘게 보이도록 확인하고 있어요',
-  finishingInvitation: '이제 거의 다 완성됐어요',
+  preparing: '초대장을 저장할 준비를 하고 있어요.',
+  uploadingPhotos: '사진을 업로드하는 중이에요.',
+  uploadingAudio: '배경음악을 업로드하는 중이에요.',
+  savingInvitation: '마지막으로 초대장을 저장하는 중이에요.',
 };
-
-const SAVE_PROGRESS_ORDER: Record<SaveProgressStep, number> = {
-  checkingContent: 0,
-  organizingContent: 1,
-  collectingText: 2,
-  loadingPhotos: 3,
-  arrangingContent: 4,
-  polishingInvitation: 5,
-  reviewingDetails: 6,
-  checkingPresentation: 7,
-  finishingInvitation: 8,
-};
-
-const MIN_SAVE_PROGRESS_MESSAGE_MS = 2000;
 
 type SavedEditorInvitation = DashboardPendingInvitation & {
   audienceSlug?: string;
@@ -96,91 +77,13 @@ export const useInvitationUpload = (audienceName?: string) => {
   const [progress, setProgress] = useState<{
     step: SaveProgressStep;
     photos?: PhotoUploadProgress;
-  }>({ step: 'checkingContent' });
-  const currentProgressStepRef = useRef<SaveProgressStep>('checkingContent');
-  const pendingProgressStepRef = useRef<SaveProgressStep | null>(null);
-  const progressMessageShownAtRef = useRef(0);
-  const progressMessageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  }>({ step: 'preparing' });
   const isSaveLoadingRef = useRef(false);
   const [isFail, setIsFail] = useState(false);
   const [isCleaningUp, setIsCleaningUp] = useState(false);
   const [pendingInvitation, setPendingInvitation] =
     useState<SavedEditorInvitation | null>(null);
   const { info, success, error: showError } = useToast();
-
-  const clearProgressMessageTimer = useCallback(() => {
-    if (progressMessageTimerRef.current === null) return;
-    clearTimeout(progressMessageTimerRef.current);
-    progressMessageTimerRef.current = null;
-  }, []);
-
-  const showProgressStep = useCallback(
-    (step: SaveProgressStep, photos?: PhotoUploadProgress) => {
-      currentProgressStepRef.current = step;
-      progressMessageShownAtRef.current = Date.now();
-      setProgress({ step, photos });
-    },
-    []
-  );
-
-  const flushPendingProgressStep = useCallback(() => {
-    progressMessageTimerRef.current = null;
-
-    if (!isSaveLoadingRef.current) {
-      pendingProgressStepRef.current = null;
-      return;
-    }
-
-    const pendingStep = pendingProgressStepRef.current;
-    pendingProgressStepRef.current = null;
-
-    if (!pendingStep || pendingStep === currentProgressStepRef.current) {
-      return;
-    }
-
-    showProgressStep(pendingStep);
-  }, [showProgressStep]);
-
-  const queueProgressStep = useCallback(
-    (step: SaveProgressStep, photos?: PhotoUploadProgress) => {
-      const currentStep = currentProgressStepRef.current;
-      if (
-        !photos && SAVE_PROGRESS_ORDER[step] <= SAVE_PROGRESS_ORDER[currentStep]
-      ) {
-        return;
-      }
-
-      const elapsed = Date.now() - progressMessageShownAtRef.current;
-
-      if (
-        photos ||
-        currentStep === 'loadingPhotos' ||
-        !isSaveLoadingRef.current ||
-        elapsed >= MIN_SAVE_PROGRESS_MESSAGE_MS
-      ) {
-        pendingProgressStepRef.current = null;
-        clearProgressMessageTimer();
-        showProgressStep(step, photos);
-        return;
-      }
-
-      pendingProgressStepRef.current = step;
-
-      if (progressMessageTimerRef.current !== null) {
-        return;
-      }
-
-      progressMessageTimerRef.current = setTimeout(
-        flushPendingProgressStep,
-        MIN_SAVE_PROGRESS_MESSAGE_MS - elapsed
-      );
-    },
-    [clearProgressMessageTimer, flushPendingProgressStep, showProgressStep]
-  );
-
-  useEffect(() => clearProgressMessageTimer, [clearProgressMessageTimer]);
 
   const applySaveResult = async (
     saveResult: Awaited<ReturnType<typeof saveInvitationFlow>>,
@@ -306,9 +209,7 @@ export const useInvitationUpload = (audienceName?: string) => {
 
     try {
       isSaveLoadingRef.current = true;
-      pendingProgressStepRef.current = null;
-      clearProgressMessageTimer();
-      showProgressStep('checkingContent');
+      setProgress({ step: 'preparing' });
       setIsLoading(true);
       setIsFail(false);
       setPendingInvitation(null);
@@ -320,8 +221,6 @@ export const useInvitationUpload = (audienceName?: string) => {
           .filter((file): file is File => file instanceof File)
           .map(file => ({ id: item.id, file }))
       );
-      queueProgressStep('organizingContent');
-
       // 이전 hashFiles의 fileId들을 캡처
       const oldHashFileIds = new Set(
         hashFiles.map(h => h.split('::')[1]).filter(Boolean)
@@ -353,8 +252,6 @@ export const useInvitationUpload = (audienceName?: string) => {
           newTasks.push(task);
         }
       }
-      queueProgressStep('collectingText');
-
       const bgmData = {
         selectedBgmId: selectedBgmId ?? null,
         isLoop,
@@ -402,7 +299,7 @@ export const useInvitationUpload = (audienceName?: string) => {
         invitationThumbnail,
         invitationUuid,
         preserveVisibility,
-        onProgress: queueProgressStep,
+        onProgress: (step, photos) => setProgress({ step, photos }),
       });
       const savedInvitation = await applySaveResult(saveResult, allTasks);
       if (useBgmStore.getState().userFile === userFile) {
@@ -433,8 +330,6 @@ export const useInvitationUpload = (audienceName?: string) => {
       return null;
     } finally {
       isSaveLoadingRef.current = false;
-      pendingProgressStepRef.current = null;
-      clearProgressMessageTimer();
       setIsLoading(false);
     }
   };
@@ -446,8 +341,8 @@ export const useInvitationUpload = (audienceName?: string) => {
     isCleaningUp,
     pendingInvitation,
     photoProgress: progress.photos,
-    loadingMessage: progress.photos
-      ? `${progress.photos.retrying ? '사진 다시 업로드 중' : '사진 업로드 중'} · ${progress.photos.total}장 중 ${progress.photos.completed}장 완료`
+    loadingMessage: progress.photos?.retrying
+      ? '사진을 다시 업로드하는 중이에요.'
       : SAVE_PROGRESS_MESSAGES[progress.step],
   };
 };

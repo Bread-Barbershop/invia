@@ -72,7 +72,7 @@ export function resolveBlockAmbientEffect(
 ) {
   if (settings?.ambientEffect === 'blocks') return effect;
   if (settings?.ambientEffect !== undefined) return settings.ambientEffect;
-  // Older invitations used the opening switch to override a confetti block.
+  // A saved celebration switch overrides a legacy confetti block.
   return effect === 'confetti' && settings?.confetti !== undefined
     ? 'none'
     : effect;
@@ -115,11 +115,7 @@ export function resolveInvitationEffects(
     (useBlocks && ambient.length ? 'screen' : 'poster');
   return {
     opening,
-    confetti: settings?.confetti ?? false,
     openingMotion: resolveEffectMotion(legacyOpening ?? legacyBlocks[0]),
-    confettiMotion: resolveEffectMotion(
-      legacyBlocks.find(block => block.effect === 'confetti')
-    ),
     ambientScope,
     ambient,
   };

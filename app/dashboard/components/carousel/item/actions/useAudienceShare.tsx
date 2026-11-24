@@ -16,8 +16,6 @@ import {
 } from '@/features/invitation/audiences/model';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 
-import AudienceQrDownload from './AudienceQrDownload';
-
 import type {
   ShareAudienceLink,
   ShareAudienceWithKakao,
@@ -272,13 +270,6 @@ export function useAudienceShare({
             </li>
           ))}
         </ul>
-        {channel === 'link' && (
-          <AudienceQrDownload
-            key={eventTitle}
-            eventTitle={eventTitle}
-            options={options}
-          />
-        )}
         <button
           type="button"
           onClick={closePicker}

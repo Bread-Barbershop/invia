@@ -8,21 +8,24 @@ import DashboardNavigation from './DashboardNavigation';
 import FooterPolicyLink from './FooterPolicyLink';
 import HeaderPrivacyNoticeButton from './HeaderPrivacyNoticeButton';
 import HomeButton from './HomeButton';
+import { PublicSessionProvider } from './PublicSessionProvider';
 
 export default async function DashboardShell({
   children,
   variant = 'default',
   minimumWidth,
+  publicPage = false,
 }: Readonly<{
   children: ReactNode;
   variant?: 'default' | 'editor';
   minimumWidth?: number;
+  publicPage?: boolean;
 }>) {
-  const session = await getAuthSession();
+  const session = publicPage ? null : await getAuthSession();
   const isEditor = variant === 'editor';
   const hasResponsiveHeader = !isEditor && !minimumWidth;
 
-  return (
+  const shell = (
     <div
       className={`relative isolate min-h-dvh grid grid-rows-[auto_1fr_auto] ${
         minimumWidth ? 'overflow-x-auto' : 'overflow-x-hidden'
@@ -56,7 +59,7 @@ export default async function DashboardShell({
           />
 
           <DashboardNavigation
-            initialIsLoggedIn={session.isLoggedIn}
+            initialIsLoggedIn={session?.isLoggedIn}
             responsive={hasResponsiveHeader}
           />
         </div>
@@ -77,5 +80,13 @@ export default async function DashboardShell({
         </div>
       </footer>
     </div>
+  );
+
+  return publicPage ? (
+    <PublicSessionProvider desktopOnly={Boolean(minimumWidth)}>
+      {shell}
+    </PublicSessionProvider>
+  ) : (
+    shell
   );
 }

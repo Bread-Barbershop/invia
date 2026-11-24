@@ -11,7 +11,7 @@ import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { extractFileGroups } from '@/shared/utils/extractFileGroups';
 import { getFileKey } from '@/shared/utils/fileUtils';
 import { normalizeInvitationEffects } from '@/shared/utils/invitationEffects';
-import { createDefaultShareUrlState } from '@/shared/utils/shareUrlDefaults';
+import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 
 import { SavedData } from '../types/savedata';
 
@@ -137,7 +137,7 @@ export const useInitData = ({
       setInvitationFolderId(invitationFolderId);
     }
     if (shareUrl) {
-      setShareUrl({ ...createDefaultShareUrlState(), ...shareUrl });
+      setShareUrl(hydrateShareUrlState(shareUrl));
       const shareFiles = [
         ...(shareUrl.images ?? []),
         ...(shareUrl.urlImage ?? []),

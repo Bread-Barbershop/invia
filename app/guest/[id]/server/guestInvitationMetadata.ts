@@ -1,9 +1,11 @@
 import 'server-only';
 
+import { hideCustomShareText } from '@/features/invitation/privacy/settings';
+import { eventShareFallback } from '@/shared/utils/invitationTitle';
 import {
+  resolveInvitationShareTitles,
   resolveShareDescription,
   resolveShareImageUrl,
-  resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
 
 import type { GuestInvitationResult } from './loadGuestInvitation';
@@ -23,16 +25,18 @@ export async function guestInvitationMetadata(
     if (invitation.status !== 'ok') return { robots: noindexRobots };
 
     const shareUrl = invitation.payload.shareUrl;
-    const title = resolveShareTitle(shareUrl?.urlTitle);
+    const { linkTitle: title } = resolveInvitationShareTitles(shareUrl);
     const description = resolveShareDescription(shareUrl?.urlDescription);
     const images = resolveShareImageUrl(shareUrl?.urlImage?.[0]);
+    const hideText = hideCustomShareText(new Set(invitation.payload.activePrivacyFields));
+    const displayTitle = (!hideText && eventShareFallback(shareUrl, invitation.payload.blocks)) || title;
 
     return {
-      title,
+      title: displayTitle,
       description,
       robots: noindexRobots,
-      openGraph: { title, description, images },
-      twitter: { card: 'summary_large_image', title, description, images },
+      openGraph: { title: displayTitle, description, images },
+      twitter: { card: 'summary_large_image', title: displayTitle, description, images },
       icons: { icon: '/favicon.ico' },
     };
   } catch {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { EditorBgmPlayerProvider } from '@/components/organisms/bgm/context/EditorBgmPlayerContext';
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
@@ -20,6 +20,7 @@ import type { SavedData } from '../[id]/types/savedata';
 
 function MainContentsArea({ savedData }: { savedData?: SavedData | null }) {
   usePreventBack();
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const [isDirtyTrackerEnabled, setIsDirtyTrackerEnabled] = useState(
     !savedData
   );
@@ -40,7 +41,7 @@ function MainContentsArea({ savedData }: { savedData?: SavedData | null }) {
   useEffect(() => {
     resetBgm();
     if (window.innerWidth >= DESKTOP_CONTENT_MIN_WIDTH) {
-      showAllCalloutsFor(6000);
+      showAllCalloutsFor();
     }
 
     return () => {
@@ -77,9 +78,9 @@ function MainContentsArea({ savedData }: { savedData?: SavedData | null }) {
         <LeftPanel />
         <div className="flex gap-[clamp(20px,calc(20px+(32-20)*((100vw-1340px)/(1920-1340))),32px)] items-center">
           <div className="pl-[clamp(0px,calc(144*((100vw-1340px)/(1920-1340))),144px)]">
-            <Preview />
+            <Preview toolbarRef={toolbarRef} />
           </div>
-          <MenuPanel />
+          <MenuPanel toolbarRef={toolbarRef} />
         </div>
 
         <RightPanel />

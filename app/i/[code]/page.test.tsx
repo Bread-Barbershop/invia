@@ -5,6 +5,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
+
 import ShortGuestPage, { generateMetadata } from './page';
 
 const notFoundMock = jest.fn(() => {
@@ -179,5 +181,26 @@ describe('ShortGuestPage', () => {
       },
     });
     expect(loadGuestPayloadMock).toHaveBeenCalledWith('data-json-file-id');
+  });
+
+  it('예전 링크 기본값 대신 카카오 제목을 짧은 링크의 OG에 사용한다', async () => {
+    loadGuestPayloadMock.mockResolvedValue({
+      status: 'ok',
+      payload: {
+        ...payload,
+        shareUrl: { ...payload.shareUrl, title: '카카오 제목', urlTitle: DEFAULT_TITLE },
+      },
+      warnings: [],
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ code: 'aB7kQ2x' }),
+    });
+
+    expect(metadata).toMatchObject({
+      title: '카카오 제목',
+      openGraph: { title: '카카오 제목' },
+      twitter: { title: '카카오 제목' },
+    });
   });
 });

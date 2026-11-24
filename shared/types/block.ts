@@ -171,6 +171,7 @@ export interface BulkSlice {
 }
 
 export interface ShareUrlState {
+  titleFormat?: 'raw';
   title: string;
   description: string;
   images: (File | string)[];

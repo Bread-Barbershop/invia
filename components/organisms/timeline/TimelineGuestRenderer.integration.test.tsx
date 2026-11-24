@@ -96,6 +96,18 @@ async function renderTimelineAt(pathname: string) {
 }
 
 describe('GuestRenderer 일정 공개 미리보기', () => {
+  it('타임라인의 시간과 점에 섹션 제목색을 적용한다', async () => {
+    const block = { ...timelineBlock, props: {
+      title: '행사 일정', items: [{ id: 'start', time: '18:30', title: '도착', description: '' }],
+    } };
+    await act(async () => {
+      render(<GuestRenderer blocks={[block]} bulkData={bulkData} />);
+    });
+    const titleColor = getComputedStyle(screen.getByText('행사 일정')).color;
+    expect(screen.getByText('18:30')).toHaveStyle({ color: titleColor });
+    expect(screen.getByRole('listitem').querySelector('[aria-hidden]')).toHaveStyle({ backgroundColor: titleColor });
+  });
+
   it.each(['/guest/yaKg', '/i/yaKg'])(
     '공개 경로 %s에서는 빈 일정 안내를 숨긴다',
     async pathname => {

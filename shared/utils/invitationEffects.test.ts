@@ -18,18 +18,32 @@ describe('초대장 배경 효과 복원', () => {
       ]
     );
     expect(effects.ambientScope).toBe('screen');
-    expect(effects.confetti).toBe(false);
   });
 
-  it('배경 효과 없음을 명시하면 기존 입자만 끄고 오프닝 설정을 유지한다', () => {
+  it.each([true, false])(
+    '예전 축하 설정이 %s이면 컨페티 블록을 제외하고 다른 배경 효과를 복원한다',
+    confetti => {
+      const effects = resolveInvitationEffects({ confetti }, blocks);
+
+      expect(effects.ambient.map(({ effect }) => effect)).toEqual(['petals']);
+      expect(effects.ambientScope).toBe('screen');
+    }
+  );
+
+  it('배경 효과 없음을 명시하면 입자를 끄고 오프닝과 표시 범위를 유지한다', () => {
     const effects = resolveInvitationEffects(
-      { ambientEffect: 'none', opening: 'envelope', confetti: true },
+      {
+        ambientEffect: 'none',
+        ambientScope: 'screen',
+        opening: 'envelope',
+        confetti: true,
+      },
       blocks
     );
     expect(effects).toMatchObject({
       ambient: [],
+      ambientScope: 'screen',
       opening: 'envelope',
-      confetti: true,
     });
   });
 

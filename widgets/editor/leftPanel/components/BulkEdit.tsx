@@ -43,13 +43,13 @@ function BulkEdit() {
           />
           <BackgroundTextureEdit />
         </section>
-        <InvitationEffectsControls />
         <SectionStyleSelect
           label="기본 카드 스타일"
           sectionHeading
           value={sectionStyle}
           onChange={setSectionStyle}
         />
+        <InvitationEffectsControls />
       </LeftEditorWrapper>
     </div>
   );

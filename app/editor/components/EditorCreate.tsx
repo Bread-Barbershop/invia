@@ -10,7 +10,7 @@ import {
 } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
 import type { BgmData } from '@/shared/types/invitationSave';
-import { createDefaultShareUrlState } from '@/shared/utils/shareUrlDefaults';
+import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 import { FabricProvider } from '@/widgets/mainPoster/context/FabricContext';
 
 import MainContentsArea from './MainContentsArea';
@@ -97,10 +97,7 @@ function toSavedData(
       bgmInfo: sanitizeSampleBgm(payload.bgm),
       bgmFile: null,
     },
-    shareUrl: {
-      ...createDefaultShareUrlState(),
-      ...stripBundledSampleAssets(payload.shareUrl ?? {}),
-    },
+    shareUrl: hydrateShareUrlState(stripBundledSampleAssets(payload.shareUrl)),
     imageFolderId: '',
     audioFolderId: '',
     invitationImage: [],

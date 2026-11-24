@@ -24,19 +24,24 @@ jest.mock('./NaverMapScript', () => ({
 
 describe('PlaceMap', () => {
   const mockSetOptions = jest.fn();
+  const mockSetCenter = jest.fn();
+  const mockSetPosition = jest.fn();
+  const mockDestroy = jest.fn();
   const mockMapConstructor = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockMapConstructor.mockImplementation(() => ({
       setOptions: mockSetOptions,
+      setCenter: mockSetCenter,
+      destroy: mockDestroy,
     }));
 
     (window as unknown as { naver: unknown }).naver = {
       maps: {
         Map: mockMapConstructor,
         LatLng: jest.fn((lat, lng) => ({ lat, lng })),
-        Marker: jest.fn(),
+        Marker: jest.fn(() => ({ setPosition: mockSetPosition, setMap: jest.fn() })),
       },
     };
   });
@@ -102,23 +107,17 @@ describe('PlaceMap', () => {
     expect(button).toHaveAttribute('aria-label', '지도 움직이기');
   });
 
-  it('uses the latest lock state when coordinates and locked change together', () => {
-    const { rerender } = render(
-      <PlaceMap lng={127.04} lat={37.54} locked={true} />
+  it('주소를 다시 선택하면 기존 지도와 마커를 함께 이동한다', () => {
+    const { rerender, unmount } = render(
+      <PlaceMap lng={127.04} lat={37.54} locked />
     );
-
-    rerender(<PlaceMap lng={127.05} lat={37.55} locked={false} />);
-
-    expect(mockMapConstructor).toHaveBeenLastCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        center: { lat: 37.55, lng: 127.05 },
-        draggable: true,
-        scrollWheel: true,
-        pinchZoom: true,
-        disableDoubleClickZoom: false,
-      })
-    );
+    rerender(<PlaceMap lng={127.05} lat={37.55} />);
+    expect(mockMapConstructor).toHaveBeenCalledTimes(1);
+    expect(mockSetCenter).toHaveBeenCalledWith({ lat: 37.55, lng: 127.05 });
+    expect(mockSetPosition).toHaveBeenCalledWith({ lat: 37.55, lng: 127.05 });
+    expect(mockSetOptions).toHaveBeenCalledWith(expect.objectContaining({ draggable: true }));
+    unmount();
+    expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 
   it('reacts to prop changes for locked', () => {
