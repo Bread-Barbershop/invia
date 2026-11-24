@@ -1,8 +1,7 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-
-import { LargePrintFilter } from '@/features/showcase/components/LargePrintFilter';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const CATEGORIES = [
   { label: '전체', value: 'all' },
@@ -12,63 +11,52 @@ const CATEGORIES = [
   { label: '돌잔치', value: 'firstBirthday' },
 ] as const;
 
-const CATEGORY_BUTTON_SHADOW =
-  '0 8px 24px 0 rgb(0 0 0 / 6%), 0 2px 10px 0 rgb(0 0 0 / 8%)';
-
 function GalleryCategoryTabs() {
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const selectedCategory = searchParams.get('category') || 'all';
 
-  const setFilter = (key: string, value: string | null) => {
-    const nextParams = new URLSearchParams(searchParams);
-
-    if (value === null) {
-      nextParams.delete(key);
-    } else {
-      nextParams.set(key, value);
-    }
-
-    const query = nextParams.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
-  };
-
   return (
-    <div className="flex flex-col items-start gap-2">
-      <div className="flex flex-wrap justify-start gap-3">
-        {CATEGORIES.map(category => {
-          const selected = category.value === selectedCategory;
+    <div
+      role="group"
+      aria-label="디자인 종류"
+      className="flex flex-wrap gap-x-1 max-[345px]:gap-x-[3px] md:gap-3"
+    >
+      {CATEGORIES.map(category => {
+        const selected = category.value === selectedCategory;
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('largePrint');
 
-          return (
-            <button
-              key={category.value}
-              type="button"
-              aria-pressed={selected}
-              className={`h-12 cursor-pointer rounded-full px-8 text-[20px] font-semibold transition-colors ${
+        if (category.value === 'all') {
+          nextParams.delete('category');
+        } else {
+          nextParams.set('category', category.value);
+        }
+
+        const query = nextParams.toString();
+
+        return (
+          <Link
+            key={category.value}
+            href={query ? `${pathname}?${query}` : pathname}
+            replace
+            scroll={false}
+            prefetch={false}
+            aria-current={selected ? 'page' : undefined}
+            className="group inline-grid min-h-11 min-w-11 cursor-pointer place-content-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1e5ca9]"
+          >
+            <span
+              className={`inline-flex min-h-8 items-center justify-center rounded-full px-3 text-sm/[22px] font-[550] whitespace-nowrap transition-colors max-[370px]:px-2 md:h-12 md:px-8 md:text-[20px] md:font-semibold md:shadow-edit ${
                 selected
                   ? 'bg-black text-white'
-                  : 'bg-white text-text-plain hover:bg-[#FAFAFB]'
+                  : 'bg-[#f2f2f2] text-[#494949] group-hover:bg-black/10 md:bg-white md:text-text-plain md:group-hover:bg-[#FAFAFB]'
               }`}
-              style={{ boxShadow: CATEGORY_BUTTON_SHADOW }}
-              onClick={() =>
-                setFilter(
-                  'category',
-                  category.value === 'all' ? null : category.value
-                )
-              }
             >
               {category.label}
-            </button>
-          );
-        })}
-      </div>
-      <LargePrintFilter
-        checked={searchParams.get('largePrint') === '1'}
-        onChange={checked => setFilter('largePrint', checked ? '1' : null)}
-      />
+            </span>
+          </Link>
+        );
+      })}
     </div>
   );
 }

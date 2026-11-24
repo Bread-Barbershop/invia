@@ -21,28 +21,22 @@ const ACTION_STYLE = {
 export default function GalleryTemplateGrid() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category') || 'all';
-  const largePrintOnly = searchParams.get('largePrint') === '1';
-  const templates = getInvitationTemplates(category, largePrintOnly);
+  const templates = getInvitationTemplates(category);
 
   return (
     <ShowcasePreviewProvider
-      key={`${category}-${largePrintOnly}`}
+      key={category}
       invitationIds={templates.map(({ id }) => id)}
     >
-      <GalleryTemplateCards
-        templates={templates}
-        largePrintOnly={largePrintOnly}
-      />
+      <GalleryTemplateCards templates={templates} />
     </ShowcasePreviewProvider>
   );
 }
 
 function GalleryTemplateCards({
   templates,
-  largePrintOnly,
 }: {
   templates: InvitationTemplate[];
-  largePrintOnly: boolean;
 }) {
   const openPreview = useShowcasePreview();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -66,7 +60,7 @@ function GalleryTemplateCards({
   return (
     <section
       aria-label="초대장 디자인"
-      className="mt-10 grid w-full max-w-[1836px] grid-cols-[repeat(auto-fit,min(240px,100%))] justify-start gap-x-[26px] gap-y-10"
+      className="mt-2 grid w-full max-w-[1836px] grid-cols-[repeat(auto-fit,min(240px,100%))] justify-center gap-x-[26px] gap-y-6 md:mt-10 md:justify-start md:gap-y-10"
     >
       {templates.map(template => {
         const isSelected = selectedId === template.id;
@@ -130,9 +124,7 @@ function GalleryTemplateCards({
 
       {templates.length === 0 && (
         <div className="col-span-full rounded-2xl bg-white/72 p-8 text-lg font-semibold text-text-secondary shadow-edit backdrop-blur-sm">
-          {largePrintOnly
-            ? '이 종류에는 아직 큰 글씨 디자인이 없어요. 위의 필터를 해제하면 전체 디자인을 볼 수 있어요.'
-            : '해당 카테고리에 등록된 디자인이 없습니다.'}
+          해당 카테고리에 등록된 디자인이 없습니다.
         </div>
       )}
     </section>

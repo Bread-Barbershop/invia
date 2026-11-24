@@ -17,41 +17,23 @@ export const metadata: Metadata = {
   },
 };
 
-const PAGE_PADDING_X = 40;
-const STICKY_CATEGORY_TOP = 'max(-154px, -20vh)';
-const CURTAIN_TOP_EXTENSION = 240;
-const CURTAIN_BOTTOM_EXTENSION = 24;
-
-const curtainStyle: CSSProperties = {
-  backgroundAttachment: 'fixed',
-  backgroundImage: `url(${homeBackgroundImage.src})`,
-  backgroundPosition: 'center',
-  backgroundRepeat: 'no-repeat',
-  backgroundSize: 'cover',
-};
+const curtainStyle = {
+  '--gallery-background': `url(${homeBackgroundImage.src})`,
+} as CSSProperties;
 
 export default function GalleryPage() {
   return (
     <DashboardShell>
-      <div className="fixed inset-x-0 bottom-10 top-14 overflow-y-auto overflow-x-hidden px-10 pb-24 pt-[20vh] motion-safe:scroll-smooth [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-track]:bg-transparent">
-        <div className="relative z-30 flex justify-start">
+      <div className="fixed inset-x-0 bottom-10 top-14 overflow-y-auto overflow-x-hidden px-5 pb-24 motion-safe:scroll-smooth md:px-10 md:pt-[20vh] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-black/20 [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="relative z-30 mt-[18px] flex justify-start md:mt-0">
           <GalleryTitleBox />
         </div>
 
-        <section
-          className="sticky z-20 mt-6 flex justify-start bg-transparent"
-          style={{ top: STICKY_CATEGORY_TOP }}
-        >
+        <section className="sticky top-0 z-20 mt-2.5 flex justify-start pt-0.5 pb-1 md:top-[max(-154px,-20vh)] md:mt-6 md:py-0">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute z-0"
-            style={{
-              ...curtainStyle,
-              left: -PAGE_PADDING_X,
-              right: -PAGE_PADDING_X,
-              top: -CURTAIN_TOP_EXTENSION,
-              bottom: -CURTAIN_BOTTOM_EXTENSION,
-            }}
+            className="pointer-events-none absolute inset-y-0 -inset-x-5 bg-[#fcfcfc]/[.97] md:-inset-x-10 md:-top-60 md:-bottom-6 md:bg-transparent md:bg-fixed md:bg-cover md:bg-center md:bg-no-repeat md:[background-image:var(--gallery-background)]"
+            style={curtainStyle}
           />
           <div className="relative z-10">
             <Suspense fallback={null}>
