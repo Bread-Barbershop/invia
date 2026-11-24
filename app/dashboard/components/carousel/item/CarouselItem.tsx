@@ -1,16 +1,19 @@
 import { Copy } from 'lucide-react';
 import Image from 'next/image';
-import { KeyboardEvent, MouseEvent, useEffect, useState } from 'react';
+import { KeyboardEvent, MouseEvent, useEffect, useId, useState } from 'react';
 
 import type {
   InvitationPreviewTarget,
   InviteListItem,
 } from '@/app/dashboard/types';
+import { formatInvitationCreatedDate } from '@/app/dashboard/utils/formatInvitationCreatedDate';
 import KakaoIcon from '@/shared/assets/icons/kakao2.svg';
 import LinkIcon from '@/shared/assets/icons/link.svg';
 import { INVITATION_TEMPLATES } from '@/shared/data/invitationTemplates/catalog';
+import { cn } from '@/shared/utils/cn';
 import InvitationTemplatePoster from '@/widgets/editor/preview/components/InvitationTemplatePoster';
 
+import createdDateStyles from '../carouselCreatedDate.module.css';
 import { dashboardCarouselLayout } from '../carouselLayout';
 import {
   CarouselCardItem,
@@ -90,6 +93,10 @@ function CarouselItem({
   const [hasImageError, setHasImageError] = useState(false);
   const invite = item.invite;
   const title = invite?.displayTitle ?? invite?.name ?? item.alt;
+  const createdDateId = useId();
+  const createdDate = showHeader
+    ? formatInvitationCreatedDate(invite?.createdTime)
+    : undefined;
   const guestUrl = invite?.guestUrl ?? guestUrlProp;
   const isPublished = invite?.published ?? Boolean(guestUrlProp);
   const readiness = invite?.readiness ?? (guestUrl ? 'ready' : 'idle');
@@ -143,11 +150,14 @@ function CarouselItem({
       onClick={() => onSelect(index)}
       onKeyDown={handleKeyDown}
       aria-label={showPreviewLabel ? `${item.alt} 미리보기` : title}
+      aria-describedby={createdDate ? createdDateId : undefined}
       aria-haspopup={showPreviewLabel ? 'dialog' : undefined}
       aria-pressed={showPreviewLabel ? undefined : isSelected}
-      className={`group relative shrink-0 overflow-visible cursor-pointer select-none text-left ${
-        isSelected ? 'z-10' : 'hover:z-10'
-      }`}
+      className={cn(
+        'group relative shrink-0 overflow-visible cursor-pointer select-none text-left',
+        isSelected ? 'z-10' : 'hover:z-10',
+        showHeader && ['focus-within:z-10', createdDateStyles.slide]
+      )}
       draggable={false}
       style={{
         width: cardWidth,
@@ -159,11 +169,17 @@ function CarouselItem({
       }}
     >
       <div
-        className={`relative overflow-visible transition-transform ${
+        className={cn(
+          'relative overflow-visible transition-transform motion-reduce:transition-none',
           isSelected
             ? '[transform:translateY(calc(-1*var(--carousel-selected-lift)))]'
-            : 'group-hover:[transform:translateY(calc(-1*var(--carousel-hover-lift)))]'
-        } ${showPreviewLabel ? 'group-focus-visible:[transform:translateY(calc(-1*var(--carousel-hover-lift)))] motion-reduce:transition-none' : ''}`}
+            : 'group-hover:[transform:translateY(calc(-1*var(--carousel-hover-lift)))]',
+          !isSelected &&
+            showHeader &&
+            'group-focus-within:[transform:translateY(calc(-1*var(--carousel-hover-lift)))]',
+          showPreviewLabel &&
+            'group-focus-visible:[transform:translateY(calc(-1*var(--carousel-hover-lift)))]'
+        )}
         style={{
           transitionDuration: `${dashboardCarouselLayout.cardLiftDurationMs}ms`,
           ['--carousel-hover-lift' as string]: hoverLift,
@@ -174,6 +190,18 @@ function CarouselItem({
               : dashboardCarouselLayout.cardHeight,
         }}
       >
+        {createdDate && (
+          <time
+            id={createdDateId}
+            dateTime={invite?.createdTime}
+            className={cn(
+              'pointer-events-none absolute bottom-[calc(100%+8px)] left-0 whitespace-nowrap font-pretendard text-xs leading-4 text-text-secondary transition-opacity duration-200 motion-reduce:transition-none',
+              createdDateStyles.date
+            )}
+          >
+            {createdDate}
+          </time>
+        )}
         {isSelected && showSideActions && invite && (
           <div
             className="absolute z-20 flex translate-x-1/2 -translate-y-1/2 flex-col"
@@ -254,7 +282,6 @@ function CarouselItem({
                 hasAudienceGroups={invite?.hasAudienceGroups}
                 audienceVisibility={invite?.audienceVisibility}
                 invitationTitle={title}
-                createdTime={invite?.createdTime}
                 isPublished={isPublished}
                 disabled={!canToggleVisibility}
                 isBusy={isVisibilityUpdating}
