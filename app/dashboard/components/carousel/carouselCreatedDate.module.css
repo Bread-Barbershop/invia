@@ -1,0 +1,27 @@
+.date {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.slide[aria-pressed='true'] .date,
+.slide:focus-within .date {
+  visibility: visible;
+  opacity: 1;
+}
+
+.track:has(.slide:focus-within) .slide:not(:focus-within) .date {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .track:has(.slide:hover) .slide:not(:hover) .date {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .track:has(.slide:hover) .slide:hover .date {
+    visibility: visible;
+    opacity: 1;
+  }
+}

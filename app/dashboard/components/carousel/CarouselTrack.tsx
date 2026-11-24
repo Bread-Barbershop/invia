@@ -4,6 +4,7 @@ import type {
 } from '@/app/dashboard/types';
 import { cn } from '@/shared/utils/cn';
 
+import createdDateStyles from './carouselCreatedDate.module.css';
 import {
   dashboardCarouselLayout,
   dashboardCarouselVars,
@@ -85,6 +86,7 @@ function CarouselTrack({
       ref={emblaRef}
       className={cn(
         'h-full w-full overflow-hidden',
+        showHeader && createdDateStyles.track,
         showPreviewLabel && SHOWCASE_FADE,
         !showPreviewLabel && !isReady && 'opacity-0'
       )}

@@ -113,6 +113,21 @@ describe('대시보드 초대장', () => {
     return screen.findByRole('button', { name: '초대장 미리보기' });
   }
 
+  it('서울 기준 생성일을 선택한 초대장 바깥에 표시하고 공개 버튼에 반복하지 않는다', async () => {
+    const createdTime = '2026-11-22T15:00:00Z';
+    const invite = { ...sourceInvitation, createdTime };
+    render(<CarouselWrapper initialInvites={[invite]} loadOnMount={false} />);
+
+    const card = await screen.findByRole('button', { name: invite.name });
+    const date = screen.getByText('2026년 11월 23일 생성');
+    const visibility = screen.getByRole('button', { name: '공개' });
+
+    expect(card).toHaveAttribute('aria-pressed', 'true');
+    expect(card).toHaveAccessibleDescription('2026년 11월 23일 생성');
+    expect(date).toHaveAttribute('datetime', createdTime);
+    expect(visibility.parentElement).not.toContainElement(date);
+  });
+
   describe('행사 카드 삭제', () => {
     const weddingInvite = {
       ...privateInvite,
