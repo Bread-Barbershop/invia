@@ -177,7 +177,7 @@ frontend/
 
 **팀 소개**: 브레드 이발소 (Bread Barbershop)
 
-- **이메일**: teambread.official@gmail.com
+- **이메일**: teambred.official@gmail.com
 - **GitHub**: [Bread-Barbershop](https://github.com/Bread-Barbershop)
 - **서비스**: https://invia.co.kr
 
