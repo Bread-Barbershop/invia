@@ -1,4 +1,6 @@
 import { MiddlePreviewWrapper } from '@/components/organisms/wrapper/MiddlePreviewWrapper';
+import { TITLE_BULK_DATA } from '@/shared/data/sample/bulkData';
+import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import type { EditorBlock } from '@/shared/types/block';
 
 import { normalizeTimelineItems } from './timelineItems';
@@ -18,6 +20,7 @@ export function TimelinePreview({
   isGuestPage = false,
   ...rest
 }: Props) {
+  const accentColor = useEditorStore(state => state.titleData.color || TITLE_BULK_DATA.color);
   const items = normalizeTimelineItems(blockInfo.props.items);
   return (
     <MiddlePreviewWrapper
@@ -34,8 +37,8 @@ export function TimelinePreview({
         <ol className="relative flex w-full flex-col gap-5 border-l border-border-divider px-3 text-left">
           {items.map(item => (
             <li key={item.id} className="relative pl-4">
-              <span aria-hidden="true" className="absolute -left-[17px] top-1.5 size-2 rounded-full bg-primary" />
-              {item.time && <time className="text-xs font-semibold text-primary">{item.time}</time>}
+              <span aria-hidden="true" className="absolute -left-[17px] top-1.5 size-2 rounded-full" style={{ backgroundColor: accentColor }} />
+              {item.time && <time className="text-xs font-semibold" style={{ color: accentColor }}>{item.time}</time>}
               <p className="mt-1 break-words text-sm font-semibold text-text-primary">{item.title}</p>
               {item.description && <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-relaxed text-text-secondary">{item.description}</p>}
             </li>
