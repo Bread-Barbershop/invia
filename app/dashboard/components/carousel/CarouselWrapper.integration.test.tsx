@@ -761,7 +761,7 @@ describe('대시보드 초대장', () => {
       }
     );
 
-    it('링크 공유 목록에 모든 QR의 개수와 비공개·확인 중 그룹 안내를 표시한다', async () => {
+    it('링크 공유 목록에서 하객별 공개 상태를 보고 그룹을 하나씩 선택한다', async () => {
       const user = userEvent.setup();
       mockFetch.mockResolvedValue(
         shareAudienceResponse([baseGroup, familyGroup, workGroup], {
@@ -773,22 +773,20 @@ describe('대시보드 초대장', () => {
       await user.click(
         await screen.findByRole('button', { name: '링크·QR 공유하기' })
       );
+      const family = screen.getByRole('button', { name: '가족용' });
+      expect(family).toHaveAccessibleDescription('설정 확인 중');
       expect(
-        screen.getByText('직장용 QR은 공개 후 접속할 수 있어요.')
-      ).toBeVisible();
-      expect(
-        screen.getByText('가족용 QR은 보내기 전에 공개 상태를 확인해 주세요.')
-      ).toBeVisible();
-      expect(
-        screen.getByRole('button', { name: 'QR 3개 한 번에 받기' })
-      ).toBeEnabled();
-      await user.click(screen.getByRole('button', { name: '닫기' }));
-      await user.click(
-        screen.getByRole('button', { name: '카카오톡 공유하기' })
-      );
+        screen.getByRole('button', { name: '직장용' })
+      ).toHaveAccessibleDescription('비공개');
       expect(
         screen.queryByRole('button', { name: /한 번에 받기/ })
       ).not.toBeInTheDocument();
+      await user.click(family);
+      expect(
+        await screen.findByText(
+          '공개 설정을 확인해 주세요. 링크와 QR은 미리 저장할 수 있어요.'
+        )
+      ).toBeVisible();
     });
 
     it('목록을 다시 불러온 뒤 기본 초대장만 있으면 자동 복사 없이 공유창을 바로 연다', async () => {
@@ -813,9 +811,6 @@ describe('대시보드 초대장', () => {
         await screen.findByRole('img', { name: '초대장 공유 QR 코드' })
       ).toBeVisible();
       expect(toDataURL).toHaveBeenCalledWith('http://localhost/i/wedding');
-      expect(
-        screen.queryByRole('button', { name: /한 번에 받기/ })
-      ).not.toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: '공유하기' }));
       expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
         'download',
