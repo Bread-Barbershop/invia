@@ -171,10 +171,11 @@ describe('신규 블록의 추가·저장 데이터·공개 화면 연결', () =
     fireEvent.animationEnd(cover);
 
     expect(contentRef.current).not.toHaveAttribute('inert');
-    expect(frame.querySelector('.invia-effect-burst')).toBeInTheDocument();
+    expect(within(frame).queryByRole('dialog')).not.toBeInTheDocument();
+    expect(frame.querySelector('.invia-effect-layer')).toBeNull();
   });
 
-  it('포스터 효과를 화면 전체로 옮기고 오프닝 컨페티가 끝나도 계속 재생한다', () => {
+  it('포스터 효과를 봉투를 연 뒤에도 표시하고 화면 전체로 옮긴다', () => {
     function Invitation({ scope }: { scope: 'poster' | 'screen' }) {
       const effects = resolveInvitationEffects(
         {
@@ -202,8 +203,8 @@ describe('신규 블록의 추가·저장 데이터·공개 화면 연결', () =
     const envelope = screen.getByRole('dialog');
     fireEvent.click(screen.getByRole('button', { name: '초대장 열기' }));
     fireEvent.animationEnd(envelope);
-    fireEvent.animationEnd(document.querySelector('.invia-effect-burst')!);
     expect(poster.querySelector('.invia-effect-petals')).toBeInTheDocument();
+    expect(document.querySelectorAll('.invia-effect-layer')).toHaveLength(1);
 
     view.rerender(<Invitation scope="screen" />);
     expect(poster.querySelector('.invia-effect-layer')).toBeNull();

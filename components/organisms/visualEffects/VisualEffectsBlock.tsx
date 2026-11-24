@@ -109,14 +109,9 @@ export function VisualEffectsBlock({
             첫 방문 시 편지 봉투 오프닝 표시
           </label>
         )}
-        {(settings?.opening !== undefined ||
-          settings?.confetti !== undefined) && (
+        {settings?.opening !== undefined && (
           <p className="text-xs text-text-secondary">
-            {settings.opening !== undefined && settings.confetti !== undefined
-              ? '오프닝과 축하 효과는 전체 스타일에서 변경할 수 있어요.'
-              : settings.opening !== undefined
-                ? '오프닝은 전체 스타일에서 변경할 수 있어요.'
-                : '축하 효과는 전체 스타일에서 변경할 수 있어요.'}
+            오프닝은 전체 스타일에서 변경할 수 있어요.
           </p>
         )}
         <p className="text-xs leading-relaxed text-text-secondary">

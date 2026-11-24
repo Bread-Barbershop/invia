@@ -8,7 +8,6 @@ import {
   navigationBarHeadingClassName,
 } from '@/components/molecules/navigation-bar/NavigationBar.style';
 import { FormSelector } from '@/components/molecules/selector/FormSelector';
-import { EditorSwitch } from '@/components/molecules/switch/EditorSwitch';
 import { AmbientScopeSelect } from '@/components/organisms/visualEffects/AmbientScopeSelect';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
@@ -38,7 +37,7 @@ export function InvitationEffectsControls() {
         replayInvitationEffects: state.replayInvitationEffects,
       }))
     );
-  const { opening, confetti, ambient, ambientScope } = resolveInvitationEffects(
+  const { opening, ambient, ambientScope } = resolveInvitationEffects(
     settings,
     blocks
   );
@@ -69,23 +68,6 @@ export function InvitationEffectsControls() {
           value={opening}
           onChange={opening => updateInvitationEffects({ opening })}
         />
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-text-secondary">축하 효과</span>
-          <EditorSwitch
-            label="컨페티"
-            ariaLabel="축하 효과 컨페티"
-            checked={confetti}
-            onChange={checked =>
-              updateInvitationEffects({
-                confetti: checked,
-                ...(settings?.ambientEffect === undefined &&
-                  ambient.some(({ effect }) => effect === 'confetti') && {
-                    ambientEffect: 'blocks',
-                  }),
-              })
-            }
-          />
-        </div>
         <FormSelector
           label="배경 효과"
           className="flex flex-col gap-1.5 text-xs font-medium text-text-secondary"
@@ -110,7 +92,7 @@ export function InvitationEffectsControls() {
           type="button"
           className="inline-flex min-h-8 w-fit items-center gap-1.5 self-end rounded-md px-1 text-xs text-text-secondary enabled:hover:text-text-primary disabled:opacity-40"
           onClick={replayInvitationEffects}
-          disabled={opening === 'direct' && !confetti && !ambient.length}
+          disabled={opening === 'direct' && !ambient.length}
         >
           <RotateCcw size={14} aria-hidden="true" />
           처음부터 보기
