@@ -694,6 +694,61 @@ describe('대시보드 초대장', () => {
       );
     }
 
+    it('공유 정보를 확인하는 동안 두 버튼에 진행 상태를 표시하고 조회 후 하객 그룹을 선택한다', async () => {
+      const user = userEvent.setup();
+      let resolve!: (
+        // eslint-disable-next-line no-unused-vars
+        response: ReturnType<typeof shareAudienceResponse>
+      ) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise(res => {
+          resolve = res;
+        })
+      );
+      showCard();
+
+      const link = await screen.findByRole('button', { name: '공유 준비 중…' });
+      const kakao = screen.getByRole('button', { name: '카카오톡 준비 중…' });
+      for (const button of [link, kakao]) {
+        expect(button).toBeDisabled();
+        expect(button).toHaveAttribute('aria-busy', 'true');
+        expect(
+          button.querySelector('[data-share-loading-indicator]')
+        ).toBeVisible();
+      }
+      expect(screen.getByText('공유 정보를 확인하고 있어요.')).toBeInTheDocument();
+
+      await act(async () => {
+        resolve(shareAudienceResponse([baseGroup, familyGroup]));
+      });
+      const ready = screen.getByRole('button', { name: '링크·QR 공유하기' });
+      expect(ready).toBeEnabled();
+      expect(ready).toHaveAttribute('aria-busy', 'false');
+      expect(ready.querySelector('[data-share-loading-indicator]')).toBeNull();
+      await user.click(ready);
+      expect(
+        screen.getByRole('button', { name: '가족용' })
+      ).toBeInTheDocument();
+    });
+
+    it('공유 정보 조회가 실패하면 진행 표시를 없애고 다시 시도할 수 있다', async () => {
+      const user = userEvent.setup();
+      mockFetch
+        .mockRejectedValueOnce(new Error('offline'))
+        .mockResolvedValueOnce(shareAudienceResponse([baseGroup]));
+      showCard();
+      const retry = await screen.findByRole('button', {
+        name: '공유 다시 준비하기',
+      });
+      expect(retry).toBeEnabled();
+      expect(retry).toHaveAttribute('aria-busy', 'false');
+      expect(retry.querySelector('[data-share-loading-indicator]')).toBeNull();
+      await user.click(retry);
+      expect(
+        await screen.findByRole('button', { name: '링크·QR 공유하기' })
+      ).toBeEnabled();
+    });
+
     it.each([
       ['기본 초대장', 'http://localhost/i/wedding'],
       ['가족용', 'http://localhost/i/wedding?to=family'],
@@ -1132,9 +1187,15 @@ describe('대시보드 초대장', () => {
       const view = showKakaoCard(true);
       await user.dblClick(await readyKakaoButton());
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(
-        screen.getByRole('button', { name: '카카오톡 여는 중…' })
-      ).toBeDisabled();
+      const kakaoBusy = screen.getByRole('button', { name: '카카오톡 여는 중…' });
+      expect(kakaoBusy).toBeDisabled();
+      expect(kakaoBusy).toHaveAttribute('aria-busy', 'true');
+      expect(kakaoBusy.querySelector('[data-share-loading-indicator]')).toBeVisible();
+      const link = screen.getByRole('button', { name: '링크·QR 공유하기' });
+      expect(link).toBeDisabled();
+      expect(link).toHaveAttribute('aria-busy', 'false');
+      expect(link.querySelector('[data-share-loading-indicator]')).toBeNull();
+      expect(screen.getByText('카카오톡 공유를 준비하고 있어요.')).toBeInTheDocument();
       view.unmount();
       expect(mockFetch.mock.calls[1][1].signal.aborted).toBe(true);
       await act(async () => finish());

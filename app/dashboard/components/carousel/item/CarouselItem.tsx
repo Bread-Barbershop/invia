@@ -371,6 +371,9 @@ function CarouselItem({
                 >
                   {audienceShare.kakaoLabel}
                 </DashboardActionButton>
+                <span aria-live="polite" className="sr-only">
+                  {audienceShare.statusLabel}
+                </span>
                 {audienceShare.picker}
                 <DashboardActionButton
                   icon={LinkIcon}
