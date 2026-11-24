@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, RotateCcw, Sparkles } from 'lucide-react';
+import { ChevronDown, RotateCcw } from 'lucide-react';
 import { useShallow } from 'zustand/shallow';
 
 import {
@@ -52,7 +52,6 @@ export function InvitationEffectsControls() {
           'cursor-pointer list-none [&::-webkit-details-marker]:hidden'
         )}
       >
-        <Sparkles size={16} aria-hidden="true" className="absolute left-0" />
         <span className={navigationBarHeadingClassName}>초대장 연출</span>
         <ChevronDown
           size={16}
