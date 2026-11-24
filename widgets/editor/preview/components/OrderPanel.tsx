@@ -25,6 +25,9 @@ import ChipCarousel from '@/widgets/editor/preview/components/ChipCarousel';
 import DeleteModal from './DeleteModal';
 import SortableItems from './SortableItems';
 
+const reorderHint = '블록을 꾹 누른 채로 끌면 순서를 바꿀 수 있어요.';
+const deleteHint = '선택한 블록은 Delete 키로 삭제할 수 있어요.';
+
 /*todo : 
 max-h넘어가면 아래 방향 추가
      
@@ -51,7 +54,10 @@ function OrderPanel() {
   const isOrderCalloutOpen = useEditorCalloutStore(
     state => state.callouts['order-panel']
   );
+  const showCalloutFor = useEditorCalloutStore(state => state.showCalloutFor);
+  const hideCallout = useEditorCalloutStore(state => state.hideCallout);
   const visibleBlocks = block.filter(item => isBlockEnabled(item.component));
+  const canReorder = visibleBlocks.length >= 2;
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDrag, setIsDrag] = useState(false);
@@ -69,6 +75,11 @@ function OrderPanel() {
     y: number;
     tabId: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (canReorder) showCalloutFor('order-panel');
+    return () => hideCallout('order-panel');
+  }, [canReorder, hideCallout, showCalloutFor]);
 
   useEffect(() => {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
@@ -239,15 +250,17 @@ function OrderPanel() {
           </ul>
         )}
       </div>
-      <EditorCallout
-        targetRef={containerRef}
-        open={isOrderCalloutOpen}
-        arrowSide="bottom"
-        targetAnchor={{ x: 0.5, y: 0 }}
-        offset={0}
-        className="max-w-[300px] break-keep text-[14px] leading-5"
-        text="블록을 꾹 누른 채로 끌어 순서를 변경할 수 있어요. 선택한 블록은 Delete 키로 삭제할 수 있어요."
-      />
+      {visibleBlocks.length > 0 && (
+        <EditorCallout
+          targetRef={containerRef}
+          open={isOrderCalloutOpen}
+          arrowSide="bottom"
+          targetAnchor={{ x: 0.5, y: 0 }}
+          offset={0}
+          className="max-w-[300px] break-keep text-[14px] leading-5"
+          text={canReorder ? `${reorderHint} ${deleteHint}` : deleteHint}
+        />
+      )}
       <AnimatePresence>
         {deleteTargetId && (
           <DeleteModal

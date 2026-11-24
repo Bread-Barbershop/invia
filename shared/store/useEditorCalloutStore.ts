@@ -14,6 +14,7 @@ type EditorCalloutStore = {
   callouts: EditorCalloutState;
   setCalloutOpen: (id: EditorCalloutId, open: boolean) => void;
   showCallout: (id: EditorCalloutId) => void;
+  showCalloutFor: (id: EditorCalloutId, durationMs?: number) => void;
   showAllCallouts: () => void;
   showAllCalloutsFor: (durationMs?: number) => void;
   hideCallout: (id: EditorCalloutId) => void;
@@ -29,13 +30,25 @@ export const DEFAULT_EDITOR_CALLOUTS: EditorCalloutState = {
 };
 
 const DEFAULT_AUTO_HIDE_MS = 6000;
-let autoHideTimer: ReturnType<typeof setTimeout> | null = null;
+const autoHideTimers = new Map<EditorCalloutId, ReturnType<typeof setTimeout>>();
 
-const clearAutoHideTimer = () => {
-  if (!autoHideTimer) return;
+const clearAutoHideTimer = (id: EditorCalloutId) => {
+  clearTimeout(autoHideTimers.get(id));
+  autoHideTimers.delete(id);
+};
 
-  clearTimeout(autoHideTimer);
-  autoHideTimer = null;
+const clearAutoHideTimers = () => {
+  autoHideTimers.forEach(timer => clearTimeout(timer));
+  autoHideTimers.clear();
+};
+
+const scheduleAutoHide = (
+  id: EditorCalloutId,
+  durationMs: number,
+  hideCallout: (id: EditorCalloutId) => void
+) => {
+  clearAutoHideTimer(id);
+  autoHideTimers.set(id, setTimeout(() => hideCallout(id), durationMs));
 };
 
 const isDesktopViewport = () =>
@@ -52,10 +65,11 @@ const createCallouts = (open: boolean): EditorCalloutState =>
 
 export const useEditorCalloutStore = create<EditorCalloutStore>()(
   devtools(
-    set => ({
+    (set, get) => ({
       callouts: DEFAULT_EDITOR_CALLOUTS,
       setCalloutOpen: (id, open) => {
         if (open && !isDesktopViewport()) return;
+        clearAutoHideTimer(id);
         set(
           state => ({
             callouts: {
@@ -69,6 +83,7 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
       },
       showCallout: id => {
         if (!isDesktopViewport()) return;
+        clearAutoHideTimer(id);
         set(
           state => ({
             callouts: {
@@ -80,8 +95,14 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
           'editorCallout/show'
         );
       },
+      showCalloutFor: (id, durationMs = DEFAULT_AUTO_HIDE_MS) => {
+        if (!isDesktopViewport()) return;
+        const { showCallout, hideCallout } = get();
+        showCallout(id);
+        scheduleAutoHide(id, durationMs, hideCallout);
+      },
       showAllCallouts: () => {
-        clearAutoHideTimer();
+        clearAutoHideTimers();
         if (!isDesktopViewport()) return;
         set(
           {
@@ -92,7 +113,7 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
         );
       },
       showAllCalloutsFor: (durationMs = DEFAULT_AUTO_HIDE_MS) => {
-        clearAutoHideTimer();
+        clearAutoHideTimers();
         if (!isDesktopViewport()) return;
         set(
           {
@@ -101,18 +122,13 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
           false,
           'editorCallout/showAllFor'
         );
-        autoHideTimer = setTimeout(() => {
-          autoHideTimer = null;
-          set(
-            {
-              callouts: createCallouts(false),
-            },
-            false,
-            'editorCallout/autoHideAll'
-          );
-        }, durationMs);
+        const { hideCallout } = get();
+        (Object.keys(DEFAULT_EDITOR_CALLOUTS) as EditorCalloutId[]).forEach(
+          id => scheduleAutoHide(id, durationMs, hideCallout)
+        );
       },
-      hideCallout: id =>
+      hideCallout: id => {
+        clearAutoHideTimer(id);
         set(
           state => ({
             callouts: {
@@ -122,9 +138,10 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
           }),
           false,
           'editorCallout/hide'
-        ),
+        );
+      },
       showOnlyCallout: id => {
-        clearAutoHideTimer();
+        clearAutoHideTimers();
         if (!isDesktopViewport()) return;
         set(
           {
@@ -138,7 +155,7 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
         );
       },
       hideAllCallouts: () => {
-        clearAutoHideTimer();
+        clearAutoHideTimers();
         set(
           {
             callouts: createCallouts(false),
@@ -148,7 +165,7 @@ export const useEditorCalloutStore = create<EditorCalloutStore>()(
         );
       },
       resetCallouts: () => {
-        clearAutoHideTimer();
+        clearAutoHideTimers();
         set(
           {
             callouts: DEFAULT_EDITOR_CALLOUTS,
