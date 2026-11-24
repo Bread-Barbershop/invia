@@ -59,6 +59,7 @@ export const useKeyboardEvents = (
         const text = canvas.getActiveObject();
         if (
           shouldIgnoreEditorShortcut(e) ||
+          (e.target !== document.body && e.target !== canvas.upperCanvasEl) ||
           useEditorStore.getState().selectedId !== 'mainPoster' ||
           !isTextboxObject(text) || text.isEditing ||
           (offset[0] && text.lockMovementX) || (offset[1] && text.lockMovementY)

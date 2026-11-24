@@ -82,7 +82,7 @@ export const RichTextPanel = () => {
             size="sm"
             onClick={() => {
               activeObject.exitEditing();
-              canvas.upperCanvasEl.tabIndex = -1;
+              canvas.upperCanvasEl.setAttribute('tabindex', '-1');
               canvas.upperCanvasEl.focus({ preventScroll: true });
               canvas.requestRenderAll();
             }}
