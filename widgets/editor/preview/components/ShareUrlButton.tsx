@@ -16,8 +16,8 @@ import PlusCircleIcon from '@/shared/assets/images/share-url/plus-icon.svg';
 import ProfileAvatarIcon from '@/shared/assets/images/share-url/profile-avatar.svg';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { EditorBlock, ShareUrlState } from '@/shared/types/block';
-import { eventShareFallback } from '@/shared/utils/invitationTitle';
 import { cn } from '@/shared/utils/cn';
+import { eventShareFallback } from '@/shared/utils/invitationTitle';
 import {
   resolveShareDescription,
   resolveShareTitle,

@@ -1,13 +1,12 @@
 import 'server-only';
 
+import { hideCustomShareText } from '@/features/invitation/privacy/settings';
+import { eventShareFallback } from '@/shared/utils/invitationTitle';
 import {
   resolveShareDescription,
   resolveShareImageUrl,
   resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
-
-import { hideCustomShareText } from '@/features/invitation/privacy/settings';
-import { eventShareFallback } from '@/shared/utils/invitationTitle';
 
 import type { GuestInvitationResult } from './loadGuestInvitation';
 import type { Metadata } from 'next';
