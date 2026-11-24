@@ -33,7 +33,7 @@ const faqJsonLd = {
 
 function FaqPage() {
   return (
-    <DashboardShell>
+    <DashboardShell publicPage>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

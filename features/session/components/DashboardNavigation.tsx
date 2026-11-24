@@ -9,7 +9,7 @@ import HeaderAuthControl from './HeaderAuthControl';
 import NavMenu from './NavMenu';
 
 type DashboardNavigationProps = {
-  initialIsLoggedIn: boolean;
+  initialIsLoggedIn?: boolean;
   responsive: boolean;
 };
 

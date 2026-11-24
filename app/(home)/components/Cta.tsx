@@ -8,7 +8,7 @@ import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal
 import { useAuthGate } from '@/features/session/hooks/useAuthGate';
 
 type CtaProps = {
-  initialIsLoggedIn: boolean;
+  initialIsLoggedIn?: boolean;
 };
 
 function Cta({ initialIsLoggedIn }: CtaProps) {
