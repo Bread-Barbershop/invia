@@ -28,7 +28,10 @@ import {
   customShareTitle,
   titleFromSavedInvitation,
 } from '@/shared/utils/invitationTitle';
-import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
+import {
+  DEFAULT_TITLE,
+  resolveStoredKakaoTitle,
+} from '@/shared/utils/shareUrlDefaults';
 
 function getSharePublicOrigin(req: Request) {
   return (
@@ -187,15 +190,18 @@ async function loadShareContent(dataJsonFileId?: string | null) {
 }
 
 async function protectKakaoShare(share: ShareUrlPayload, dataJsonFileId?: string | null) {
-  if (!dataJsonFileId) return share;
+  const readableShare = { ...share };
+  delete readableShare.titleInput;
+  if (!dataJsonFileId) return readableShare;
 
   // Read the same saved settings as the guest page. Share metadata is saved
   // separately and can be older than the invitation itself.
   const { invitation, fields, hideText } = await loadShareContent(dataJsonFileId);
   const unavailable = !invitation?.bulkData;
   return {
-    ...share,
-    ...(hideText ? { title: '', description: '' } : {}),
+    ...readableShare,
+    title: hideText ? '' : resolveStoredKakaoTitle(share, invitation?.shareUrl),
+    ...(hideText ? { description: '' } : {}),
     ...(unavailable || fields.has('media') ? { imageFileId: undefined } : {}),
     ...(unavailable || fields.has('location') ? { showLocationButton: false, locationInfo: undefined } : {}),
   };
@@ -337,7 +343,9 @@ export async function GET(req: Request) {
         const custom =
           customShareTitle(invitation.shareUrl?.urlTitle) ||
           customShareTitle(invitation.shareUrl?.title) ||
-          customShareTitle(meta?.payload.kakaoShare?.title);
+          customShareTitle(
+            meta?.payload.kakaoShare?.titleInput ?? meta?.payload.kakaoShare?.title
+          );
         const event = titleFromSavedInvitation({ blocks: invitation.blocks });
         message = custom || (event ? `${event}에 초대합니다.` : DEFAULT_TITLE);
       }

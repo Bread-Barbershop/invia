@@ -190,6 +190,47 @@ describe('saveInvitationFlow', () => {
     );
   });
 
+  it('비어 있던 카카오 입력을 저장하면서 카카오 메타데이터에는 링크 제목을 사용한다', async () => {
+    const result = await saveInvitationFlow({
+      bulkData,
+      images: [],
+      audio: null,
+      data: [],
+      shareUrl: { ...shareUrl, title: '', urlTitle: ' 링크 제목 ' },
+      bgmData,
+      mainPoster: { version: '7.1.0', objects: [] },
+      invitationThumbnail: {
+        name: 'invitation-thumbnail.png',
+        mimeType: 'image/png',
+        dataUrl: '',
+        width: 0,
+        height: 0,
+        createdAt: '',
+      },
+    });
+
+    expect(result.success).toBe(true);
+    const [file] = jest.mocked(updateFileToDrive).mock.calls[0];
+    const json = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+    expect(JSON.parse(json).shareUrl).toMatchObject({
+      titleFormat: 'raw',
+      title: '',
+      urlTitle: ' 링크 제목 ',
+    });
+    const [, request] = mockFetch.mock.calls.find(
+      ([url]) => url === '/api/drive/shareUrl'
+    )!;
+    expect(JSON.parse(request.body).shareData).toMatchObject({
+      title: '링크 제목',
+      titleInput: '',
+    });
+  });
+
   it('여백과 세로 구분선의 개별 카드 스타일과 등장 효과를 저장한다', async () => {
     const blocks: [EditorBlock<'spacer'>, EditorBlock<'divider'>] = [
       {

@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { MultiRowInput } from '@/components/atoms/input/MultiRowInput';
@@ -16,13 +16,14 @@ import { useToast } from '@/shared/hooks/useToast';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { EditorBlock } from '@/shared/types/block';
 import { compressImages } from '@/shared/utils/imageCompression';
-import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
+import { resolveInvitationShareTitles } from '@/shared/utils/shareUrlDefaults';
 
 import { SHARE_NOTICES } from './constants/share';
 
 const SHARE_URL_IMAGE_ID = 'shareUrl';
 
 function ShareUrl() {
+  const titleHintId = useId();
   const {
     block,
     shareUrl,
@@ -40,6 +41,7 @@ function ShareUrl() {
       updateImage: state.updateImage,
     }))
   );
+  const { kakaoTitle, linkTitle } = resolveInvitationShareTitles(shareUrl);
   const { warning } = useToast();
   const [loadingTab, setLoadingTab] = useState<typeof shareUrlTab | null>(
     null
@@ -155,16 +157,20 @@ function ShareUrl() {
             className="w-full flex flex-col gap-1"
           >
             <TextField
-          key={`title-${shareUrlTab}`}
-          label="제목"
-          className="py-1.5"
-          inputProps={{
-            name: shareUrlTab === 'kakao' ? 'title' : 'urlTitle',
-            placeholder: DEFAULT_TITLE,
-            onChange: handleChange,
-            value: shareUrlTab === 'kakao' ? shareUrl.title : shareUrl.urlTitle,
-          }}
-        />
+              key={`title-${shareUrlTab}`}
+              label="제목"
+              className="py-1.5"
+              inputProps={{
+                name: shareUrlTab === 'kakao' ? 'title' : 'urlTitle',
+                placeholder: shareUrlTab === 'kakao' ? kakaoTitle : linkTitle,
+                'aria-describedby': titleHintId,
+                onChange: handleChange,
+                value: shareUrlTab === 'kakao' ? shareUrl.title : shareUrl.urlTitle,
+              }}
+            />
+            <p id={titleHintId} className="text-xs text-text-secondary">
+              한 곳에만 입력하면 두 공유 방식에 같은 제목을 사용해요.
+            </p>
         <div className="flex flex-col gap-1.5 py-1.5">
           <Label className="font-semibold text-center">내용</Label>
           <MultiRowInput

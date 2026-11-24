@@ -9,7 +9,7 @@ import { BODY_BULK_DATA, TITLE_BULK_DATA } from '@/shared/data/sample/bulkData';
 import type { EditorBlock, PersistedEditorBlock } from '@/shared/types/block';
 import type { BgmData } from '@/shared/types/invitationSave';
 import { parseStrictDate } from '@/shared/utils/dateValidation';
-import { createDefaultShareUrlState } from '@/shared/utils/shareUrlDefaults';
+import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 
 import { SavedData } from '../types/savedata';
 import { fetchAudioFiles, fetchImageFiles } from '../utils/fetchFile';
@@ -152,12 +152,12 @@ export const useSavedData = (
           props: mapIdsToFiles(block.props) as typeof block.props,
         }));
 
-        const updatedShareUrl = data.config.shareUrl
-          ? {
-              ...createDefaultShareUrlState(),
-              ...(mapIdsToFiles(data.config.shareUrl) as typeof data.config.shareUrl),
-            }
-          : createDefaultShareUrlState();
+        const shareUrl = hydrateShareUrlState(data.config.shareUrl);
+        const updatedShareUrl = {
+          ...shareUrl,
+          images: mapIdsToFiles(shareUrl.images) as typeof shareUrl.images,
+          urlImage: mapIdsToFiles(shareUrl.urlImage) as typeof shareUrl.urlImage,
+        };
 
         const audio = await loadSavedAudioFile(
           data.audios.files ?? null,

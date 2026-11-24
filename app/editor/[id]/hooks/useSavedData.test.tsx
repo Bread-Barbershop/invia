@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 
 import { getSavedAudioFileId } from '@/features/invitation/save/savedAudioFiles';
+import { DEFAULT_TITLE } from '@/shared/utils/shareUrlDefaults';
 
 import { fetchAudioFiles } from '../utils/fetchFile';
 
@@ -136,4 +137,35 @@ describe('다시 편집할 때 저장된 사용자 음원 복원', () => {
       )
     );
   });
+
+  it.each([
+    [undefined, ''],
+    ['raw', DEFAULT_TITLE],
+  ])(
+    '제목 저장 형식 %s에 맞춰 직접 입력한 값과 예전 기본 문구를 구분한다',
+    async (titleFormat, expected) => {
+      const data = savedAudioResponse(null);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          ...data,
+          config: {
+            ...data.config,
+            shareUrl: { titleFormat, title: DEFAULT_TITLE, urlTitle: ' 링크 제목 ' },
+          },
+          audios: { files: [] },
+        }),
+      });
+
+      const { result } = renderHook(() => useSavedData('invitation', 'aud_family'));
+
+      await waitFor(() =>
+        expect(result.current.savedData?.shareUrl).toMatchObject({
+          titleFormat: 'raw',
+          title: expected,
+          urlTitle: ' 링크 제목 ',
+        })
+      );
+    }
+  );
 });
