@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { UtilityButton } from '@/components/atoms/button';
 import { LeftEditorWrapper } from '@/components/organisms/wrapper/LeftEditorWrapper';
 import { useFabricContext } from '@/widgets/mainPoster/context/FabricContext';
 import { isTextboxObject } from '@/widgets/mainPoster/utils/fabricUtils';
@@ -75,6 +76,24 @@ export const RichTextPanel = () => {
         />
         <TextAlign />
       </div>
+      {activeObject && (
+        <div className="flex w-full items-center gap-3">
+          <UtilityButton
+            size="sm"
+            onClick={() => {
+              activeObject.exitEditing();
+              canvas.upperCanvasEl.tabIndex = -1;
+              canvas.upperCanvasEl.focus({ preventScroll: true });
+              canvas.requestRenderAll();
+            }}
+          >
+            위치 조정
+          </UtilityButton>
+          <p className="text-xs text-text-secondary">
+            드래그하거나 방향키로 1px씩 옮기세요.
+          </p>
+        </div>
+      )}
       <CharSpacing />
       <LineHeight />
     </LeftEditorWrapper>
