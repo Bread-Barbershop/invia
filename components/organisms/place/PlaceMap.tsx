@@ -22,6 +22,7 @@ export function PlaceMap({
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<NaverMap | null>(null);
+  const marker = useRef<naver.maps.Marker | null>(null);
   const [prevLocked, setPrevLocked] = useState(locked);
   const [isLocked, setIsLocked] = useState(locked);
   const isLockedRef = useRef(locked);
@@ -44,9 +45,19 @@ export function PlaceMap({
     });
   }, []);
 
-  const initMap = useCallback(() => {
+  useEffect(() => {
+    isLockedRef.current = isLocked;
+    applyLockOptions(isLocked);
+  }, [isLocked, applyLockOptions]);
+
+  useEffect(() => {
     if (!mapRef.current || !window.naver || !window.naver.maps) return;
     const center = new naver.maps.LatLng(lat, lng);
+    if (mapInstance.current) {
+      mapInstance.current.setCenter(center);
+      marker.current?.setPosition(center);
+      return;
+    }
     const initialLocked = isLockedRef.current;
     mapInstance.current = new naver.maps.Map(mapRef.current, {
       center,
@@ -61,30 +72,18 @@ export function PlaceMap({
       disableTwoFingerTapZoom: initialLocked,
     });
 
-    new naver.maps.Marker({
+    marker.current = new naver.maps.Marker({
       map: mapInstance.current,
       position: center,
     });
   }, [lng, lat]);
 
-  const validatePosition = (lngVal: Lng, latVal: Lat) => {
-    if (lngVal > 180 || lngVal < -180 || latVal > 90 || latVal < -90) {
-      return false;
-    }
-    return true;
-  };
-
-  // 좌표 변경으로 지도를 새로 만들기 전에 최신 잠금 값을 ref에 반영한다.
-  useEffect(() => {
-    isLockedRef.current = isLocked;
-    applyLockOptions(isLocked);
-  }, [isLocked, applyLockOptions]);
-
-  useEffect(() => {
-    if (window.naver && window.naver.maps && validatePosition(lng, lat)) {
-      initMap();
-    }
-  }, [initMap, lng, lat]);
+  useEffect(() => () => {
+    marker.current?.setMap(null);
+    mapInstance.current?.destroy();
+    marker.current = null;
+    mapInstance.current = null;
+  }, []);
 
   const toggleLock = useCallback(() => {
     setIsLocked(prev => !prev);

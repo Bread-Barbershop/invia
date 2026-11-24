@@ -13,6 +13,7 @@ import {
 
 import { NaverMapScript } from './NaverMapScript';
 import { Navigation } from './Navigation';
+import { hasPlaceCoordinates } from './placeCoordinates';
 import { PlaceMap } from './PlaceMap';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -41,6 +42,7 @@ export const PlacePreview = ({
     checkedPlaceTel = false,
     mapLocked,
   } = blockInfo.props;
+  const showMap = blockInfo.props.openMap && hasPlaceCoordinates(blockInfo.props.lng, blockInfo.props.lat);
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const { fontFamily, fontSize } = useBodyFontInfo();
   const detailStyle = {
@@ -76,7 +78,7 @@ export const PlacePreview = ({
         </p>
       )}
 
-      {blockInfo.props.openMap && isScriptLoaded && (
+      {showMap && isScriptLoaded && (
         <PlaceMap
           lng={blockInfo.props.lng}
           lat={blockInfo.props.lat}
@@ -85,7 +87,7 @@ export const PlacePreview = ({
         />
       )}
 
-      {blockInfo.props.openMap && blockInfo.props.openNavi && (
+      {showMap && blockInfo.props.openNavi && (
         <Navigation
           lat={blockInfo.props.lat}
           lng={blockInfo.props.lng}
