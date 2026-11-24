@@ -1,5 +1,6 @@
 import { tiptapJsonToHtmlUniversal } from '@/components/molecules/text-editor/utils/tiptapJsonToHtml';
 import { getInterviewCard } from '@/components/organisms/interview/interviewContent';
+import { safeRsvpFormUrl } from '@/components/organisms/rsvp/rsvpFormUrl';
 import type { EditorBlock } from '@/shared/types/block';
 
 import type { GuestBlock } from '../types/guestTypes';
@@ -40,6 +41,10 @@ export function hasGuestBlockContent(block: GuestBlock) {
         props.birthday?.trim() ||
         hasProfileContent(props)
       );
+    }
+    case 'rsvp': {
+      const props = block.props as EditorBlock<'rsvp'>['props'];
+      return Boolean(safeRsvpFormUrl(props.formUrl));
     }
     case 'interview': {
       const props = block.props as EditorBlock<'interview'>['props'];

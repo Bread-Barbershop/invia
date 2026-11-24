@@ -68,6 +68,11 @@ export function RsvpBlock({
             />
           </label>
         ))}
+        {!formUrl && (
+          <p className="text-xs text-text-secondary">
+            응답 링크를 입력하면 하객에게 참석 여부 블록이 표시됩니다.
+          </p>
+        )}
         {formUrl && !validFormUrl && (
           <p role="alert" className="text-xs text-red-600">
             응답자용 Google Forms HTTPS 링크를 입력해 주세요.
