@@ -22,7 +22,7 @@ jest.mock('./PlaceMap', () => ({
 }));
 
 jest.mock('./Navigation', () => ({
-  Navigation: () => null,
+  Navigation: () => <div>길찾기</div>,
 }));
 
 import { PlacePreview } from './PlacePreview';
@@ -51,6 +51,11 @@ describe('PlacePreview', () => {
       lat: 37.54,
       ...propsPartial,
     },
+  });
+
+  it.each([[0, 0], [181, 37], [127, NaN]])('미확정 좌표(%s, %s)에는 길찾기를 숨긴다', (lng, lat) => {
+    render(<PlacePreview blockInfo={createBlock({ lng, lat, openMap: true, openNavi: true })} className="" />);
+    expect(screen.queryByText('길찾기')).not.toBeInTheDocument();
   });
 
   it('does not render TEL when checkedPlaceTel is false by default', () => {
