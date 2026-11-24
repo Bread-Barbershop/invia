@@ -83,6 +83,21 @@ describe('shareUrl route', () => {
     }
   );
 
+  it('카카오와 SMS에서 빈 공유 제목을 행사명으로 채운다', async () => {
+    jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
+    (loadInvitationMeta as jest.Mock).mockResolvedValue({
+      payload: { published: true, dataJsonFileId: 'root', kakaoShare: { ...shareData, title: DEFAULT_TITLE } },
+    });
+    (downloadFiles as jest.Mock).mockResolvedValue({ bulkData: {}, blocks: [
+      { component: 'closingComment', props: { eventName: '연말 식탁' } },
+    ] });
+    const base = 'http://localhost/api/drive/shareUrl?invitationFolderId=root';
+    const kakao = await GET(new Request(base + '&intent=share'));
+    expect(await kakao.json()).toMatchObject({ data: { title: '연말 식탁' } });
+    const sms = await GET(new Request(base + '&intent=sms'));
+    expect(await sms.json()).toEqual({ message: '연말 식탁에 초대합니다.' });
+  });
+
   it('카카오 카드가 없는 공개 초대장은 저장된 행사명으로 문자 초안을 준비한다', async () => {
     jest.mocked(getDefaultShareVisibility).mockResolvedValue('public');
     (loadInvitationMeta as jest.Mock).mockResolvedValue({ payload: { dataJsonFileId: 'root', published: true } });

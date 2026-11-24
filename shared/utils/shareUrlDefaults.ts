@@ -1,10 +1,10 @@
 import { ShareUrlState } from '@/shared/types/block';
 
 /** 공유 썸네일 기본값 SSOT */
-export const DEFAULT_TITLE = '소중한 분들을 초대합니다.';
+export const DEFAULT_TITLE = '초대장이 도착했어요.';
 export const DEFAULT_DESCRIPTION =
-  '뜻깊은 날, 귀한 걸음으로 저희와 함께해 주세요.';
-export const DEFAULT_IMAGE_URL = '/images/wedding_default.webp';
+  '일정과 장소를 초대장에서 확인해 주세요.';
+export const DEFAULT_IMAGE_URL = '/opengraph-image.png';
 
 const DRIVE_IMAGE_BASE_URL = 'https://lh3.googleusercontent.com/d/';
 

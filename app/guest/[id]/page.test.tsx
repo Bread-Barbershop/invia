@@ -130,16 +130,28 @@ describe('GuestPage (/guest/[id])', () => {
     expect(notFoundMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    { title: '', fields: [], expected: '한 해의 마지막 식탁' },
+    { title: '직접 쓴 제목', fields: [], expected: '직접 쓴 제목' },
+    { title: '', fields: ['name'], expected: '초대장이 도착했어요.' },
+  ])('공유 제목과 개인정보 설정에 맞는 행사 제목을 표시한다 ($expected)', async ({ title, fields, expected }) => {
+    loadGuestPayloadMock.mockResolvedValue({
+      status: 'ok', warnings: [], payload: {
+        ...payload,
+        blocks: [{ component: 'closingComment', props: { eventName: '한 해의 마지막 식탁' } }],
+        activePrivacyFields: fields,
+        shareUrl: { urlTitle: title },
+      },
+    });
+    const metadata = await generateMetadata({ params: Promise.resolve({ id: 'guest-file-123' }) });
+    expect(metadata.title).toBe(expected);
+    expect(metadata.openGraph?.title).toBe(expected);
+  });
+
   it('generates metadata from the resolved guest payload', async () => {
     loadGuestPayloadMock.mockResolvedValue({
       status: 'ok',
-      payload: {
-        ...payload,
-        share: {
-          title: '소중한 분들을 초대합니다.',
-          description: '뜻깊은 날, 귀한 걸음으로 저희와 함께해 주세요.',
-        },
-      },
+      payload,
       warnings: [],
     });
 
@@ -147,7 +159,7 @@ describe('GuestPage (/guest/[id])', () => {
       params: Promise.resolve({ id: 'guest-file-123' }),
     });
 
-    expect(metadata.title).toBe('소중한 분들을 초대합니다.');
-    expect(metadata.description).toBe('뜻깊은 날, 귀한 걸음으로 저희와 함께해 주세요.');
+    expect(metadata.title).toBe('초대장이 도착했어요.');
+    expect(metadata.description).toBe('일정과 장소를 초대장에서 확인해 주세요.');
   });
 });
