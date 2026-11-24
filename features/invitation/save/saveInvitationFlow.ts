@@ -14,8 +14,9 @@ import type {
   UploadTask,
 } from '@/shared/types/invitationSave';
 import {
+  readShareTitleInputs,
+  resolveInvitationShareTitles,
   resolveShareDescription,
-  resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
 
 import { createGuestRenderHints } from './createGuestRenderHints';
@@ -491,12 +492,11 @@ async function commit(params: {
   const invitationUrl = `${window.location.origin}/guest/${prep.dataJsonFileId}`;
   let finalGuestUrl = invitationUrl;
 
-  // 공유 URL 메타데이터가 비어 있으면 기본 문구로 보정한다.
+  // 제목 입력값은 그대로 저장하고, 공유할 때 빈 제목을 보정한다.
   const normalizedShareUrl: ShareUrlState = {
     ...shareUrl,
-    title: resolveShareTitle(shareUrl.title), // 카카오톡 공유 타이틀
+    ...readShareTitleInputs(shareUrl),
     description: resolveShareDescription(shareUrl.description), // 카카오톡 공유 설명
-    urlTitle: resolveShareTitle(shareUrl.urlTitle), // 썸네일 (메타데이터) 공유 타이틀
     urlDescription: resolveShareDescription(shareUrl.urlDescription), // 썸네일 (메타데이터) 공유 설명
   };
 
@@ -687,7 +687,8 @@ async function commit(params: {
         invitationFolderId: prep.invitationFolderId,
         dataJsonFileId: prep.dataJsonFileId,
         shareData: {
-          title: normalizedShareUrl.title,
+          title: resolveInvitationShareTitles(normalizedShareUrl).kakaoTitle,
+          titleInput: normalizedShareUrl.title,
           description: normalizedShareUrl.description,
           imageFileId,
           showLocationButton,

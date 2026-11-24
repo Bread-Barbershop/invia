@@ -1,8 +1,9 @@
 import { isJsonRecord } from '@/shared/utils/json';
 import { isDriveFileId } from '@/shared/utils/media/driveImageUtils';
 import {
+  readShareTitleInputs,
+  resolveInvitationShareTitles,
   resolveShareDescription,
-  resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
 
 import type { ShareUrlPayload } from './ensureInvitationMetaFile';
@@ -144,7 +145,8 @@ export function kakaoFromSavedData(
   const { locationInfo } = share;
   const image = Array.isArray(share.images) ? share.images[0] : null;
   return {
-    title: resolveShareTitle(share.title),
+    title: resolveInvitationShareTitles(share).kakaoTitle,
+    titleInput: readShareTitleInputs(share).title,
     description: resolveShareDescription(share.description),
     showLocationButton: share.showLocationButton,
     ...(typeof image === 'string' && isDriveFileId(image)

@@ -18,8 +18,8 @@ import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { EditorBlock, ShareUrlState } from '@/shared/types/block';
 import { cn } from '@/shared/utils/cn';
 import {
+  resolveInvitationShareTitles,
   resolveShareDescription,
-  resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
 
 const GLASS_SHADOW_CLASS =
@@ -118,9 +118,9 @@ export const ShareUrlButton = () => {
 
 // --- 하위 컴포넌트: URL 공유 썸네일 미리보기 UI ---
 const UrlShareUrlView = ({ shareUrl }: { shareUrl: ShareUrlState }) => {
-  const { urlTitle, urlDescription, urlImage = [] } = shareUrl;
+  const { urlDescription, urlImage = [] } = shareUrl;
 
-  const displayTitle = resolveShareTitle(urlTitle);
+  const { linkTitle: displayTitle } = resolveInvitationShareTitles(shareUrl);
   const displayDescription = resolveShareDescription(urlDescription);
   const imageUrl = useImageObjectUrl(urlImage[0]);
 
@@ -255,13 +255,12 @@ const KakaoShareUrlView = ({ shareUrl }: { shareUrl: ShareUrlState }) => {
     typeof placeBlock.props.lng === 'number'
   );
   const {
-    title,
     description,
     images = [],
     showLocationButton = false,
   } = shareUrl;
 
-  const displayTitle = resolveShareTitle(title);
+  const { kakaoTitle: displayTitle } = resolveInvitationShareTitles(shareUrl);
   const displayDescription = resolveShareDescription(description);
 
   const imageUrl = useImageObjectUrl(images[0]);

@@ -682,6 +682,33 @@ describe('초대장 복제 API', () => {
     ).toHaveLength(2);
   });
 
+  it('복제본의 비어 있는 카카오 입력은 유지하고 공유에는 링크 제목을 사용한다', async () => {
+    const { documents } = mockDrive();
+    const shareUrl = {
+      ...sourceData.shareUrl,
+      titleFormat: 'raw',
+      title: '',
+      urlTitle: '링크 제목',
+    };
+    documents.get(DATA)!.body = { ...sourceData, shareUrl };
+
+    const response = await clone();
+    const { invite } = await response.json();
+    expect(response.status).toBe(200);
+    expect(documents.get(invite.dataJsonFileId)?.body).toMatchObject({
+      shareUrl: { titleFormat: 'raw', title: '', urlTitle: '링크 제목' },
+    });
+
+    const kakao = await readShare(
+      new Request(
+        `https://invia.test/api/drive/shareUrl?invitationFolderId=${invite.folderId}`
+      )
+    );
+    const { data } = await kakao.json();
+    expect(data.title).toBe('링크 제목');
+    expect(data).not.toHaveProperty('titleInput');
+  });
+
   it('최종 폴더 반영이 실패하면 준비가 끝난 임시 복제본을 다시 사용한다', async () => {
     const { documents, setFailNextCommit } = mockDrive();
     setFailNextCommit();

@@ -42,6 +42,24 @@ const basePayload = {
 };
 
 describe('parseGuestPayload', () => {
+  it('직접 입력한 공유 제목의 저장 형식을 게스트 메타데이터까지 보존한다', () => {
+    const shareUrl = {
+      titleFormat: 'raw',
+      title: '카카오 제목',
+      urlTitle: '소중한 분들을 초대합니다.',
+      description: '',
+      urlDescription: '',
+      images: [],
+      urlImage: [],
+      showLocationButton: false,
+    };
+    const result = parseGuestPayload({ ...basePayload, shareUrl, blocks: [] });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.payload.shareUrl).toMatchObject(shareUrl);
+  });
+
   it('유효한 payload를 정규화된 payload로 반환한다', () => {
     const result = parseGuestPayload({
       ...basePayload,

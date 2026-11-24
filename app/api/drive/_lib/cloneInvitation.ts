@@ -9,6 +9,7 @@ import {
   previewDriveFileUrl,
   publicDriveFileUrl,
 } from '@/shared/utils/media/driveImageUtils';
+import { resolveStoredKakaoTitle } from '@/shared/utils/shareUrlDefaults';
 
 import { captureDriveError } from './captureDriveError';
 import {
@@ -214,7 +215,7 @@ async function toInvite(
     name: folder.name,
     displayTitle: await resolveDashboardTitle(
       folder.name,
-      meta.kakaoShare?.title,
+      meta.kakaoShare?.titleInput ?? meta.kakaoShare?.title,
       loadSavedData
     ),
     createdTime: folder.createdTime,
@@ -461,9 +462,25 @@ export async function cloneOwnedInvitation(input: {
         guestUrl,
       };
       const copyData = remapInvitationJson(data, options);
-      const kakaoShare = sourceKakao
-        ? remapInvitationJson(sourceKakao, options)
-        : kakaoFromSavedData(copyData);
+      if (isJsonRecord(data.shareUrl) && isJsonRecord(copyData.shareUrl)) {
+        copyData.shareUrl = {
+          ...copyData.shareUrl,
+          title: data.shareUrl.title,
+          urlTitle: data.shareUrl.urlTitle,
+          ...(data.shareUrl.titleFormat === 'raw' && { titleFormat: 'raw' }),
+        };
+      }
+      let kakaoShare = kakaoFromSavedData(copyData);
+      if (sourceKakao) {
+        const title = resolveStoredKakaoTitle(sourceKakao, copyData.shareUrl);
+        kakaoShare = {
+          ...remapInvitationJson(sourceKakao, options),
+          title,
+          ...(sourceKakao.titleInput !== undefined || title !== sourceKakao.title
+            ? { titleInput: sourceKakao.titleInput ?? sourceKakao.title }
+            : {}),
+        };
+      }
       await writeCloneData(newData.id, copyData);
       const { payload } = await upsertInvitationMeta(created.id, {
         guestUrl,

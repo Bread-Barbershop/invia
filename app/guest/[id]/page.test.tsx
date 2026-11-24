@@ -150,4 +150,25 @@ describe('GuestPage (/guest/[id])', () => {
     expect(metadata.title).toBe('소중한 분들을 초대합니다.');
     expect(metadata.description).toBe('뜻깊은 날, 귀한 걸음으로 저희와 함께해 주세요.');
   });
+
+  it('기본 문구를 링크 제목으로 직접 입력한 경우 카카오 제목과 독립적으로 표시한다', async () => {
+    const linkTitle = '소중한 분들을 초대합니다.';
+    loadGuestPayloadMock.mockResolvedValue({
+      status: 'ok',
+      payload: {
+        ...payload,
+        shareUrl: { titleFormat: 'raw', title: '카카오 제목', urlTitle: linkTitle },
+      },
+      warnings: [],
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: 'guest-file-123' }),
+    });
+
+    expect(metadata).toMatchObject({
+      title: linkTitle,
+      openGraph: { title: linkTitle },
+    });
+  });
 });

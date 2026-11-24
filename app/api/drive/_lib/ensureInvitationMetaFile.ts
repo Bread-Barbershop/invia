@@ -12,6 +12,8 @@ export const META_JSON_VERSION = 1;
 
 export type ShareUrlPayload = {
   title: string;
+  // The editor's Kakao input, before fallback. Dashboard and SMS use this value.
+  titleInput?: string;
   description: string;
   imageFileId?: string;
   showLocationButton: boolean;

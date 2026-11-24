@@ -36,6 +36,7 @@ export type GuestPayload = {
   bulkData: BulkJson;
   blocks: GuestBlock[];
   shareUrl?: {
+    titleFormat?: 'raw';
     title: string;
     description: string;
     images: string[];

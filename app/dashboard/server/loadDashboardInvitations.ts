@@ -165,7 +165,7 @@ export async function loadDashboardInvitations(): Promise<LoadInvitationResponse
       )?.id;
       const displayTitle = await resolveDashboardTitle(
         invite.name,
-        metaPayload?.kakaoShare?.title,
+        metaPayload?.kakaoShare?.titleInput ?? metaPayload?.kakaoShare?.title,
         async () => {
           const dataFiles = files.filter(file => file.name === 'data.json');
           const dataFile =

@@ -1,9 +1,9 @@
 import 'server-only';
 
 import {
+  resolveInvitationShareTitles,
   resolveShareDescription,
   resolveShareImageUrl,
-  resolveShareTitle,
 } from '@/shared/utils/shareUrlDefaults';
 
 import type { GuestInvitationResult } from './loadGuestInvitation';
@@ -23,7 +23,7 @@ export async function guestInvitationMetadata(
     if (invitation.status !== 'ok') return { robots: noindexRobots };
 
     const shareUrl = invitation.payload.shareUrl;
-    const title = resolveShareTitle(shareUrl?.urlTitle);
+    const { linkTitle: title } = resolveInvitationShareTitles(shareUrl);
     const description = resolveShareDescription(shareUrl?.urlDescription);
     const images = resolveShareImageUrl(shareUrl?.urlImage?.[0]);
 
