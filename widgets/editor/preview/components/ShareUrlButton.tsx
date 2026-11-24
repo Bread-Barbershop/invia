@@ -17,10 +17,13 @@ import ProfileAvatarIcon from '@/shared/assets/images/share-url/profile-avatar.s
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { EditorBlock, ShareUrlState } from '@/shared/types/block';
 import { cn } from '@/shared/utils/cn';
+import { eventShareFallback } from '@/shared/utils/invitationTitle';
 import {
   resolveInvitationShareTitles,
   resolveShareDescription,
 } from '@/shared/utils/shareUrlDefaults';
+
+import { ShareThumbnail } from './ShareThumbnail';
 
 const GLASS_SHADOW_CLASS =
   'border border-white shadow-[0px_8px_40px_0px_rgba(0,0,0,0.06),0px_2px_32px_0px_rgba(0,0,0,0.06)]';
@@ -73,6 +76,8 @@ export const ShareUrlButton = () => {
     setPreviewContainer(document.getElementById('preview-container'));
   }, []);
 
+  const eventTitle = useEditorStore(state => eventShareFallback(state.shareUrl, state.block));
+  const displayShare = eventTitle ? { ...shareUrl, title: eventTitle, urlTitle: eventTitle } : shareUrl;
   const isOpen = selectedId === 'shareUrl';
 
   const handleToggle = () => {
@@ -105,9 +110,9 @@ export const ShareUrlButton = () => {
           <AnimatePresence mode="wait">
             {isOpen &&
               (shareUrlTab === 'kakao' ? (
-                <KakaoShareUrlView key="kakao" shareUrl={shareUrl} />
+                <KakaoShareUrlView key="kakao" shareUrl={displayShare} />
               ) : (
-                <UrlShareUrlView key="url" shareUrl={shareUrl} />
+                <UrlShareUrlView key="url" shareUrl={displayShare} />
               ))}
           </AnimatePresence>,
           previewContainer
@@ -185,16 +190,7 @@ const UrlShareUrlView = ({ shareUrl }: { shareUrl: ShareUrlState }) => {
       {/* Link preview card */}
       <div className="absolute left-4 top-[181px] flex w-[256px] flex-col items-center">
         <div className="h-[341px] w-[256px] shrink-0 overflow-hidden rounded-t-[16px]">
-          {imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imageUrl}
-              alt="thumbnail"
-              className="size-full object-cover"
-            />
-          ) : (
-            <div className="checkerboard checker-size size-full" />
-          )}
+          <ShareThumbnail imageUrl={imageUrl} className="size-full" />
         </div>
 
         <div className="relative w-[256px]">
@@ -294,16 +290,7 @@ const KakaoShareUrlView = ({ shareUrl }: { shareUrl: ShareUrlState }) => {
           <div className="bg-white pb-2 w-[260px] rounded-lg shadow-sm">
             {/* 썸네일 이미지 영역 */}
             <div>
-              {imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt="thumbnail"
-                  className="w-full aspect-[4/3] object-cover rounded-t-lg"
-                />
-              ) : (
-                <div className="checkerboard checker-size aspect-[4/3] w-full rounded-t-lg" />
-              )}
+              <ShareThumbnail imageUrl={imageUrl} className="w-full aspect-[4/3] rounded-t-lg" />
             </div>
 
             {/* 텍스트 영역 */}

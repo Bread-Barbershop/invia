@@ -26,6 +26,7 @@ import {
 } from '@/features/invitation/privacy/settings';
 import {
   customShareTitle,
+  eventShareFallback,
   titleFromSavedInvitation,
 } from '@/shared/utils/invitationTitle';
 import {
@@ -198,12 +199,16 @@ async function protectKakaoShare(share: ShareUrlPayload, dataJsonFileId?: string
   // separately and can be older than the invitation itself.
   const { invitation, fields, hideText } = await loadShareContent(dataJsonFileId);
   const unavailable = !invitation?.bulkData;
+  const eventTitle = !hideText && !customShareTitle(share.title)
+    ? eventShareFallback(invitation?.shareUrl, invitation?.blocks)
+    : '';
   return {
     ...readableShare,
     title: hideText ? '' : resolveStoredKakaoTitle(share, invitation?.shareUrl),
     ...(hideText ? { description: '' } : {}),
     ...(unavailable || fields.has('media') ? { imageFileId: undefined } : {}),
     ...(unavailable || fields.has('location') ? { showLocationButton: false, locationInfo: undefined } : {}),
+    ...(eventTitle ? { title: eventTitle } : {}),
   };
 }
 
