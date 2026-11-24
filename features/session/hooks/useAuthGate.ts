@@ -3,15 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { usePublicSession } from '@/features/session/components/PublicSessionProvider';
+import { fetchSessionState } from '@/features/session/hooks/fetchSessionState';
 import { useToast } from '@/shared/hooks/useToast';
 
 type UseAuthGateOptions = {
   initialIsLoggedIn?: boolean;
   stayOnSessionExpiry?: boolean;
-};
-
-type SessionResponse = {
-  isLoggedIn: boolean;
 };
 
 type GoogleOAuthMessage = {
@@ -33,26 +31,9 @@ function openGoogleLoginPopup() {
   );
 }
 
-async function fetchSessionState() {
-  const res = await fetch('/api/auth/session', {
-    method: 'GET',
-    cache: 'no-store',
-  });
-
-  if (res.status === 401) {
-    return false;
-  }
-
-  if (!res.ok) {
-    throw new Error(`session check failed: ${res.status}`);
-  }
-
-  const session = (await res.json()) as SessionResponse;
-  return session.isLoggedIn;
-}
-
 export function useAuthGate(options: UseAuthGateOptions = {}) {
   const { initialIsLoggedIn = false } = options;
+  const publicSession = usePublicSession();
   const router = useRouter();
   const { success } = useToast();
 
@@ -97,6 +78,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
     setIsLoginOpen(false);
     setIsDrivePermissionRequiredOpen(false);
     setIsLoggedIn(true);
+    publicSession?.setSession(true);
 
     success('로그인에 성공했습니다.');
 
@@ -109,7 +91,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
     }
 
     router.refresh();
-  }, [router, success]);
+  }, [router, success, publicSession]);
 
   const closePrivacyNotice = useCallback(() => {
     setIsPrivacyNoticeOpen(false);
@@ -225,7 +207,10 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
 
   const validateSession = async () => {
     try {
-      const isSessionValid = await fetchSessionState();
+      const isSessionValid = publicSession
+        ? await publicSession.checkSession()
+        : await fetchSessionState();
+      if (isSessionValid === null) return false;
 
       if (!isSessionValid) {
         pendingActionRef.current = null;
@@ -260,6 +245,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
       }
 
       setIsLoggedIn(false);
+      publicSession?.setSession(false);
       setIsPrivacyNoticeOpen(false);
       setIsDrivePermissionRequiredOpen(false);
       openLoginAfterNoticeRef.current = false;
@@ -273,7 +259,21 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
   };
 
   const runAfterAuth = (action: () => void | Promise<void>) => {
-    if (isLoggedIn) {
+    if (publicSession && publicSession.isLoggedIn === null) {
+      if (isBusy) return;
+      setIsBusy(true);
+      return (async () => {
+        const session = await publicSession.checkSession();
+        if (session === true) await Promise.resolve(action());
+        else if (session === false) {
+          pendingActionRef.current = action;
+          login();
+        }
+      })()
+        .catch(console.error)
+        .finally(() => setIsBusy(false));
+    }
+    if (publicSession ? publicSession.isLoggedIn : isLoggedIn) {
       if (isBusy) return;
 
       setIsBusy(true);
@@ -300,7 +300,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
   };
 
   return {
-    isLoggedIn,
+    isLoggedIn: publicSession?.isLoggedIn ?? isLoggedIn,
     isBusy,
     isLoginOpen,
     isLoginPending,

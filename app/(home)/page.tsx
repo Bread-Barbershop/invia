@@ -1,4 +1,3 @@
-import { getAuthSession } from '@/app/api/auth/_lib/getAuthSession';
 import DashboardShell from '@/features/session/components/DashboardShell';
 import ShowcasePreviewProvider from '@/features/showcase/components/ShowcasePreviewProvider';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
@@ -16,8 +15,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Home() {
-  const session = await getAuthSession();
+export default function Home() {
   const showcaseItems = getShuffledShowcaseItems();
 
   return (
@@ -27,9 +25,9 @@ export default async function Home() {
       </div>
 
       <div className="hidden min-[1340px]:block" data-home-variant="desktop">
-        <DashboardShell minimumWidth={DESKTOP_CONTENT_MIN_WIDTH}>
+        <DashboardShell publicPage minimumWidth={DESKTOP_CONTENT_MIN_WIDTH}>
           <div className="fixed z-10" style={{ left: '2.5rem', top: '30%' }}>
-            <Cta initialIsLoggedIn={session.isLoggedIn} />
+            <Cta />
           </div>
           <HomeShowcaseCarousel items={showcaseItems} />
         </DashboardShell>
