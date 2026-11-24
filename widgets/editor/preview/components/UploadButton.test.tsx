@@ -22,6 +22,7 @@ const upload = {
   isCleaningUp: false,
   pendingInvitation: null,
   loadingMessage: '',
+  photoProgress: undefined,
 };
 
 beforeEach(() => jest.clearAllMocks());

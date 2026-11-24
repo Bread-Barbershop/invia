@@ -17,7 +17,7 @@ jest.mock('@sentry/nextjs', () => ({
   captureException: jest.fn(),
 }));
 
-import { saveInvitationFlow } from './saveInvitationFlow';
+import { saveInvitationFlow, type SaveProgressStep } from './saveInvitationFlow';
 import { createHash, webcrypto } from 'node:crypto';
 import { updateFileToDrive } from './updateFileToDrive';
 import { uploadFileToDrive } from './uploadFileToDrive';
@@ -181,7 +181,10 @@ describe('saveInvitationFlow', () => {
 
     expect(result.success).toBe(true);
     expect(result.guestUrl).toBe('http://localhost/i/aB7kQ2x');
-    expect(onProgress.mock.calls.map(([step]) => step)).not.toContain('loadingPhotos');
+    expect(onProgress.mock.calls.map(([step]) => step)).toEqual([
+      'preparing',
+      'savingInvitation',
+    ]);
     expect(mockFetch).toHaveBeenCalledWith(
       '/api/drive/shareUrl',
       expect.objectContaining({
@@ -505,6 +508,7 @@ describe('saveInvitationFlow', () => {
         }));
       const firstAttempt: number[] = [];
       const retryAttempt: number[] = [];
+      const progressSteps: SaveProgressStep[] = [];
       const result = await saveInvitationFlow({
         bulkData,
         shareUrl,
@@ -521,7 +525,8 @@ describe('saveInvitationFlow', () => {
           height: 0,
           createdAt: '',
         },
-        onProgress: (_, photos) => {
+        onProgress: (step, photos) => {
+          if (progressSteps.at(-1) !== step) progressSteps.push(step);
           if (!photos) return;
           expect(photos.total).toBe(2);
           const counts = photos.retrying ? retryAttempt : firstAttempt;
@@ -558,8 +563,61 @@ describe('saveInvitationFlow', () => {
       ]);
       expect(firstAttempt).toEqual([0, 1]);
       expect(retryAttempt).toEqual(expectedRetry);
+      expect(progressSteps).toEqual([
+        'preparing',
+        'uploadingPhotos',
+        'preparing',
+        'uploadingPhotos',
+        'savingInvitation',
+      ]);
     }
   );
+
+  it('배경음악 이름은 인증 정보를 갱신하는 동안 숨기고 다시 전송할 때 표시한다', async () => {
+    const audio = new File(['track'], 'music.mp3', { type: 'audio/mpeg' });
+    const progressSteps: SaveProgressStep[] = [];
+    const normalFetch = mockFetch.getMockImplementation()!;
+    mockFetch.mockImplementation(async (input, init) => {
+      if (input === '/api/drive/getToken') {
+        expect(progressSteps.at(-1)).toBe('preparing');
+        return jsonResponse({
+          accessToken: 'refreshed-token',
+          expiresAt: Date.now() + 600_000,
+        });
+      }
+      return normalFetch(input, init);
+    });
+    jest
+      .mocked(uploadFileToDrive)
+      .mockRejectedValueOnce(new Error('Drive upload failed: 401'))
+      .mockImplementationOnce(async file => {
+        expect(progressSteps.at(-1)).toBe('uploadingAudio');
+        return { fileId: 'saved-audio', name: file.name };
+      });
+
+    const result = await saveInvitationFlow({
+      bulkData,
+      shareUrl,
+      bgmData: { ...bgmData, selectedBgmId: 'user-bgm' },
+      audio,
+      images: [],
+      data: [],
+      mainPoster: { version: '7.1.0', objects: [] },
+      invitationThumbnail: {
+        name: '', mimeType: 'image/png', dataUrl: '', width: 0, height: 0, createdAt: '',
+      },
+      onProgress: step => progressSteps.push(step),
+    });
+
+    expect(result.success).toBe(true);
+    expect(progressSteps).toEqual([
+      'preparing',
+      'uploadingAudio',
+      'preparing',
+      'uploadingAudio',
+      'savingInvitation',
+    ]);
+  });
 
   it('후원사 로고를 Drive ID로 저장하고 이름만 있는 후원사와 구분해 다시 읽는다', async () => {
     const logo = new File(['logo'], 'logo.png', { type: 'image/png' });

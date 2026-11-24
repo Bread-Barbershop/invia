@@ -61,6 +61,7 @@ function Dialog({ showSettings = false }: { showSettings?: boolean }) {
         isLoading: false,
         isCleaningUp: false,
         loadingMessage: '저장하고 있어요.',
+        photoProgress: undefined,
       }}
       onClose={close}
       onOpenEditor={openEditor}
@@ -145,6 +146,7 @@ describe('하객별 구분', () => {
             isLoading: false,
             isCleaningUp: false,
             loadingMessage: '',
+            photoProgress: undefined,
           }}
           audienceName={savedData?.audienceName}
         />

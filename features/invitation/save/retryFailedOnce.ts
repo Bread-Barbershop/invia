@@ -31,6 +31,7 @@ export async function retryFailedOnce(params: {
   accessToken: string;
   concurrency?: number;
   onFileUploaded?: () => void;
+  onRetryUpload?: () => void;
   refreshAccessToken: () => Promise<string>;
 }): Promise<{
   ok: UploadOk[];
@@ -75,6 +76,7 @@ export async function retryFailedOnce(params: {
     : accessToken;
 
   // 3 재시도 실행
+  params.onRetryUpload?.();
   const { ok, fail } = await uploadAllSettled({
     originFile: retryTargets.map(target => target.file),
     folderId,

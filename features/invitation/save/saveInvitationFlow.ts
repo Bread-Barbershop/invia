@@ -58,15 +58,10 @@ type SaveInvitationPrepareResponse = {
 type BatchResult = { ok: UploadOk[]; fail: UploadFail[] };
 
 export type SaveProgressStep =
-  | 'checkingContent'
-  | 'organizingContent'
-  | 'collectingText'
-  | 'loadingPhotos'
-  | 'arrangingContent'
-  | 'polishingInvitation'
-  | 'reviewingDetails'
-  | 'checkingPresentation'
-  | 'finishingInvitation';
+  | 'preparing'
+  | 'uploadingPhotos'
+  | 'uploadingAudio'
+  | 'savingInvitation';
 
 export type PhotoUploadProgress = {
   completed: number;
@@ -341,6 +336,7 @@ async function upload(params: {
     originFile: (UploadTask | File)[];
     concurrency?: number;
     onFileUploaded?: () => void;
+    onRetryUpload?: () => void;
   }): Promise<StepResult> => {
     if (step.originFile.length === 0) {
       return {
@@ -364,7 +360,11 @@ async function upload(params: {
           accessToken: token.currentToken,
           concurrency: step.concurrency,
           onFileUploaded: step.onFileUploaded,
-          refreshAccessToken: token.refreshAccessToken,
+          onRetryUpload: step.onRetryUpload,
+          refreshAccessToken: () => {
+            onProgress?.('preparing');
+            return token.refreshAccessToken();
+          },
         })
       : {
           ok: [],
@@ -391,20 +391,25 @@ async function upload(params: {
     ? previousImages.fail.map(failure => failure.file)
     : images;
   let completedPhotos = previousImages?.ok.length ?? 0;
+  let retryingPhotos = params.retryingPhotos ?? false;
   const reportPhotos = () =>
-    onProgress?.('loadingPhotos', {
+    onProgress?.('uploadingPhotos', {
       completed: completedPhotos,
       total: images.length,
-      retrying: params.retryingPhotos ?? false,
+      retrying: retryingPhotos,
     });
-  if (pendingImages.length > 0) reportPhotos();
   diagnostics.currentStage = 'upload_images';
+  if (pendingImages.length > 0) reportPhotos();
   const imagesStep = await runUploadStep({
     originFile: pendingImages,
     folderId: prep.imageFolderId,
     concurrency: 5,
     onFileUploaded: () => {
       completedPhotos += 1;
+      reportPhotos();
+    },
+    onRetryUpload: () => {
+      retryingPhotos = true;
       reportPhotos();
     },
   });
@@ -424,12 +429,15 @@ async function upload(params: {
     });
   });
 
-  onProgress?.('arrangingContent');
   diagnostics.currentStage = 'upload_audio';
   const savedAudioFileId = getSavedAudioFileId(audio, prep.audioFolderId);
+  const audioToUpload = audio && !savedAudioFileId ? audio : null;
+  const reportAudio = () => onProgress?.('uploadingAudio');
+  if (audioToUpload) reportAudio();
   const audioStep = await runUploadStep({
-    originFile: audio && !savedAudioFileId ? [{ id: 'bgm', file: audio }] : [],
+    originFile: audioToUpload ? [{ id: 'bgm', file: audioToUpload }] : [],
     folderId: prep.audioFolderId,
+    onRetryUpload: reportAudio,
   });
   const uploadedAudio = audioStep.final.ok[0];
   if (uploadedAudio) {
@@ -483,7 +491,7 @@ async function commit(params: {
   } = params;
   const { fileToId, audioFileId } = uploadResult;
 
-  onProgress?.('collectingText');
+  onProgress?.('savingInvitation');
   // uploadImages의 imageId -> File 매핑 (중복 이미지 처리용)
   const uploadImagesByImageId = new Map(
     (uploadImages ?? []).map(task => [task.id, task.file as File])
@@ -567,7 +575,6 @@ async function commit(params: {
       : null,
   };
 
-  onProgress?.('polishingInvitation');
   let thumbnailFileId: string | undefined = undefined;
   let thumbnailSaveFailed = false;
   let thumbnailSaveError: unknown;
@@ -614,7 +621,6 @@ async function commit(params: {
     type: 'application/json',
   });
 
-  onProgress?.('reviewingDetails');
   diagnostics.currentStage = 'save_data_json';
   // data.json PATCH가 저장 완료의 핵심 단계다. 실패하면 401/5xx에 한해 1회 재시도한다.
   const dataFirstAttempt: BatchResult = await (async () => {
@@ -652,7 +658,6 @@ async function commit(params: {
     usedAccessToken: token.currentToken,
   };
 
-  onProgress?.('checkingPresentation');
   // 공유 데이터 저장 실패는 기존 정책대로 전체 저장 실패로 보지 않는다.
   let metaSaveFailed = false;
   let metaSaveError: unknown;
@@ -809,11 +814,13 @@ async function runSaveInvitationFlow(
   params: SaveInvitationFlowParams,
   diagnostics: SaveDiagnostics
 ): Promise<SaveInvitationFlowResult> {
-  const { images, audio, invitationUuid } = params;
+  const { images, invitationUuid } = params;
+  const audio =
+    params.bgmData.selectedBgmId === 'user-bgm' ? params.audio : null;
 
   let usedPrepareFallback = false;
 
-  params.onProgress?.('checkingContent');
+  params.onProgress?.('preparing');
   diagnostics.currentStage = 'prepare';
   let prep = await prepare(invitationUuid);
   let token = createTokenState(prep);
@@ -843,7 +850,7 @@ async function runSaveInvitationFlow(
 
   if (!commitResult || shouldPrepareFallback(commitResult.dataStep.final.fail)) {
     usedPrepareFallback = true;
-    params.onProgress?.('checkingContent');
+    params.onProgress?.('preparing');
     diagnostics.currentStage = 'prepare';
     const previousImageFolderId = prep.imageFolderId;
     prep = await prepareFallback(prep.invitationUuid);
@@ -877,7 +884,6 @@ async function runSaveInvitationFlow(
     commitResult.dataStep.final.fail.length +
     (commitResult.thumbnailSaveFailed ? 1 : 0) +
     (commitResult.metaSaveFailed ? 1 : 0);
-  params.onProgress?.('finishingInvitation');
   diagnostics.currentStage = 'publish_visibility';
   const visibility =
     saveFailedBeforeVisibility === 0 && !params.preserveVisibility

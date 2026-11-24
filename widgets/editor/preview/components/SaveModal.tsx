@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { forwardRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -43,11 +43,6 @@ const MESSAGE_ANIMATION = {
       y: 0,
       transition: { duration: 0.32, ease: MESSAGE_EASE },
     },
-    exit: {
-      opacity: 0,
-      y: -8,
-      transition: { duration: 0.22, ease: MESSAGE_EASE },
-    },
   },
   blur: {
     initial: { opacity: 0, filter: 'blur(6px)' },
@@ -55,11 +50,6 @@ const MESSAGE_ANIMATION = {
       opacity: 1,
       filter: 'blur(0px)',
       transition: { duration: 0.38, ease: MESSAGE_EASE },
-    },
-    exit: {
-      opacity: 0,
-      filter: 'blur(6px)',
-      transition: { duration: 0.22, ease: MESSAGE_EASE },
     },
   },
   scale: {
@@ -69,18 +59,13 @@ const MESSAGE_ANIMATION = {
       scale: 1,
       transition: { duration: 0.3, ease: MESSAGE_EASE },
     },
-    exit: {
-      opacity: 0,
-      scale: 0.9,
-      transition: { duration: 0.2, ease: MESSAGE_EASE },
-    },
   },
 } as const;
 
 export const SaveLoadingMessage = ({
   message,
   animation = 'slide',
-  className = '-mt-8 min-h-6 text-base font-semibold text-[#202020]',
+  className = 'min-h-6 text-base font-semibold text-[#202020]',
 }: {
   message?: string;
   animation?: SaveLoadingMessageAnimation;
@@ -88,69 +73,51 @@ export const SaveLoadingMessage = ({
 }) => {
   if (animation === 'stagger') {
     return (
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.p
-          key={message}
-          className={className}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          variants={{
-            animate: {
-              transition: {
-                staggerChildren: 0.016,
-              },
+      <motion.p
+        key={message}
+        className={className}
+        initial="initial"
+        animate="animate"
+        variants={{
+          animate: {
+            transition: {
+              staggerChildren: 0.016,
             },
-            exit: {
-              transition: {
-                staggerChildren: 0.012,
+          },
+        }}
+      >
+        {Array.from(message ?? '').map((char, index) => (
+          <motion.span
+            key={`${message}-${index}`}
+            className="inline-block"
+            variants={{
+              initial: { opacity: 0, y: 6 },
+              animate: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.28,
+                  ease: MESSAGE_EASE,
+                },
               },
-            },
-          }}
-        >
-          {Array.from(message ?? '').map((char, index) => (
-            <motion.span
-              key={`${message}-${index}`}
-              className="inline-block"
-              variants={{
-                initial: { opacity: 0, y: 6 },
-                animate: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.28,
-                    ease: MESSAGE_EASE,
-                  },
-                },
-                exit: {
-                  opacity: 0,
-                  y: 6,
-                  transition: {
-                    duration: 0.28,
-                    ease: MESSAGE_EASE,
-                  },
-                },
-              }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </motion.span>
-          ))}
-        </motion.p>
-      </AnimatePresence>
+            }}
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </motion.span>
+        ))}
+      </motion.p>
     );
   }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.p
-        key={message}
-        {...MESSAGE_ANIMATION[animation]}
-        className={className}
-        style={animation === 'blur' ? { willChange: 'filter' } : undefined}
-      >
-        {message}
-      </motion.p>
-    </AnimatePresence>
+    <motion.p
+      key={message}
+      {...MESSAGE_ANIMATION[animation]}
+      className={className}
+      style={animation === 'blur' ? { willChange: 'filter' } : undefined}
+    >
+      {message}
+    </motion.p>
   );
 };
 
@@ -165,7 +132,17 @@ const ModalFrame = forwardRef<
     onClose: () => void;
   }
 >((props, ref) => {
-  const { children, isLoading, loadingMessage, photoProgress, loadingAnimation, onClose } = props;
+  const {
+    children,
+    isLoading,
+    loadingMessage,
+    photoProgress,
+    loadingAnimation,
+    onClose,
+  } = props;
+  const photoCount = photoProgress
+    ? `${photoProgress.total}장 중 ${photoProgress.completed}장 완료`
+    : undefined;
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(
     isLoading ? undefined : onClose
   );
@@ -186,29 +163,30 @@ const ModalFrame = forwardRef<
         className={`fixed top-1/2 left-1/2 z-[101] flex min-h-[249px] max-h-[calc(100dvh-32px)] w-[335px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-6 overflow-y-auto rounded-xl bg-white p-5 shadow-[0_24px_60px_-20px_rgb(0_0_0_/_12%),0_8px_24px_-8px_rgb(0_0_0_/_18%)] ${isLoading ? 'justify-center' : ''}`}
       >
         {isLoading ? (
-          <div className="-mt-2 flex flex-col items-center gap-3 text-center">
+          <div className="-mt-2 flex w-full flex-col items-center gap-3 text-center">
             <SaveLottie variant="loading" loop />
-            {photoProgress ? (
-              <div className="-mt-8 grid justify-items-center gap-2">
-                <p
-                  role="status"
-                  className="text-base font-semibold tabular-nums text-[#202020]"
-                >
-                  {loadingMessage}
-                </p>
+            <div className="-mt-8 grid w-full justify-items-center gap-2">
+              <div role="status" aria-atomic="true">
+                <SaveLoadingMessage
+                  message={loadingMessage}
+                  animation={loadingAnimation}
+                />
+                {photoCount && (
+                  <p className="mt-1 text-sm text-neutral-600 tabular-nums">
+                    {photoCount}
+                  </p>
+                )}
+              </div>
+              {photoProgress && (
                 <progress
                   aria-label="사진 업로드"
+                  aria-valuetext={photoCount}
                   value={photoProgress.completed}
                   max={photoProgress.total}
-                  className="h-2 w-full accent-[#476247]"
+                  className="h-2 w-[229px] max-w-full accent-[#476247]"
                 />
-              </div>
-            ) : (
-              <SaveLoadingMessage
-                message={loadingMessage}
-                animation={loadingAnimation}
-              />
-            )}
+              )}
+            </div>
           </div>
         ) : (
           children
