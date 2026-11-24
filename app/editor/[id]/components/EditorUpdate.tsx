@@ -1,7 +1,7 @@
 'use client';
 
 import { notFound } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { EditorBgmPlayerProvider } from '@/components/organisms/bgm/context/EditorBgmPlayerContext';
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
@@ -24,6 +24,7 @@ interface Props {
 }
 
 function EditorUpdate({ folderId, uuid }: Props) {
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const { savedData, loading, error } = useSavedData(folderId, uuid);
   const { initEditStore, initBgmStore, initBulkData } = useInitData({
     savedData,
@@ -76,9 +77,12 @@ function EditorUpdate({ folderId, uuid }: Props) {
             <LeftPanel />
             <div className="flex gap-[clamp(20px,calc(20px+(32-20)*((100vw-1340px)/(1920-1340))),32px)] items-center">
               <div className="pl-[clamp(0px,calc(144*((100vw-1340px)/(1920-1340))),144px)]">
-                <Preview />
+                <Preview toolbarRef={toolbarRef} />
               </div>
-              <MenuPanel audienceName={savedData.audienceName} />
+              <MenuPanel
+                audienceName={savedData.audienceName}
+                toolbarRef={toolbarRef}
+              />
             </div>
             <RightPanel />
           </div>

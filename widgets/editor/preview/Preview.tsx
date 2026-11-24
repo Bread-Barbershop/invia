@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { type RefObject, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 
 import { EditorCallout } from '@/components/molecules/editor-callout';
@@ -51,7 +51,13 @@ const restrictPreviewDragToVerticalAxis: Modifier = ({ transform }) => ({
   x: 0,
 });
 
-function Preview() {
+const previewCalloutAnchor = { x: 1, y: 0.8 };
+
+function Preview({
+  toolbarRef,
+}: {
+  toolbarRef?: RefObject<HTMLDivElement | null>;
+}) {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const previewScrollContainerRef = useRef<HTMLDivElement>(null);
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -309,11 +315,13 @@ function Preview() {
       </div>
       <EditorCallout
         targetRef={previewContainerRef}
+        avoidRef={toolbarRef}
         open={isPreviewCalloutOpen}
         arrowSide="left"
-        targetAnchor={{ x: 1, y: 0.75 }}
+        targetAnchor={previewCalloutAnchor}
         offset={0}
-        text="블록을 클릭해 편집하고, 꾹 누른 채로 끌어 순서를 바꿔보세요."
+        className="max-w-[350px] break-keep"
+        text="블록을 클릭해 내용을 편집할 수 있어요."
       />
       <button
         type="button"
@@ -326,7 +334,7 @@ function Preview() {
             return;
           }
 
-          showAllCalloutsFor(6000);
+          showAllCalloutsFor();
         }}
       >
         <CalloutIcon
