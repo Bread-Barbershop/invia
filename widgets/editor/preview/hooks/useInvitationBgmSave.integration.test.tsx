@@ -103,7 +103,7 @@ describe('편집기에서 사용자 배경음악 저장', () => {
       .mockImplementation(() => {});
     jest.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => {});
     const { container } = render(<GuestBgm bgm={bgm} />);
-    fireEvent.click(screen.getByRole('button', { name: '배경음악 켜기' }));
+    fireEvent.click(screen.getByRole('button', { name: '배경음악' }));
     expect(container.querySelector('audio')?.src).toContain('id=audio-1&');
   });
 

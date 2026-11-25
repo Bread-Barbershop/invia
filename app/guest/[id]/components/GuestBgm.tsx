@@ -3,7 +3,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import {
+  BGM_PLAYBACK_ERROR_MESSAGE,
+  isAutoplayBlockedError,
+} from '@/components/organisms/bgm/bgmPlaybackMessages';
 import { BgmPlaybackHint } from '@/components/organisms/bgm/components/BgmPlaybackHint';
+import { BgmPlaybackNotice } from '@/components/organisms/bgm/components/BgmPlaybackNotice';
 import BgmToggleButton from '@/components/organisms/bgm/components/BgmToggleButton';
 import { BGM_LIST } from '@/components/organisms/bgm/data/bgmList';
 
@@ -18,6 +23,8 @@ interface GuestBgmProps {
 
 const USER_BGM_ID = 'user-bgm';
 const PREVIEW_CONTROL_TOP = '!top-[var(--phone-frame-bgm-top,2rem)]';
+const PREVIEW_NOTICE_OFFSET =
+  '!top-[calc(var(--phone-frame-bgm-top,2rem)+2.5rem)] !right-[var(--phone-frame-bgm-right,2rem)]';
 
 function driveAudioUrl(fileId: string) {
   return `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download`;
@@ -62,6 +69,10 @@ function GuestBgm({
   const [requestedAudioKey, setRequestedAudioKey] = useState<string | null>(
     null
   );
+  const [playbackError, setPlaybackError] = useState<{
+    message: string;
+    audioKey: string | null;
+  } | null>(null);
 
   const isUserBgm = bgm.selectedBgmId === USER_BGM_ID;
   const shouldUseProxyForUserBgm =
@@ -116,6 +127,19 @@ function GuestBgm({
       ? selectedAudioSrc
       : null;
 
+  // 곡이 바뀌면 이전 곡의 실패 안내는 의미가 없으므로 바로 숨긴다.
+  const visiblePlaybackError =
+    playbackError && playbackError.audioKey === selectedAudioKey
+      ? playbackError.message
+      : null;
+
+  useEffect(() => {
+    if (!playbackError) return;
+
+    const timer = window.setTimeout(() => setPlaybackError(null), 8000);
+    return () => window.clearTimeout(timer);
+  }, [playbackError]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -148,11 +172,16 @@ function GuestBgm({
 
     const handleError = () => {
       if (isUserBgm && bgm.userBgmFileId && !shouldUseProxyForUserBgm) {
+        // 공개 Drive 링크가 막힌 경우엔 조용히 인증 프록시로 한 번 더 시도한다.
         setDirectFailedUserBgmFileId(bgm.userBgmFileId);
         return;
       }
 
       setIsOn(false);
+      setPlaybackError({
+        message: BGM_PLAYBACK_ERROR_MESSAGE.load,
+        audioKey: selectedAudioKey,
+      });
     };
 
     audio.addEventListener('error', handleError);
@@ -160,7 +189,12 @@ function GuestBgm({
     return () => {
       audio.removeEventListener('error', handleError);
     };
-  }, [bgm.userBgmFileId, isUserBgm, shouldUseProxyForUserBgm]);
+  }, [
+    bgm.userBgmFileId,
+    isUserBgm,
+    selectedAudioKey,
+    shouldUseProxyForUserBgm,
+  ]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -172,7 +206,18 @@ function GuestBgm({
     }
 
     const tryPlay = () => {
-      void audio.play().catch(() => setIsOn(false));
+      void audio
+        .play()
+        .then(() => setPlaybackError(null))
+        .catch((error: unknown) => {
+          setIsOn(false);
+          setPlaybackError({
+            message: isAutoplayBlockedError(error)
+              ? BGM_PLAYBACK_ERROR_MESSAGE.blocked
+              : BGM_PLAYBACK_ERROR_MESSAGE.play,
+            audioKey: selectedAudioKey,
+          });
+        });
     };
 
     if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
@@ -184,7 +229,7 @@ function GuestBgm({
     return () => {
       audio.removeEventListener('canplay', tryPlay);
     };
-  }, [isOn, src]);
+  }, [isOn, selectedAudioKey, src]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -209,6 +254,7 @@ function GuestBgm({
     if (!selectedAudioKey) return;
 
     setIsHintDismissed(true);
+    setPlaybackError(null);
     setRequestedAudioKey(selectedAudioKey);
     setIsOn(prev => !prev);
   };
@@ -241,6 +287,12 @@ function GuestBgm({
             isOn={isOn}
             onToggle={handleToggle}
           />
+          {visiblePlaybackError && (
+            <BgmPlaybackNotice
+              className={isDashboardPreview ? PREVIEW_NOTICE_OFFSET : ''}
+              message={visiblePlaybackError}
+            />
+          )}
         </>
       )}
     </>
