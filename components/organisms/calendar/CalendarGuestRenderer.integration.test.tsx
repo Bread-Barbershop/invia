@@ -261,9 +261,9 @@ describe('GuestRenderer 달력 공개 미리보기', () => {
     expect(content.replace(/\r\n /g, '')).toContain(
       'LOCATION:인비아 하우스\\, 3층 그랜드홀\\, 서울 강남구 테헤란로 1'
     );
-    expect((click.mock.instances[0] as HTMLAnchorElement).download).toBe(
-      'invia-invitation-20260309.ics'
-    );
+    expect(
+      (click.mock.instances[0] as unknown as HTMLAnchorElement).download
+    ).toBe('invia-invitation-20260309.ics');
     expect(
       new URL(
         screen.getByTestId('add-to-calendar-google').getAttribute('href') ?? ''

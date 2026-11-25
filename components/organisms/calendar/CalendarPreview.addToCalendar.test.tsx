@@ -43,14 +43,15 @@ const coupleBlock = {
 
 const renderCalendar = (
   blockInfo: EditorBlock<'calendar'> = calendarBlock,
-  siblingBlocks: readonly InvitationBlockSource[] = []
+  siblingBlocks: readonly InvitationBlockSource[] = [],
+  language?: 'ko' | 'en'
 ) =>
   render(
     <InvitationBlocksProvider blocks={siblingBlocks}>
       <CalendarPreview
         blockInfo={blockInfo}
         className=""
-        language="ko"
+        language={language}
         isGuestPage
         onClick={() => {}}
       />
@@ -101,6 +102,20 @@ describe('CalendarPreview add-to-calendar', () => {
     expect(within(actions).getByText('Google 캘린더')).toBeInTheDocument();
   });
 
+  it('keeps Korean action labels when no language is given', () => {
+    renderCalendar({
+      ...calendarBlock,
+      props: { ...calendarBlock.props, template: 'calendarType1' },
+    });
+
+    expect(screen.getByTestId('add-to-calendar-ics')).toHaveTextContent(
+      '캘린더에 저장'
+    );
+    expect(
+      screen.getByLabelText('예식 일시 일정을 캘린더에 저장 (.ics 파일)')
+    ).toBeInTheDocument();
+  });
+
   it('pulls the venue from the invitation place block', async () => {
     renderCalendar(calendarBlock, [coupleBlock, placeBlock]);
 
@@ -117,6 +132,18 @@ describe('CalendarPreview add-to-calendar', () => {
 
   it('names the event after the couple when the block title is empty', async () => {
     renderCalendar(calendarBlock, [coupleBlock]);
+
+    expect(await savedIcs()).toContain('SUMMARY:김민수·이서연 결혼식');
+  });
+
+  it('treats the section heading "예식 일시" as unnamed and uses the event name', async () => {
+    renderCalendar(
+      {
+        ...calendarBlock,
+        props: { ...calendarBlock.props, title: '예식 일시' },
+      },
+      [coupleBlock]
+    );
 
     expect(await savedIcs()).toContain('SUMMARY:김민수·이서연 결혼식');
   });

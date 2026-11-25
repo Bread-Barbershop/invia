@@ -67,16 +67,18 @@ describe('AddToCalendarActions', () => {
   });
 
   it('downloads a real .ics file named after the event day', () => {
-    const createObjectURL = jest.fn((_blob: Blob) => 'blob:invia-calendar');
+    const blobs: Blob[] = [];
+    const createObjectURL = jest.fn((blob: Blob) => {
+      blobs.push(blob);
+      return 'blob:invia-calendar';
+    });
     URL.createObjectURL = createObjectURL;
 
     render(<AddToCalendarActions {...baseProps} />);
     const anchor = clickDownload();
 
     expect(createObjectURL).toHaveBeenCalledTimes(1);
-    expect(createObjectURL.mock.calls[0][0].type).toBe(
-      'text/calendar;charset=utf-8'
-    );
+    expect(blobs[0].type).toBe('text/calendar;charset=utf-8');
     expect(anchor?.download).toBe('invia-invitation-20260309.ics');
     expect(anchor?.href).toBe('blob:invia-calendar');
   });

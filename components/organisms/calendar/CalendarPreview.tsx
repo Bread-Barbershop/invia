@@ -30,6 +30,16 @@ interface Props {
   onClick: () => void;
 }
 
+/** Block headings that describe the section rather than the event itself. */
+const GENERIC_CALENDAR_TITLES = new Set([
+  '예식 일시',
+  '행사 일시',
+  '예식일시',
+  '행사일시',
+  'THE WEDDING CEREMONY',
+  'Date & Time',
+]);
+
 export function CalendarPreview({
   blockInfo,
   className,
@@ -78,11 +88,11 @@ export function CalendarPreview({
   );
   const eventTitle = useMemo(() => {
     const ownTitle = (title ?? '').trim();
-    if (ownTitle) return ownTitle;
     const invitationTitle = titleFromSavedInvitation({
       blocks: invitationBlocks,
     });
-    return invitationTitle || defaultTitle;
+    if (ownTitle && !GENERIC_CALENDAR_TITLES.has(ownTitle)) return ownTitle;
+    return invitationTitle || ownTitle || defaultTitle;
   }, [defaultTitle, invitationBlocks, title]);
   const eventDescription = useMemo(
     () => (hasSavedMessage ? htmlToPlainText(blockInfo.props.messageHtml) : ''),
@@ -185,7 +195,7 @@ export function CalendarPreview({
             time={time}
             location={venue.location}
             description={eventDescription}
-            language={language}
+            language={requestedLanguage ?? 'ko'}
           />
         </>
       )}
