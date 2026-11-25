@@ -117,4 +117,39 @@ describe('ContentsArea 컴포넌트', () => {
     );
     expect(mockOpenTemplatePicker).toHaveBeenCalledWith('firstBirthday');
   });
+
+  it('지금 만드는 초대장 분류를 맨 앞에 두고 표시를 붙인다', () => {
+    render(
+      <ContentsArea
+        scrollContainerRef={scrollContainerRef}
+        sectionRefs={sectionRefs}
+        searchQuery=""
+        currentType="birthday"
+        onOpenTemplatePicker={mockOpenTemplatePicker}
+        onOpenMealMenuPicker={mockOpenMealMenuPicker}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings[0]).toHaveTextContent('생일');
+    expect(headings[1]).toHaveTextContent('결혼식');
+    expect(screen.getByText('현재 초대장')).toBeInTheDocument();
+  });
+
+  it('검색 중에는 분류 순서를 바꾸지 않고 결과만 보여준다', () => {
+    render(
+      <ContentsArea
+        scrollContainerRef={scrollContainerRef}
+        sectionRefs={sectionRefs}
+        searchQuery="인사말"
+        currentType="birthday"
+        onOpenTemplatePicker={mockOpenTemplatePicker}
+        onOpenMealMenuPicker={mockOpenMealMenuPicker}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings[0]).toHaveTextContent('결혼식');
+    expect(screen.queryByText('현재 초대장')).not.toBeInTheDocument();
+  });
 });
