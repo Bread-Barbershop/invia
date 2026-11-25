@@ -6,12 +6,13 @@ import React, {
   useState,
 } from 'react';
 
-import { Image } from '@/components/atoms/image';
 import Arrow from '@/shared/assets/icons/arrow.svg';
 import { cn } from '@/shared/utils/cn';
 
 import { GalleryItemVariants } from '../GalleryCarouselType';
 import { GalleryTemplateProps } from '../types/galleryType';
+
+import { GalleryImage } from './GalleryImage';
 
 function GalleryType7({ imageClick, preview, ratio }: GalleryTemplateProps) {
   const [isFullyExpanded, setIsFullyExpanded] = useState(false);
@@ -83,10 +84,9 @@ function GalleryType7({ imageClick, preview, ratio }: GalleryTemplateProps) {
             )}
             onClick={() => imageClick(index)}
           >
-            <Image
+            <GalleryImage
               src={file}
               alt={`갤러리 이미지 ${index + 1}`}
-              fill
               className="object-cover rounded-lg"
             />
           </div>
