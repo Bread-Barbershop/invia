@@ -9,10 +9,13 @@ import {
   type NormalizedGuestPayload,
 } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
+import { loadEditorDraft } from '@/features/editor/draft/editorDraft';
+import { useToastStore } from '@/shared/store/useToastStore';
 import type { BgmData } from '@/shared/types/invitationSave';
 import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 import { FabricProvider } from '@/widgets/mainPoster/context/FabricContext';
 
+import { toEditorDraftSavedData } from './draftSavedData';
 import MainContentsArea from './MainContentsArea';
 import TemplateEditorEntry from './TemplateEditorEntry';
 
@@ -145,17 +148,26 @@ function EditorCreate({
 
 function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
   const [savedData, setSavedData] = useState<SavedData | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(sampleId));
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadSample() {
+    async function loadInitialEditorData() {
+      // 샘플 없이 새로 시작할 때는 저장 직전에 로그인으로 끊긴 초안을 먼저 살핀다.
       if (!sampleId) {
-        setSavedData(null);
-        setIsLoading(false);
+        const draft = await loadEditorDraft();
+        if (cancelled) return;
+
+        setSavedData(draft ? toEditorDraftSavedData(draft) : null);
         setLoadError(false);
+        setIsLoading(false);
+
+        if (draft) {
+          showToast('작성 중이던 초대장을 이어서 불러왔어요.', 'info');
+        }
         return;
       }
 
@@ -203,12 +215,12 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
       }
     }
 
-    void loadSample();
+    void loadInitialEditorData();
 
     return () => {
       cancelled = true;
     };
-  }, [sampleId]);
+  }, [sampleId, showToast]);
 
   if (isLoading) {
     return <ScreenTransitionLoader label="에디터를 준비하는 중" />;

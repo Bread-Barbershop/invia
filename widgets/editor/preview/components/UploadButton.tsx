@@ -1,5 +1,10 @@
 import React, { useRef, useState } from 'react';
 
+import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
+import LoginModal from '@/features/session/components/LoginModal';
+import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
+import { fetchSessionState } from '@/features/session/hooks/fetchSessionState';
+import { useAuthGate } from '@/features/session/hooks/useAuthGate';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useFabricViewContext } from '@/widgets/mainPoster/context/FabricContext';
 
@@ -20,6 +25,7 @@ function UploadButton({
     handleUpload,
     isLoading,
     isFail,
+    isAuthRequired,
     isCleaningUp,
     pendingInvitation,
     loadingMessage,
@@ -27,12 +33,37 @@ function UploadButton({
   } = upload;
   const { confirm } = useConfirm();
   const { canvas } = useFabricViewContext();
+  const auth = useAuthGate({ stayOnSessionExpiry: true });
 
   const handleClose = () => {
     if (!isLoading) {
       setIsModalOpen(false);
     }
   };
+
+  // 로그인이 끝나면 팝업에서 돌아온 즉시 같은 저장을 다시 시도한다.
+  const handleGoogleLogin = () => {
+    void (async () => {
+      try {
+        // 세션이 살아 있는데 401이 났다면 로그인 창을 또 띄우지 않고 바로 다시 저장한다.
+        if (await fetchSessionState()) {
+          void handleUpload();
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
+      void auth.runAfterAuth(() => {
+        void handleUpload();
+      });
+    })();
+  };
+
+  const authDialogOpen =
+    auth.isLoginOpen ||
+    auth.isPrivacyNoticeOpen ||
+    auth.isDrivePermissionRequiredOpen;
 
   return (
     <div ref={tabRef}>
@@ -75,6 +106,9 @@ function UploadButton({
           ref={modalRef}
           isLoading={isLoading}
           isFail={isFail}
+          authRequired={isAuthRequired}
+          onGoogleLogin={handleGoogleLogin}
+          escapeDisabled={authDialogOpen}
           pendingInvitation={pendingInvitation}
           skipDashboardHandoff={Boolean(pendingInvitation?.audienceSlug)}
           loadingMessage={loadingMessage}
@@ -83,6 +117,23 @@ function UploadButton({
           onClose={handleClose}
         />
       )}
+      <LoginModal
+        open={auth.isLoginOpen}
+        isLoading={auth.isLoginPending}
+        onClose={auth.closeLogin}
+        onGoogleLogin={auth.loginWithGoogle}
+      />
+      <PrivacyNoticeModal
+        open={auth.isPrivacyNoticeOpen}
+        onClose={auth.closePrivacyNotice}
+        onConfirm={auth.confirmPrivacyNotice}
+      />
+      <DrivePermissionRequiredModal
+        open={auth.isDrivePermissionRequiredOpen}
+        isLoading={auth.isLoginPending}
+        onClose={auth.closeDrivePermissionRequired}
+        onRetry={auth.retryDrivePermission}
+      />
     </div>
   );
 }

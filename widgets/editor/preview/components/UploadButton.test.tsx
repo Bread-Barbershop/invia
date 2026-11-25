@@ -7,6 +7,9 @@ import UploadButton from './UploadButton';
 
 const mockConfirm = jest.fn();
 const mockGetObjects = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: jest.fn(), refresh: jest.fn() }),
+}));
 jest.mock('@/shared/hooks/useConfirm', () => ({
   useConfirm: () => ({ confirm: mockConfirm }),
 }));
@@ -19,6 +22,7 @@ const upload = {
   handleUpload: jest.fn(),
   isLoading: false,
   isFail: false,
+  isAuthRequired: false,
   isCleaningUp: false,
   pendingInvitation: null,
   loadingMessage: '',

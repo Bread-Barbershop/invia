@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { LinkShareModal } from '@/components/molecules/link-share/LinkShareModal';
@@ -16,6 +18,9 @@ import { SaveLottie } from './SaveLottie';
 interface Props {
   isLoading: boolean;
   isFail: boolean;
+  authRequired?: boolean;
+  onGoogleLogin?: () => void;
+  escapeDisabled?: boolean;
   pendingInvitation:
     | (DashboardPendingInvitation & { qrDownloadName?: string })
     | null;
@@ -129,6 +134,7 @@ const ModalFrame = forwardRef<
     loadingMessage?: string;
     photoProgress?: PhotoUploadProgress;
     loadingAnimation?: SaveLoadingMessageAnimation;
+    escapeDisabled?: boolean;
     onClose: () => void;
   }
 >((props, ref) => {
@@ -138,6 +144,7 @@ const ModalFrame = forwardRef<
     loadingMessage,
     photoProgress,
     loadingAnimation,
+    escapeDisabled = false,
     onClose,
   } = props;
   const photoCount = photoProgress
@@ -146,6 +153,19 @@ const ModalFrame = forwardRef<
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(
     isLoading ? undefined : onClose
   );
+
+  // 저장 중에는 닫지 않고, ESC로도 언제든 빠져나올 수 있게 한다.
+  useEffect(() => {
+    if (isLoading || escapeDisabled) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [escapeDisabled, isLoading, onClose]);
 
   return (
     <>
@@ -162,6 +182,16 @@ const ModalFrame = forwardRef<
         tabIndex={-1}
         className={`fixed top-1/2 left-1/2 z-[101] flex min-h-[249px] max-h-[calc(100dvh-32px)] w-[335px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-6 overflow-y-auto rounded-xl bg-white p-5 shadow-[0_24px_60px_-20px_rgb(0_0_0_/_12%),0_8px_24px_-8px_rgb(0_0_0_/_18%)] ${isLoading ? 'justify-center' : ''}`}
       >
+        {!isLoading && (
+          <button
+            type="button"
+            aria-label="닫기"
+            onClick={onClose}
+            className="absolute top-3 right-3 grid size-8 cursor-pointer place-items-center rounded-lg text-neutral-500 transition-colors hover:bg-[#F5F5F5] hover:text-[#202020] focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        )}
         {isLoading ? (
           <div className="-mt-2 flex w-full flex-col items-center gap-3 text-center">
             <SaveLottie variant="loading" loop />
@@ -197,6 +227,54 @@ const ModalFrame = forwardRef<
 });
 
 ModalFrame.displayName = 'ModalFrame';
+
+const SaveAuthRequiredView = ({
+  onGoogleLogin,
+  onClose,
+}: {
+  onGoogleLogin?: () => void;
+  onClose: () => void;
+}) => (
+  <>
+    <div className="mt-5 grid w-full justify-items-center gap-2 px-4 text-center">
+      <p
+        id="save-modal-title"
+        className="text-base font-semibold text-[#202020]"
+      >
+        저장을 위해 Google 로그인이 필요해요
+      </p>
+      <p className="text-sm leading-6 text-neutral-600">
+        지금까지 작업한 내용은 이 브라우저에 임시로 보관했어요.
+        <br />
+        로그인하면 그대로 이어서 저장할 수 있어요.
+      </p>
+    </div>
+    <div className="flex w-full flex-col gap-2">
+      <button
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={!onGoogleLogin}
+        className="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-[8px] bg-white px-2 py-1.5 text-[15px] font-medium text-[#111827] ring-1 ring-[#EBEBEB] ring-inset transition-colors enabled:hover:bg-[#FAFAFB] enabled:active:bg-[#F5F8FF] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <Image
+          src="/assets/icons/google-icon.svg"
+          alt="Google"
+          width={32}
+          height={32}
+          className="absolute left-2"
+        />
+        Google로 계속하기
+      </button>
+      <button
+        type="button"
+        onClick={onClose}
+        className="flex h-11 w-full cursor-pointer items-center justify-center rounded-[8px] bg-transparent text-sm font-semibold text-neutral-500 transition-colors hover:bg-[#F7F7F7] hover:text-[#202020]"
+      >
+        나중에 할게요
+      </button>
+    </div>
+  </>
+);
 
 const SaveStepView = ({
   isFail,
@@ -273,6 +351,9 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
     {
       isLoading,
       isFail,
+      authRequired = false,
+      onGoogleLogin,
+      escapeDisabled,
       pendingInvitation,
       skipDashboardHandoff,
       loadingMessage,
@@ -326,21 +407,29 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
         loadingMessage={loadingMessage}
         photoProgress={photoProgress}
         loadingAnimation={loadingAnimation}
+        escapeDisabled={escapeDisabled}
         onClose={onClose}
       >
-        <SaveStepView
-          isFail={isFail}
-          publicationPending={
-            pendingInvitation?.published === true &&
-            pendingInvitation.ready === false
-          }
-          onShare={
-            pendingInvitation?.guestUrl ? () => setIsSharing(true) : undefined
-          }
-          onRetry={retry}
-          onClose={onClose}
-          onExit={handleExit}
-        />
+        {authRequired ? (
+          <SaveAuthRequiredView
+            onGoogleLogin={onGoogleLogin}
+            onClose={onClose}
+          />
+        ) : (
+          <SaveStepView
+            isFail={isFail}
+            publicationPending={
+              pendingInvitation?.published === true &&
+              pendingInvitation.ready === false
+            }
+            onShare={
+              pendingInvitation?.guestUrl ? () => setIsSharing(true) : undefined
+            }
+            onRetry={retry}
+            onClose={onClose}
+            onExit={handleExit}
+          />
+        )}
       </ModalFrame>,
       document.body
     );
