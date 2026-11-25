@@ -6,6 +6,7 @@ import type {
   InvitationPreviewTarget,
   InviteListItem,
 } from '@/app/dashboard/types';
+import { resolveCardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import { formatInvitationCreatedDate } from '@/app/dashboard/utils/formatInvitationCreatedDate';
 import KakaoIcon from '@/shared/assets/icons/kakao2.svg';
 import LinkIcon from '@/shared/assets/icons/link.svg';
@@ -22,6 +23,7 @@ import {
 } from '../carouselTypes';
 
 import DashboardActionButton from './actions/DashboardActionButton';
+import DashboardCardActionAlert from './actions/DashboardCardActionAlert';
 import DeleteButton from './actions/DeleteButton';
 import InvitationAudienceButton from './actions/InvitationAudienceButton';
 import { useAudienceShare } from './actions/useAudienceShare';
@@ -91,6 +93,12 @@ function CarouselItem({
     ? `${(Number.parseFloat(dashboardCarouselLayout.cardHeight) * collectionTemplate.poster.width) / collectionTemplate.poster.height}px`
     : dashboardCarouselLayout.cardWidth;
   const [hasImageError, setHasImageError] = useState(false);
+  const [dismissedVisibilityError, setDismissedVisibilityError] = useState<
+    string | null
+  >(null);
+  const [dismissedShareError, setDismissedShareError] = useState<string | null>(
+    null
+  );
   const invite = item.invite;
   const title = invite?.displayTitle ?? invite?.name ?? item.alt;
   const createdDateId = useId();
@@ -115,6 +123,14 @@ function CarouselItem({
   const canToggleVisibility = Boolean(
     invite && !isPending && !isVisibilityUpdating
   );
+  const visibilityFailure =
+    visibilityError && visibilityError !== dismissedVisibilityError
+      ? resolveCardActionFailureMessage('visibility', visibilityError)
+      : null;
+  const shareFailure =
+    audienceShare.error && audienceShare.error !== dismissedShareError
+      ? resolveCardActionFailureMessage('share', audienceShare.error)
+      : null;
   const showSelectedOverlay =
     showHeader || showSideActions || showCenterActions;
   const hoverLift = showHeader
@@ -254,10 +270,11 @@ function CarouselItem({
                 isDeleting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
               }
               aria-disabled={isDeleting}
-              aria-label="초대장 삭제"
+              aria-busy={isDeleting}
+              aria-label={isDeleting ? '초대장 삭제 중' : '초대장 삭제'}
               aria-haspopup="dialog"
             >
-              <DeleteButton />
+              <DeleteButton isBusy={isDeleting} />
             </button>
           </div>
         )}
@@ -292,6 +309,24 @@ function CarouselItem({
                 }}
               />
             </div>
+          )}
+
+          {visibilityFailure && isSelected && showHeader && (
+            <DashboardCardActionAlert
+              title={visibilityFailure.title}
+              description={visibilityFailure.description}
+              actionLabel="다시 시도"
+              onAction={() => {
+                if (!invite || !canToggleVisibility) return;
+                setDismissedVisibilityError(null);
+                void onToggleVisibility?.(invite.folderId, !isPublished);
+              }}
+              onDismiss={() => setDismissedVisibilityError(visibilityError)}
+              className="absolute inset-x-2 z-30"
+              style={{
+                top: `calc(${dashboardCarouselLayout.headerHeight} + 8px)`,
+              }}
+            />
           )}
 
           <div
@@ -364,6 +399,18 @@ function CarouselItem({
                     dashboardCarouselLayout.centerActionBottomPadding,
                 }}
               >
+                {shareFailure && (
+                  <DashboardCardActionAlert
+                    title={shareFailure.title}
+                    description={shareFailure.description}
+                    actionLabel="다시 준비"
+                    onAction={audienceShare.retry}
+                    onDismiss={() =>
+                      setDismissedShareError(audienceShare.error ?? null)
+                    }
+                    className="mb-1 w-full"
+                  />
+                )}
                 <DashboardActionButton
                   icon={KakaoIcon}
                   variant="kakao"

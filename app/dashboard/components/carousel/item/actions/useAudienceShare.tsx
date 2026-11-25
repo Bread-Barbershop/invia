@@ -145,6 +145,8 @@ export function useAudienceShare({
     };
   }, [enabled, request]);
 
+  const retry = () => setAttempt(previous => previous + 1);
+
   function closePicker() {
     setChannel(null);
     dialog.current?.close();
@@ -199,6 +201,8 @@ export function useAudienceShare({
     };
   }
   return {
+    error,
+    retry,
     linkButtonProps: buttonProps('link', linkEnabled),
     kakaoButtonProps: buttonProps('kakao', kakaoEnabled),
     kakaoLabel:
