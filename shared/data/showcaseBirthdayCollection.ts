@@ -1,3 +1,5 @@
+import { SHOWCASE_PHOTOS } from './showcaseImages';
+
 import type { ShowcaseInvitation } from './showcaseInvitations';
 
 export const birthdayCollection: ShowcaseInvitation[] = [
@@ -56,11 +58,37 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         detail: 'B사이드 방 문에 레코드 재킷을 걸어 둘게요.',
       },
       {
+        component: 'mealMenu',
+        title: 'B면의 음료',
+        subtitle: 'B-side Drinks',
+        style: 'minimal',
+        courses: [
+          {
+            name: '첫 잔',
+            dishes: ['자몽 에이드', '콜드브루'],
+          },
+          {
+            name: '곁들임',
+            dishes: ['소금 팝콘과 견과'],
+          },
+        ],
+      },
+      {
         component: 'notice',
         preset: 'time',
         title: '한 곡만 골라 줘',
         heading: '신청곡 적는 법',
         message: '입구의 슬리브에 곡 제목과 이 곡을 고른 이유를 적어 주세요.',
+      },
+      {
+        component: 'faq',
+        title: '청음회 안내',
+        items: [
+          {
+            question: '신청곡은 꼭 가져가야 하나요?',
+            answer: '빈손으로 오셔도 좋아요. 자리에 앉아 떠오르는 곡을 그때 적어 주셔도 됩니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -112,7 +140,7 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '한 조각 먼저',
         caption: '레몬 껍질을 곱게 갈아 올린 오늘의 생일 케이크예요.',
-        image: '/images/showcase/citrus.webp',
+        image: SHOWCASE_PHOTOS.lemonTart,
       },
       {
         component: 'calendar',
@@ -124,10 +152,35 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         detail: '키친 안쪽 유리문을 지나 오른쪽 긴 테이블이에요.',
       },
       {
+        component: 'timeline',
+        title: '타르트가 나오는 순서',
+        items: [
+          {
+            time: '15:00',
+            title: '테라스에서 인사',
+          },
+          {
+            time: '15:20',
+            title: '레몬 타르트 자르기',
+          },
+          {
+            time: '15:50',
+            title: '햇살 아래 단체 사진',
+          },
+        ],
+      },
+      {
         component: 'dressCode',
         title: '테라스에서 편하게',
         colors: ['#FFF6C9', '#506521', '#293E30'],
         guidelines: ['햇볕 좋은 자리예요. 얇은 겉옷을 하나 챙겨 와요.'],
+      },
+      {
+        component: 'notice',
+        title: '햇살이 강한 날',
+        heading: '모자 한 개면 충분해요',
+        message: '테라스 자리라 오후 햇살이 들어옵니다. 모자나 선크림을 챙겨 오시면 더 편해요.',
+        preset: 'clothes',
       },
       {
         component: 'closingComment',
@@ -164,12 +217,28 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '당신의 좌석',
         caption: '붉은 의자와 방금 튀긴 팝콘이 기다리고 있어요.',
-        image: '/images/showcase/cinema.webp',
+        image: SHOWCASE_PHOTOS.birthdayCinema,
       },
       {
         component: 'place',
         title: '표를 받는 곳',
         detail: '소극장 매표대에서 민혁의 생일 상영회라고 말해 주세요.',
+      },
+      {
+        component: 'mealMenu',
+        title: '상영 전 매점',
+        subtitle: 'Concession',
+        style: 'bistro',
+        courses: [
+          {
+            name: '매점 간식',
+            dishes: ['카라멜 팝콘', '나초와 살사'],
+          },
+          {
+            name: '마실 것',
+            dishes: ['콜라와 탄산수'],
+          },
+        ],
       },
       {
         component: 'timeline',
@@ -195,6 +264,16 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         title: '영화가 시작되면',
         heading: '휴대폰은 무음으로',
         message: '감상평은 엔딩 뒤에 준비한 엽서에 한 줄씩 남겨 줘요.',
+      },
+      {
+        component: 'faq',
+        title: '상영 안내',
+        items: [
+          {
+            question: '몇 시에 상영이 시작하나요?',
+            answer: '저녁 7시 30분에 시작합니다. 10분 전까지 오시면 좌석을 편하게 고르실 수 있어요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -223,7 +302,7 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '아침에 골라 온 꽃',
         caption: '오늘은 라넌큘러스와 양귀비를 주인공으로 골랐어요.',
-        image: '/images/showcase/flowers.webp',
+        image: SHOWCASE_PHOTOS.flowerMarket,
       },
       {
         component: 'greeting',
@@ -267,9 +346,26 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'notice',
+        title: '꽃과 함께 오세요',
+        heading: '한 송이면 충분해요',
+        message: '오시는 길에 좋아하는 꽃 한 송이를 들고 오시면 테이블에 함께 꽂아 둘게요.',
+        preset: 'party',
+      },
+      {
         component: 'place',
         title: '온실 테이블',
         detail: '플라워룸에서 앞치마를 받아 온실로 들어오세요.',
+      },
+      {
+        component: 'faq',
+        title: '브런치 안내',
+        items: [
+          {
+            question: '알레르기가 있으면 미리 알려야 하나요?',
+            answer: '견과와 유제품을 쓰는 메뉴가 있어요. 오기 전에 편하게 말씀해 주시면 따로 준비하겠습니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -303,6 +399,24 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         detail: '솔숲 입구에서 랜턴이 걸린 텐트를 찾아 주세요.',
       },
       {
+        component: 'timeline',
+        title: '캠프의 저녁',
+        items: [
+          {
+            time: '17:30',
+            title: '랜턴 켜고 자리 잡기',
+          },
+          {
+            time: '18:10',
+            title: '모닥불 앞 저녁',
+          },
+          {
+            time: '19:00',
+            title: '별 보며 케이크',
+          },
+        ],
+      },
+      {
         component: 'calendar',
         title: '해 지기 전 만나요',
         template: 'calendarType2',
@@ -311,7 +425,7 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '밤을 밝힐 자리',
         caption: '랜턴을 켜 둔 상자 옆에 의자를 놓아두었어요.',
-        image: '/images/showcase/camp.webp',
+        image: SHOWCASE_PHOTOS.birthdayCamp,
       },
       {
         component: 'dressCode',
@@ -336,6 +450,13 @@ export const birthdayCollection: ShowcaseInvitation[] = [
             dishes: ['마시멜로', '핫초코'],
           },
         ],
+      },
+      {
+        component: 'notice',
+        title: '밤 공기가 차요',
+        heading: '긴 소매 하나 챙겨 주세요',
+        message: '해가 지면 솔숲 바람이 차갑습니다. 따뜻한 겉옷과 편한 신발을 준비해 주세요.',
+        preset: 'clothes',
       },
       {
         component: 'closingComment',

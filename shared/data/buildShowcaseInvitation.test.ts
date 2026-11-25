@@ -94,16 +94,21 @@ describe('첫 화면 초대장 샘플', () => {
   });
 
   it.each(SHOWCASE_INVITATIONS)(
-    '$name의 본문 사진은 로컬 파일로 열 수 있다',
+    '$name의 본문 사진은 로컬 파일이거나 공개 Drive 주소다',
     design => {
       const { blocks } = buildShowcaseInvitation(design);
       // 사진 블록뿐 아니라 인터뷰·연사·후원사 등 중첩된 이미지 필드도 확인한다.
+      // 저장소 용량을 늘리지 않도록 본문 사진은 Drive에 두고 링크로 불러온다.
+      const isHostedPhoto = (image: string) =>
+        /^https:\/\/lh3\.googleusercontent\.com\/d\/[\w-]+$/.test(image);
       function checkImages(value: unknown): void {
         if (!value || typeof value !== 'object') return;
         for (const [key, child] of Object.entries(value)) {
           if (key === 'image' || key === 'images') {
             expect(Array.isArray(child)).toBe(true);
             for (const image of child as string[]) {
+              expect(typeof image).toBe('string');
+              if (isHostedPhoto(image)) continue;
               expect(image).toMatch(/^\/(images|samples|templates)\//);
               expect(
                 existsSync(path.join(process.cwd(), 'public', image))

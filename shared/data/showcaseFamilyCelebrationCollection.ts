@@ -1,3 +1,5 @@
+import { SHOWCASE_PHOTOS } from './showcaseImages';
+
 import type { ShowcaseInvitation } from './showcaseInvitations';
 
 export const familyCelebrationCollection: ShowcaseInvitation[] = [
@@ -23,7 +25,7 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '생신상을 차렸어요',
-        image: '/images/showcase/flowers.webp',
+        image: SHOWCASE_PHOTOS.flowerLetter,
         caption: '어머니께서 좋아하시는 꽃을 놓았습니다.',
       },
       { component: 'calendar', title: '함께하는 날' },
@@ -54,7 +56,7 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         heading: '어머니와의 추억을 적어 주세요',
         message:
           '자리마다 작은 꽃카드를 놓아둘게요. 어머니와 함께 웃었던 날을 적어 주시면 손주들이 모아 읽어 드릴게요.',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.flowerAlbum,
       },
       { component: 'closingComment', message: '사랑을 담아, 자녀와 손주 올림' },
     ],
@@ -99,9 +101,25 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '아버지께 드리는 편지',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.seventiethTea,
         caption:
           '아버지, 비 오는 날이면 정류장에서 우산을 들고 기다려 주셨지요. 이제는 저희가 마중 나갈게요. 칠순을 축하드립니다.',
+      },
+      {
+        component: 'mealMenu',
+        title: '칠순 잔치상',
+        subtitle: 'Family Table',
+        style: 'classic',
+        courses: [
+          {
+            name: '첫 접시',
+            dishes: ['전복 죽과 계절 나물'],
+          },
+          {
+            name: '식사',
+            dishes: ['한우 갈비찜과 솥밥'],
+          },
+        ],
       },
       {
         component: 'notice',
@@ -146,8 +164,25 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         template: 'galleryType1',
         ratio: '4:3',
         images: [
-          '/images/showcase/garden-table.webp',
-          '/images/showcase/flowers.webp',
+          SHOWCASE_PHOTOS.gardenLongTable,
+          SHOWCASE_PHOTOS.gardenSetting,
+          SHOWCASE_PHOTOS.gardenWateringCan,
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '정원의 점심',
+        subtitle: 'Garden Lunch',
+        style: 'garden',
+        courses: [
+          {
+            name: '첫 접시',
+            dishes: ['제철 채소 샐러드'],
+          },
+          {
+            name: '메인',
+            dishes: ['정원 허브를 곁들인 구운 닭'],
+          },
         ],
       },
       {
@@ -166,6 +201,16 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         heading: '두 분을 모시고 정원으로',
         message:
           '축하 노래가 끝나면 정원실 앞 나무 그늘로 모여 주세요. 비가 오면 밖으로 나가지 않고 정원실에서 함께 찍겠습니다.',
+      },
+      {
+        component: 'faq',
+        title: '정원 잔치에 오시기 전',
+        items: [
+          {
+            question: '주차는 어디에 하나요?',
+            answer: '정원 입구 안내 직원에게 말씀해 주세요. 잔치 동안 무료로 주차할 수 있습니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -197,7 +242,7 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '두 사람의 약속',
-        image: '/images/showcase/vow-rings.webp',
+        image: SHOWCASE_PHOTOS.hanbokBojagi,
         caption:
           '저녁이면 마주 앉아 그날 있었던 일을 묻는 부부가 되겠습니다. 민서와 지훈 드림',
       },
@@ -212,6 +257,11 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'wreath',
+        title: '화환 대신 마음으로',
+        declineMessage: '작은 예식이라 축하 화환은 정중히 사양합니다. 오시는 길에 편한 마음으로 와 주세요.',
+      },
+      {
         component: 'faq',
         title: '예식 당일 안내',
         items: [
@@ -224,6 +274,22 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
             question: '가족사진은 어디에서 기다리면 될까요?',
             answer:
               '행진이 끝난 뒤 예식홀 앞줄에 앉아 계시면 양가 가족부터 안내해 드립니다.',
+          },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '예식 뒤의 식사',
+        subtitle: 'Wedding Table',
+        style: 'classic',
+        courses: [
+          {
+            name: '첫 접시',
+            dishes: ['은행과 잣을 곁들인 죽'],
+          },
+          {
+            name: '식사',
+            dishes: ['한우 갈비찜과 제철 나물'],
           },
         ],
       },

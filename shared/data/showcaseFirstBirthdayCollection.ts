@@ -1,3 +1,5 @@
+import { SHOWCASE_PHOTOS } from './showcaseImages';
+
 import type { ShowcaseInvitation } from './showcaseInvitations';
 
 export const firstBirthdayCollection: ShowcaseInvitation[] = [
@@ -28,7 +30,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         birthday: '2026.02.20',
         message:
           '옷고름을 매어 주면 손뼉부터 쳐요. 오늘은 그 작은 손으로 돌잡이도 합니다.',
-        image: '/images/showcase/hanbok.webp',
+        image: SHOWCASE_PHOTOS.dolHanbokChild,
       },
       {
         component: 'calendar',
@@ -90,6 +92,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         message: '민준이 곁에서 함께 보낸 첫해를 여러분과 나누고 싶습니다.',
       },
       {
+        component: 'faq',
+        title: '돌잔치에 오시기 전',
+        items: [
+          {
+            question: '한복을 입고 와도 될까요?',
+            answer: '네, 편하게 입고 오세요. 사랑채 마당에서 사진 찍기 좋은 자리를 안내해 드릴게요.',
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message:
           '돌상에 올린 실타래처럼 오래오래 이어질 인연에 감사드립니다. 민준이네 올림',
@@ -117,7 +129,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '사과나무 아래에서',
         caption: '처음 만져 본 사과를 한참이나 놓지 않던 오후예요.',
-        image: '/images/showcase/orchard.webp',
+        image: SHOWCASE_PHOTOS.dolOrchardChild,
       },
       {
         component: 'greeting',
@@ -173,6 +185,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         detail: '가든 입구의 사과 바구니 앞에서 만나요.',
       },
       {
+        component: 'faq',
+        title: '소풍 준비물',
+        items: [
+          {
+            question: '돗자리는 챙겨야 하나요?',
+            answer: '큰 돗자리는 준비해 두었어요. 아이가 앉을 작은 담요만 하나 가져와 주세요.',
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message: '빈 바구니에 오늘의 웃음을 가득 담아 갈게요. 민준이네 드림',
       },
@@ -222,12 +244,28 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.06.12',
         message: '작은 배를 밀어 주면 파도 소리를 흉내 내며 방긋 웃어요.',
-        image: '/images/showcase/sea.webp',
+        image: SHOWCASE_PHOTOS.dolSailboatChild,
       },
       {
         component: 'place',
         title: '승선하는 곳',
         detail: '블루룸 입구에서 이름이 적힌 승선권을 찾아 주세요.',
+      },
+      {
+        component: 'mealMenu',
+        title: '승선 뒤의 간식',
+        subtitle: 'Galley Snack',
+        style: 'minimal',
+        courses: [
+          {
+            name: '갑판 간식',
+            dishes: ['버터 쿠키와 계절 과일'],
+          },
+          {
+            name: '마실 것',
+            dishes: ['사과 주스와 보리차'],
+          },
+        ],
       },
       {
         component: 'calendar',
@@ -241,6 +279,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         heading: '방명록에 물결을 그려 주세요',
         message:
           '푸른 잉크로 한 줄씩 남겨 주시면 민준이 항해일지에 붙여 둘게요.',
+      },
+      {
+        component: 'faq',
+        title: '승선 안내',
+        items: [
+          {
+            question: '아이와 함께 타도 괜찮을까요?',
+            answer: '물론입니다. 입구에서 승선권을 보여 주시면 유모차를 둘 자리와 좌석을 함께 안내해 드려요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -271,7 +319,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.01.16',
         message: '별 무늬 이불 끝을 쥐면 금세 편안한 표정이 돼요.',
-        image: '/images/showcase/moon.webp',
+        image: SHOWCASE_PHOTOS.dolMoonlampChild,
       },
       {
         component: 'greeting',
@@ -294,6 +342,22 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         detail: '라운지 안쪽의 남색 커튼이 달린 방입니다.',
       },
       {
+        component: 'mealMenu',
+        title: '달빛 아래 저녁',
+        subtitle: 'Moonlight Table',
+        style: 'tasting',
+        courses: [
+          {
+            name: '따뜻한 접시',
+            dishes: ['단호박 수프와 구운 빵'],
+          },
+          {
+            name: '마지막 한 입',
+            dishes: ['우유 푸딩과 베리'],
+          },
+        ],
+      },
+      {
         component: 'timeline',
         title: '저녁의 순서',
         items: [
@@ -308,6 +372,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
           {
             time: '17:45',
             title: '가족 저녁 식사',
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '달빛방 안내',
+        items: [
+          {
+            question: '아이가 잠들면 어떻게 하나요?',
+            answer: '방 옆에 조용한 쉼방을 준비했어요. 잠든 아이를 눕히고 어른들은 천천히 이야기 나누시면 됩니다.',
           },
         ],
       },
@@ -341,7 +415,14 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '첫 전시의 대표 사진',
         caption: '셔터 소리에 웃음이 터진 순간을 골랐습니다.',
-        image: '/images/showcase/portrait.webp',
+        image: SHOWCASE_PHOTOS.dolStudioChild,
+      },
+      {
+        component: 'gallery',
+        title: '인화지 위의 한 살',
+        template: 'galleryType5',
+        ratio: '4:3',
+        images: [SHOWCASE_PHOTOS.dolStudioPrints, SHOWCASE_PHOTOS.dolStudioFrames],
       },
       {
         component: 'myFamily',
@@ -425,7 +506,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.04.17',
         message: '목이 긴 초록 공룡을 가장 먼저 데려와 손님들에게 건넵니다.',
-        image: '/images/showcase/dino.webp',
+        image: SHOWCASE_PHOTOS.dolDinoChild,
       },
       {
         component: 'notice',
@@ -439,6 +520,24 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'place',
         title: '초록 전시실',
         detail: '키즈룸 안쪽 장난감 전시대에서 만나요.',
+      },
+      {
+        component: 'timeline',
+        title: '박물관 관람 순서',
+        items: [
+          {
+            time: '15:00',
+            title: '입장권에 도장 찍기',
+          },
+          {
+            time: '15:20',
+            title: '공룡 발자국 따라 걷기',
+          },
+          {
+            time: '15:50',
+            title: '돌잡이와 사진',
+          },
+        ],
       },
       {
         component: 'calendar',
@@ -457,6 +556,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
           {
             name: '후식',
             dishes: ['공룡 모양 쿠키'],
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '전시실 안내',
+        items: [
+          {
+            question: '아이가 뛰어다녀도 되나요?',
+            answer: '전시실 바닥은 푹신한 매트로 깔아 두었어요. 마음껏 걸어 다녀도 괜찮습니다.',
           },
         ],
       },
@@ -505,7 +614,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '편지가 도착했어요',
         caption: '봉투를 한참 들여다보던 민준이의 오후.',
-        image: '/images/showcase/post.webp',
+        image: SHOWCASE_PHOTOS.dolAirmailChild,
       },
       {
         component: 'calendar',
@@ -540,6 +649,16 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
           {
             time: '13:10',
             title: '가족 식사',
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '편지 쓰는 법',
+        items: [
+          {
+            question: '편지는 언제 쓰나요?',
+            answer: '접수대에서 엽서를 받아 자유롭게 적어 주세요. 주소를 남기시면 민준이가 자라서 한 장씩 읽어 드립니다.',
           },
         ],
       },
