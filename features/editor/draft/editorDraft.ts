@@ -1,3 +1,4 @@
+import type { SectionStyle } from '@/shared/data/sectionStyles';
 import type { PersistedEditorBlock, ShareUrlState } from '@/shared/types/block';
 import type {
   BgmData,
@@ -15,8 +16,11 @@ const DRAFT_VERSION = 1;
 // 로그인 전에 끊긴 작업은 일주일까지 되살린다. 그보다 오래된 초안은 새 작업으로 본다.
 export const EDITOR_DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
+// 저장 payload와 같이 섹션 스타일까지 함께 보관한다.
+export type EditorDraftBulkData = BulkJson & { sectionStyle?: SectionStyle };
+
 export type EditorDraftInput = {
-  bulkData: BulkJson;
+  bulkData: EditorDraftBulkData;
   blocks: PersistedEditorBlock[];
   images: UploadTask[];
   shareUrl: ShareUrlState;
@@ -196,7 +200,7 @@ export function createEditorDraftSnapshot(
   return {
     version: DRAFT_VERSION,
     savedAt,
-    bulkData: cloneForDraft(input.bulkData) as BulkJson,
+    bulkData: cloneForDraft(input.bulkData) as EditorDraftBulkData,
     blocks: cloneForDraft(input.blocks) as PersistedEditorBlock[],
     images: cloneForDraft(input.images) as UploadTask[],
     shareUrl: cloneForDraft(input.shareUrl) as ShareUrlState,
