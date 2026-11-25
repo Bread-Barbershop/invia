@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import type { EditorBlock } from '@/shared/types/block';
 
@@ -148,21 +148,23 @@ describe('PlaceMap', () => {
     }
   );
 
-  it('shows the error within the map and retries when the coordinates change', () => {
+  it('shows the error within the map and retries when the coordinates change', async () => {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
     mockMapConstructor.mockImplementationOnce(() => {
       throw new Error('Naver map initialization failed');
     });
     const { rerender } = render(<PlaceMap lng={127.04} lat={37.54} locked />);
 
-    expect(screen.getByRole('status')).toHaveTextContent(
+    expect(await screen.findByRole('status')).toHaveTextContent(
       '네이버 지도를 불러오지 못했어요.'
     );
     expect(screen.queryByTestId('map-lock-button')).not.toBeInTheDocument();
 
     rerender(<PlaceMap lng={127.05} lat={37.55} locked />);
 
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
     expect(screen.getByTestId('map-lock-button')).toBeInTheDocument();
   });
 

@@ -47,13 +47,19 @@ export function PlaceMap({
     }
   }, []);
 
+  const updateMapStatus = useCallback((failed: boolean) => {
+    queueMicrotask(() => {
+      if (mapRef.current) setMapFailed(failed);
+    });
+  }, []);
+
   const showMapError = useCallback(
     (error: unknown) => {
       console.warn('[PlaceMap] Failed to display the Naver map.', error);
       disposeMap();
-      setMapFailed(true);
+      updateMapStatus(true);
     },
-    [disposeMap]
+    [disposeMap, updateMapStatus]
   );
 
   if (prevLocked !== locked) {
@@ -85,7 +91,7 @@ export function PlaceMap({
     if (!container) return;
     const maps = window.naver?.maps;
     if (!maps) {
-      setMapFailed(true);
+      updateMapStatus(true);
       return;
     }
 
@@ -115,11 +121,11 @@ export function PlaceMap({
         map: mapInstance.current,
         position: center,
       });
-      setMapFailed(false);
+      updateMapStatus(false);
     } catch (error) {
       showMapError(error);
     }
-  }, [lng, lat, showMapError]);
+  }, [lng, lat, showMapError, updateMapStatus]);
 
   useEffect(() => disposeMap, [disposeMap]);
 
