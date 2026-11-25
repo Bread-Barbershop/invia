@@ -18,9 +18,17 @@ import {
  */
 function EditorSkipLinks() {
   useEffect(() => {
-    EDITOR_SKIP_TARGETS.forEach(target => {
-      ensureEditorSkipTarget(document, target);
-    });
+    const labelTargets = () => {
+      EDITOR_SKIP_TARGETS.forEach(target => {
+        ensureEditorSkipTarget(document, target);
+      });
+    };
+
+    labelTargets();
+    // 미리보기 영역은 이 이펙트보다 늦게 그려질 수 있어, 다음 프레임에 한 번 더 확인한다.
+    const frame = requestAnimationFrame(labelTargets);
+
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const moveFocus = useCallback(
