@@ -23,12 +23,24 @@ function EditorSkipLinks() {
         ensureEditorSkipTarget(document, target);
       });
     };
+    const findMissingTargets = () =>
+      EDITOR_SKIP_TARGETS.filter(
+        target => document.getElementById(target.id) === null
+      );
 
     labelTargets();
-    // 미리보기 영역은 이 이펙트보다 늦게 그려질 수 있어, 다음 프레임에 한 번 더 확인한다.
-    const frame = requestAnimationFrame(labelTargets);
 
-    return () => cancelAnimationFrame(frame);
+    // 편집기 본문(미리보기 등)은 이 링크보다 늦게 그려진다.
+    // 모두 찾을 때까지만 화면 변화를 지켜보며 이름을 붙이고, 찾으면 바로 그만둔다.
+    if (findMissingTargets().length === 0) return;
+
+    const observer = new MutationObserver(() => {
+      labelTargets();
+      if (findMissingTargets().length === 0) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
   }, []);
 
   const moveFocus = useCallback(

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import EditorSkipLinks from './EditorSkipLinks';
 
@@ -58,5 +58,22 @@ describe('편집기 화면 맨 앞의 영역 이동 링크', () => {
     expect(preview).toHaveAttribute('role', 'region');
     expect(preview).toHaveAttribute('aria-label', '미리보기');
     expect(blockPanel).toHaveAttribute('aria-label', '블록 설정');
+  });
+
+  it('미리보기 영역이 나중에 그려져도 이름을 붙인다', async () => {
+    const stylePanel = document.createElement('div');
+    stylePanel.id = 'editor-style-panel';
+    document.body.append(stylePanel);
+
+    render(<EditorSkipLinks />);
+
+    const preview = document.createElement('div');
+    preview.id = 'preview-container';
+    document.body.append(preview);
+
+    await waitFor(() => {
+      expect(preview).toHaveAttribute('aria-label', '미리보기');
+    });
+    expect(preview).toHaveAttribute('role', 'region');
   });
 });
