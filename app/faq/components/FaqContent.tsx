@@ -23,7 +23,7 @@ function FaqContent() {
         selectedCategory === 'all' || item.category === selectedCategory;
       const matchesQuery =
         normalizedQuery.length === 0 ||
-        `${item.question} ${item.answer}`
+        `${item.question} ${item.answer} ${(item.keywords ?? []).join(' ')}`
           .toLowerCase()
           .includes(normalizedQuery);
 
