@@ -3,7 +3,7 @@
 import AutoScroll from 'embla-carousel-auto-scroll';
 import useEmblaCarousel from 'embla-carousel-react';
 import { Pause, Play } from 'lucide-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import { dashboardCarouselLayout } from '@/app/dashboard/components/carousel/carouselLayout';
 import CarouselTrack from '@/app/dashboard/components/carousel/CarouselTrack';
@@ -28,6 +28,7 @@ export default function HomeShowcaseCarousel({
   const [isPointerInside, setIsPointerInside] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [isPausedByUser, setIsPausedByUser] = useState(false);
+  const pauseToggleRef = useRef<HTMLButtonElement>(null);
   const [slideStatus, setSlideStatus] = useState({
     index: 0,
     total: items.length,
@@ -99,7 +100,16 @@ export default function HomeShowcaseCarousel({
       style={{ height: dashboardCarouselLayout.stageHeight }}
       onPointerEnter={() => setIsPointerInside(true)}
       onPointerLeave={() => setIsPointerInside(false)}
-      onFocus={() => setIsFocusWithin(true)}
+      onFocus={event => {
+        // 키보드로 카드·화살표에 포커스가 있을 때만 멈추고,
+        // 자동 넘김 토글에 포커스가 있어도 다시 시작할 수 있게 한다.
+        const target = event.target;
+        setIsFocusWithin(
+          target instanceof Element &&
+            target !== pauseToggleRef.current &&
+            target.matches(':focus-visible')
+        );
+      }}
       onBlur={event => {
         if (
           event.relatedTarget instanceof Node &&
@@ -129,6 +139,7 @@ export default function HomeShowcaseCarousel({
             reducedMotion ? null : (
               <button
                 type="button"
+                ref={pauseToggleRef}
                 aria-label={
                   isPausedByUser ? '자동 넘김 다시 시작' : '자동 넘김 일시정지'
                 }
