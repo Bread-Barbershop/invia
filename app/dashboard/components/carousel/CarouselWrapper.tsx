@@ -18,6 +18,8 @@ import { dashboardCarouselLayout } from './carouselLayout';
 import { CarouselCardItem } from './carouselTypes';
 import CopyInvitationDialog from './CopyInvitationDialog';
 import DashboardCarouselSkeleton from './DashboardCarouselSkeleton';
+import DashboardErrorCard from './DashboardErrorCard';
+import DashboardRefreshErrorNotice from './DashboardRefreshErrorNotice';
 import DeleteInvitationDialog from './DeleteInvitationDialog';
 import EmptyInvitationCard from './EmptyInvitationCard';
 
@@ -124,6 +126,8 @@ function CarouselWrapper({
   const {
     invites,
     loading,
+    refreshing,
+    error,
     handleClone,
     handleDelete,
     handleUpdate,
@@ -174,6 +178,18 @@ function CarouselWrapper({
   const closeCloneDialog = useCallback(() => {
     setCloneTarget(null);
   }, []);
+  const [dismissedRefreshError, setDismissedRefreshError] = useState<
+    string | null
+  >(null);
+  const dismissRefreshError = useCallback(
+    () => setDismissedRefreshError(error),
+    [error]
+  );
+  // 새로 불러오기를 시작하면 닫아 둔 안내를 초기화해, 같은 오류가 다시 나도 알린다.
+  const refreshInvitations = useCallback(() => {
+    setDismissedRefreshError(null);
+    void loadInvitations();
+  }, [loadInvitations]);
 
   const items: CarouselCardItem[] = useMemo(
     () =>
@@ -282,11 +298,30 @@ function CarouselWrapper({
   }
 
   if (items.length === 0) {
+    if (error) {
+      return (
+        <DashboardErrorCard
+          message={error}
+          retrying={refreshing}
+          onRetry={refreshInvitations}
+        />
+      );
+    }
+
     return <EmptyInvitationCard />;
   }
 
+  const showRefreshError = Boolean(error) && error !== dismissedRefreshError;
+
   return (
     <>
+      {showRefreshError && (
+        <DashboardRefreshErrorNotice
+          retrying={refreshing}
+          onRetry={refreshInvitations}
+          onDismiss={dismissRefreshError}
+        />
+      )}
       {blockedShare && (
         <Confirm
           ref={blockedDialog}
@@ -321,7 +356,7 @@ function CarouselWrapper({
           onClose={closeVisibility}
           onSaved={() => {
             closeVisibility();
-            void loadInvitations();
+            refreshInvitations();
           }}
         />
       )}

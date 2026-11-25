@@ -22,12 +22,12 @@ const refreshMock = jest.fn();
 const successToastMock = jest.fn();
 const errorToastMock = jest.fn();
 
+// next/navigation의 useRouter는 렌더링마다 같은 라우터를 돌려준다.
+// 목이 매번 새 객체를 주면 loadInvitations의 참조가 바뀌어 목록을 계속 다시 부른다.
+const mockRouter = { push: pushMock, replace: replaceMock, refresh: refreshMock };
+
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: pushMock,
-    replace: replaceMock,
-    refresh: refreshMock,
-  }),
+  useRouter: () => mockRouter,
 }));
 
 jest.mock('@/shared/hooks/useToast', () => ({
@@ -359,5 +359,113 @@ describe('useDashboardInvitations', () => {
         signal: expect.any(AbortSignal),
       }
     );
+  });
+
+  describe('목록 불러오기 실패', () => {
+    it('처음 목록을 불러오지 못하면 error를 남기고 빈 목록을 유지한다', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const { result } = renderHook(() => useDashboardInvitations());
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(
+          '초대장 목록을 불러오지 못했습니다.'
+        );
+      });
+      expect(result.current.invites).toEqual([]);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.refreshing).toBe(false);
+    });
+
+    it('다시 불러오기에 성공하면 error를 지우고 목록을 보여 준다', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockFetch
+        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({ invites: [sourceInvitation] }),
+        });
+
+      const { result } = renderHook(() => useDashboardInvitations());
+
+      await waitFor(() => expect(result.current.error).not.toBeNull());
+
+      await act(() => result.current.loadInvitations());
+
+      expect(result.current.error).toBeNull();
+      expect(result.current.invites.map(invite => invite.folderId)).toEqual([
+        sourceInvitation.folderId,
+      ]);
+    });
+
+    it('새로 고침에 실패해도 이미 보이던 초대장을 지우지 않는다', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const { result } = renderHook(() =>
+        useDashboardInvitations([sourceInvitation], { loadOnMount: false })
+      );
+
+      await act(() => result.current.loadInvitations());
+
+      expect(result.current.error).toBe('초대장 목록을 불러오지 못했습니다.');
+      expect(result.current.invites.map(invite => invite.folderId)).toEqual([
+        sourceInvitation.folderId,
+      ]);
+      expect(result.current.getGuestUrl(sourceInvitation.folderId)).toBeNull();
+    });
+
+    it('새로 고침 중에는 카드 자리를 스켈레톤으로 바꾸지 않는다', async () => {
+      let finish!: () => void;
+      mockFetch.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            finish = () =>
+              resolve({
+                ok: true,
+                status: 200,
+                json: async () => ({ invites: [sourceInvitation] }),
+              });
+          })
+      );
+
+      const { result } = renderHook(() =>
+        useDashboardInvitations([sourceInvitation], { loadOnMount: false })
+      );
+
+      let load!: Promise<void>;
+      act(() => {
+        load = result.current.loadInvitations();
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.refreshing).toBe(true);
+      expect(result.current.invites).toHaveLength(1);
+
+      await act(async () => {
+        finish();
+        await load;
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.refreshing).toBe(false);
+    });
+
+    it('서버가 준 오류 문구를 error로 전달한다', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => ({ message: 'Drive 접근 권한이 없습니다.' }),
+      });
+
+      const { result } = renderHook(() => useDashboardInvitations());
+
+      await waitFor(() => {
+        expect(result.current.error).toBe('Drive 접근 권한이 없습니다.');
+      });
+    });
   });
 });
