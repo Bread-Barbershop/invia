@@ -35,14 +35,14 @@ function EditorSkipLinks() {
   return (
     <nav
       aria-label="편집기 바로가기"
-      className="pointer-events-none fixed left-0 top-0 z-[120] flex flex-col items-start gap-2 p-4"
+      className="group pointer-events-none fixed left-0 top-0 z-[120] flex flex-col items-start gap-2 p-4"
     >
       {EDITOR_SKIP_TARGETS.map(target => (
         <a
           key={target.id}
           href={`#${target.id}`}
           onClick={event => moveFocus(event, target)}
-          className="pointer-events-auto sr-only rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-edit focus:not-sr-only focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="pointer-events-auto sr-only rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-edit focus:not-sr-only focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-focus-within:not-sr-only group-focus-within:inline-flex group-focus-within:h-11 group-focus-within:items-center"
         >
           {target.label}
         </a>
