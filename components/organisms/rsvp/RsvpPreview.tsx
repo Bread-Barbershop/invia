@@ -38,7 +38,7 @@ export function RsvpPreview({
     >
       <div className="flex w-full flex-col items-center gap-4 px-2">
         {description && (
-          <p className="whitespace-pre-wrap break-words text-center text-sm leading-relaxed text-text-secondary">
+          <p className="whitespace-pre-wrap break-words text-center text-sm leading-relaxed text-text-secondary [[data-invitation-dark]_&]:text-white/85">
             {description}
           </p>
         )}

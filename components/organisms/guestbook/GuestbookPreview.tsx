@@ -36,7 +36,7 @@ export function GuestbookPreview({
       {...rest}
     >
       {description && (
-        <p className="whitespace-pre-wrap break-words text-center text-sm leading-relaxed text-text-secondary">
+        <p className="whitespace-pre-wrap break-words text-center text-sm leading-relaxed text-text-secondary [[data-invitation-dark]_&]:text-white/85">
           {description}
         </p>
       )}

@@ -42,6 +42,14 @@ describe('RsvpPreview 하객 안내', () => {
     ).toBeInTheDocument();
   });
 
+  it('어두운 초대장 배경에서도 안내 문구가 어두운 표면용 스타일을 함께 쓴다', () => {
+    render(<RsvpPreview blockInfo={block()} className="" />);
+
+    expect(
+      screen.getByText('참석 가능 여부를 알려주세요.').className
+    ).toContain('[data-invitation-dark]');
+  });
+
   it('편집·관리 링크가 들어오면 버튼과 제출 안내를 그리지 않는다', () => {
     render(
       <RsvpPreview

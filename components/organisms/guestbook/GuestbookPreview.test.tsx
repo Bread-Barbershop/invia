@@ -69,15 +69,17 @@ describe('GuestbookPreview 하객 안내', () => {
     ).toBeInTheDocument();
   });
 
-  it('어두운 초대장 배경에서도 버튼과 안내가 어두운 표면용 스타일을 함께 쓴다', () => {
+  it('어두운 초대장 배경에서도 안내 문구가 어두운 표면용 스타일을 함께 쓴다', () => {
     render(<GuestbookPreview blockInfo={block()} className="" />);
 
     const link = screen.getByRole('link', { name: '축하 메시지 작성하기' });
     const note = screen.getByText(
       /축하 메시지는 주최자가 관리하는\s*설문으로 제출되며/
     );
+    const description = screen.getByText('소중한 축하 메시지를 남겨주세요.');
 
     expect(link.className).toContain('[data-invitation-dark]');
     expect(note.className).toContain('[data-invitation-dark]');
+    expect(description.className).toContain('[data-invitation-dark]');
   });
 });
