@@ -2,9 +2,10 @@
 
 import { ArrowUpRight, Copy } from 'lucide-react';
 
+import { CONTACT_EMAIL } from '@/features/contact/contactEmail';
 import { useToast } from '@/shared/hooks/useToast';
 
-export const CONTACT_EMAIL = 'teambread.official@gmail.com';
+export { CONTACT_EMAIL } from '@/features/contact/contactEmail';
 
 const copyTextToClipboard = async (text: string) => {
   if (navigator.clipboard?.writeText && window.isSecureContext) {
