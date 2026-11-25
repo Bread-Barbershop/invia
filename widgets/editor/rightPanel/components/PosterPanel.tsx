@@ -60,7 +60,7 @@ export const PosterPanel = () => {
           type="search"
           value={searchQuery}
           onChange={event => setSearchQuery(event.target.value)}
-          placeholder="표지 검색 (예: 모던, 꽃)"
+          placeholder="표지 검색 (예: 클래식, 꽃)"
           className="w-full bg-transparent text-xs text-text-primary outline-none placeholder:text-text-tertiary [&::-webkit-search-cancel-button]:hidden"
         />
         {searchQuery && (
