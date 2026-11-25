@@ -72,4 +72,30 @@ describe('편집기 영역 이동(스킵 링크) 대상', () => {
   it('대상이 화면에 없으면 false를 돌려준다', () => {
     expect(focusEditorSkipTarget(document, EDITOR_SKIP_TARGETS[2])).toBe(false);
   });
+
+  it('링 클래스를 넣을 수 없는 미리보기는 포커스 동안 인라인 링을 그린다', () => {
+    const preview = document.createElement('div');
+    preview.id = 'preview-container';
+    document.body.append(preview);
+
+    focusEditorSkipTarget(document, EDITOR_SKIP_TARGETS[1]);
+
+    expect(preview.style.outline).toBe('2px solid var(--color-primary, #1f72ef)');
+    expect(preview.style.outlineOffset).toBe('2px');
+
+    preview.blur();
+
+    expect(preview.style.outline).toBe('');
+    expect(preview.style.outlineOffset).toBe('');
+  });
+
+  it('포커스 링 클래스를 이미 가진 영역에는 인라인 링을 더하지 않는다', () => {
+    const leftPanel = document.createElement('div');
+    leftPanel.id = 'editor-style-panel';
+    document.body.append(leftPanel);
+
+    focusEditorSkipTarget(document, EDITOR_SKIP_TARGETS[0]);
+
+    expect(leftPanel.style.outline).toBe('');
+  });
 });

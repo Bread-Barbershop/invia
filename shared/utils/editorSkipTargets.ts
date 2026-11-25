@@ -12,6 +12,11 @@ export type EditorSkipTarget = {
   label: string;
   /** 대상이 아직 접근 가능한 이름을 갖지 못했을 때 붙일 영역 이름 */
   regionLabel: string;
+  /**
+   * 포커스 링 클래스를 넣을 수 없는 대상(다른 컴포넌트가 그리는 요소)이면
+   * 포커스를 옮긴 뒤 포커스가 떠날 때까지 인라인 링을 그린다.
+   */
+  ringInStyle?: boolean;
 };
 
 export const EDITOR_SKIP_TARGETS: readonly EditorSkipTarget[] = [
@@ -24,6 +29,7 @@ export const EDITOR_SKIP_TARGETS: readonly EditorSkipTarget[] = [
     id: 'preview-container',
     label: '미리보기로 바로가기',
     regionLabel: '미리보기',
+    ringInStyle: true,
   },
   {
     id: 'editor-block-panel',
@@ -37,6 +43,23 @@ function hasAccessibleName(element: HTMLElement) {
     element.getAttribute('aria-label')?.trim() ||
       element.getAttribute('aria-labelledby')?.trim()
   );
+}
+
+/** 편집기 공통 포커스 링 색(--color-primary)과 같은 값을 쓴다. */
+const FOCUS_RING_COLOR = 'var(--color-primary, #1f72ef)';
+
+/** 포커스를 받은 동안만 보이는 인라인 링. 포커스가 떠나면 원래대로 되돌린다. */
+function applyTransientFocusRing(element: HTMLElement) {
+  element.style.outline = `2px solid ${FOCUS_RING_COLOR}`;
+  element.style.outlineOffset = '2px';
+
+  const clear = () => {
+    element.style.outline = '';
+    element.style.outlineOffset = '';
+    element.removeEventListener('blur', clear);
+  };
+
+  element.addEventListener('blur', clear);
 }
 
 /**
@@ -79,5 +102,8 @@ export function focusEditorSkipTarget(
 
   if (!element.hasAttribute('tabindex')) element.setAttribute('tabindex', '-1');
   element.focus();
+
+  if (target.ringInStyle) applyTransientFocusRing(element);
+
   return true;
 }
