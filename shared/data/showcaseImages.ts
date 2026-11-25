@@ -16,7 +16,7 @@ export const SHOWCASE_PHOTOS = {
   birthdayCinema: 'https://lh3.googleusercontent.com/d/1jhGlxNYEzZzjOhjRREsz7UF6ZteLJuMt',
   brickAlley: 'https://lh3.googleusercontent.com/d/1ZcQnOdO_of6hWNnWbpoV6fFKQXX0hsRV',
   brickBakery: 'https://lh3.googleusercontent.com/d/17YLwW2qH2CuIIPiVvWahdJMpvfYC8aEt',
-  businessSpeaker: 'https://lh3.googleusercontent.com/d/1i0wq924jy_H67nBo4kxaPt1AzNQcsLjy',
+  businessSpeaker: 'https://lh3.googleusercontent.com/d/1OoRAaDcNdTcf2ZeUWkpp7HGz9cSUuPRv',
   cheersGlasses: 'https://lh3.googleusercontent.com/d/1TRgywnOc8mzoDNqusvudlEBiL_yBQpEQ',
   cityCouple: 'https://lh3.googleusercontent.com/d/1Vy-7w2VdbVzJ2GRooko_0ySh2NQEvpE9',
   classicEnvelope: 'https://lh3.googleusercontent.com/d/1WNSQi1AV6Pj9qDy5P0hescThD3PG9QpF',
