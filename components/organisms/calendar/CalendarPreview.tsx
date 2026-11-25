@@ -1,20 +1,25 @@
 'use client';
 
+import { useMemo, type CSSProperties } from 'react';
+
+import { useInvitationBlocks } from '@/features/invitation/blocks/InvitationBlocksProvider';
 import { isCalendarCardType } from '@/shared/data/template/componentTemplate';
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
 import { useTitleFontInfo } from '@/shared/hooks/useTitleFontInfo';
 import { EditorBlock } from '@/shared/types/block';
+import { htmlToPlainText } from '@/shared/utils/calendarExport';
 import { isDarkInvitationBackground } from '@/shared/utils/invitationBackgroundColor';
+import { titleFromSavedInvitation } from '@/shared/utils/invitationTitle';
+import { resolveInvitationVenue } from '@/shared/utils/invitationVenue';
 
 import { MiddlePreviewWrapper } from '../wrapper/MiddlePreviewWrapper';
 
 import { getCalendarMessageHtml } from './calendarMessage';
 import styles from './calendarPreview.module.css';
 import { CalendarTemplates, DDayCountdown } from './components';
+import { AddToCalendarActions } from './components/AddToCalendarActions';
 import { CalendarCard } from './components/CalendarCard';
 import { useCalendarData } from './hooks/useCalendarData';
-
-import type { CSSProperties } from 'react';
 
 interface Props {
   blockInfo: EditorBlock<'calendar'>;
@@ -66,6 +71,23 @@ export function CalendarPreview({
   const isDateIncomplete = !date || date.length < 10;
   const hasSavedMessage =
     blockInfo.props.messageHtml != null || blockInfo.props.messageJson != null;
+  const invitationBlocks = useInvitationBlocks();
+  const venue = useMemo(
+    () => resolveInvitationVenue(invitationBlocks),
+    [invitationBlocks]
+  );
+  const eventTitle = useMemo(() => {
+    const ownTitle = (title ?? '').trim();
+    if (ownTitle) return ownTitle;
+    const invitationTitle = titleFromSavedInvitation({
+      blocks: invitationBlocks,
+    });
+    return invitationTitle || defaultTitle;
+  }, [defaultTitle, invitationBlocks, title]);
+  const eventDescription = useMemo(
+    () => (hasSavedMessage ? htmlToPlainText(blockInfo.props.messageHtml) : ''),
+    [blockInfo.props.messageHtml, hasSavedMessage]
+  );
   const { fontFamily, fontSize, color, isColorAutomatic } = useBodyFontInfo();
   const { mainStyle } = useTitleFontInfo();
   const automaticLightInk =
@@ -156,6 +178,15 @@ export function CalendarPreview({
               messageHtml={getCalendarMessageHtml(blockInfo)}
             />
           )}
+
+          <AddToCalendarActions
+            title={eventTitle}
+            date={date}
+            time={time}
+            location={venue.location}
+            description={eventDescription}
+            language={language}
+          />
         </>
       )}
     </MiddlePreviewWrapper>

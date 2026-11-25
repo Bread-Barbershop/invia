@@ -177,7 +177,8 @@ describe.each([
         color: '#000000',
       });
       if (template === 'calendarType3') {
-        for (const label of ['02:30', '오후']) {
+        // 12-hour display: "오후 02:30" is shown as 2:30 / 오후
+        for (const label of ['2:30', '오후']) {
           const time = screen.getByText(label);
           expect(time.closest('[style]')).toBe(selectedDay);
           expect(time).not.toHaveClass('text-white');

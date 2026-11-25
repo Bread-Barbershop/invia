@@ -26,6 +26,7 @@ import { EditorBgmOverlay } from '@/components/organisms/bgm/components/EditorBg
 import InvitationChapter from '@/components/organisms/invitation-chapter/InvitationChapter';
 import { AmbientParticles } from '@/components/organisms/visualEffects/ParticleLayer';
 import { InvitationVisualEffects } from '@/components/organisms/visualEffects/VisualEffectsPreview';
+import { InvitationBlocksProvider } from '@/features/invitation/blocks/InvitationBlocksProvider';
 import CalloutIcon from '@/shared/assets/icons/callout.svg';
 import { componentCls } from '@/shared/data/componentsInfo/componentInfo';
 import { isBlockEnabled } from '@/shared/data/registry/blockAvailability';
@@ -35,6 +36,7 @@ import { useEditorCalloutStore } from '@/shared/store/useEditorCalloutStore';
 import { usesDarkInvitationCards } from '@/shared/utils/invitationBackgroundColor';
 import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
 import { MainPosterPreview } from '@/widgets/mainPoster/components/MainPosterPreview';
+
 
 import { SortablePreviewBlock } from './components/SortablePreviewBlock';
 import styles from './Preview.module.css';
@@ -201,115 +203,117 @@ function Preview({
             </div>
           )}
           <div className="relative isolate flex min-h-full flex-col font-lineseed">
-            <InvitationBackgroundTexture
-              color={backgroundColor}
-              texture={backgroundTexture}
-            />
-            <div
-              className="relative"
-              ref={el => {
-                blockRefs.current.mainPoster = el;
-              }}
-            >
-              <MainPosterPreview />
-              <AmbientParticles
-                key={invitationEffectsReplay}
-                effects={effects}
-                placement="poster"
+            <InvitationBlocksProvider blocks={block}>
+              <InvitationBackgroundTexture
+                color={backgroundColor}
+                texture={backgroundTexture}
               />
-            </div>
-            <DndContext
-              sensors={sensors}
-              modifiers={[restrictPreviewDragToVerticalAxis]}
-              autoScroll={{
-                canScroll: element =>
-                  element === previewScrollContainerRef.current,
-              }}
-              collisionDetection={closestCenter}
-              onDragStart={({ active }) => {
-                draggingRef.current = true;
-                setActiveDragId(String(active.id));
-                selectedBlock(String(active.id));
-                setIsEdit(false);
-              }}
-              onDragEnd={finishDrag}
-              onDragCancel={() => {
-                draggingRef.current = false;
-                setActiveDragId(null);
-              }}
-              accessibility={{
-                screenReaderInstructions: {
-                  draggable:
-                    '스페이스 키로 블록을 잡고 위아래 방향키로 이동한 뒤, 스페이스 키로 놓으세요. Escape 키로 취소할 수 있어요.',
-                },
-              }}
-            >
-              <SortableContext
-                items={visibleBlocks.map(item => item.id)}
-                strategy={verticalListSortingStrategy}
+              <div
+                className="relative"
+                ref={el => {
+                  blockRefs.current.mainPoster = el;
+                }}
               >
-                {visibleBlocks.map(comp => {
-                  const registryItem = blockRegistry[comp.component];
-                  const selected = selectedId === comp.id;
-                  const animationType =
-                    getBlockEntrance(comp.component, comp.props) ??
-                    scrollAnimation.animationType;
+                <MainPosterPreview />
+                <AmbientParticles
+                  key={invitationEffectsReplay}
+                  effects={effects}
+                  placement="poster"
+                />
+              </div>
+              <DndContext
+                sensors={sensors}
+                modifiers={[restrictPreviewDragToVerticalAxis]}
+                autoScroll={{
+                  canScroll: element =>
+                    element === previewScrollContainerRef.current,
+                }}
+                collisionDetection={closestCenter}
+                onDragStart={({ active }) => {
+                  draggingRef.current = true;
+                  setActiveDragId(String(active.id));
+                  selectedBlock(String(active.id));
+                  setIsEdit(false);
+                }}
+                onDragEnd={finishDrag}
+                onDragCancel={() => {
+                  draggingRef.current = false;
+                  setActiveDragId(null);
+                }}
+                accessibility={{
+                  screenReaderInstructions: {
+                    draggable:
+                      '스페이스 키로 블록을 잡고 위아래 방향키로 이동한 뒤, 스페이스 키로 놓으세요. Escape 키로 취소할 수 있어요.',
+                  },
+                }}
+              >
+                <SortableContext
+                  items={visibleBlocks.map(item => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {visibleBlocks.map(comp => {
+                    const registryItem = blockRegistry[comp.component];
+                    const selected = selectedId === comp.id;
+                    const animationType =
+                      getBlockEntrance(comp.component, comp.props) ??
+                      scrollAnimation.animationType;
 
-                  if (!registryItem.viewComponent) return null;
+                    if (!registryItem.viewComponent) return null;
 
-                  const View =
-                    registryItem.viewComponent as React.ComponentType<{
-                      blockInfo: typeof comp;
-                      className: string;
-                      titleClassName: string;
-                    }>;
-                  return (
-                    <SortablePreviewBlock
-                      key={comp.id}
-                      id={comp.id}
-                      label={blockLabels.get(comp.component) ?? '블록'}
-                      selected={selected}
-                      backgroundColor={backgroundColor}
-                      registerNode={el => {
-                        blockRefs.current[comp.id] = el;
-                      }}
-                      onSelect={() => {
-                        selectedBlock(comp.id);
-                        setIsEdit(false);
-                      }}
-                    >
-                      <ScrollFadeIn
-                        key={`${scrollAnimation.animationDurationMs}-${scrollAnimation.animationEasing}-${animationType}-${scrollAnimation.triggerMode}`}
-                        {...scrollAnimation}
-                        animationType={activeDragId ? 'none' : animationType}
-                        className={
-                          activeDragId
-                            ? 'transition-none'
-                            : selected
-                              ? styles.selectedBlock
-                              : undefined
-                        }
+                    const View =
+                      registryItem.viewComponent as React.ComponentType<{
+                        blockInfo: typeof comp;
+                        className: string;
+                        titleClassName: string;
+                      }>;
+                    return (
+                      <SortablePreviewBlock
+                        key={comp.id}
+                        id={comp.id}
+                        label={blockLabels.get(comp.component) ?? '블록'}
+                        selected={selected}
+                        backgroundColor={backgroundColor}
+                        registerNode={el => {
+                          blockRefs.current[comp.id] = el;
+                        }}
+                        onSelect={() => {
+                          selectedBlock(comp.id);
+                          setIsEdit(false);
+                        }}
                       >
-                        <InvitationChapter
-                          component={comp.component}
-                          collectionStyle={comp.props.collectionStyle}
-                          sectionStyle={comp.props.sectionStyle}
-                          defaultStyle={sectionStyle}
+                        <ScrollFadeIn
+                          key={`${scrollAnimation.animationDurationMs}-${scrollAnimation.animationEasing}-${animationType}-${scrollAnimation.triggerMode}`}
+                          {...scrollAnimation}
+                          animationType={activeDragId ? 'none' : animationType}
+                          className={
+                            activeDragId
+                              ? 'transition-none'
+                              : selected
+                                ? styles.selectedBlock
+                                : undefined
+                          }
                         >
-                          <View
-                            blockInfo={comp}
-                            className=""
-                            titleClassName={previewTitleVariants({
-                              variant: comp.type,
-                            })}
-                          />
-                        </InvitationChapter>
-                      </ScrollFadeIn>
-                    </SortablePreviewBlock>
-                  );
-                })}
-              </SortableContext>
-            </DndContext>
+                          <InvitationChapter
+                            component={comp.component}
+                            collectionStyle={comp.props.collectionStyle}
+                            sectionStyle={comp.props.sectionStyle}
+                            defaultStyle={sectionStyle}
+                          >
+                            <View
+                              blockInfo={comp}
+                              className=""
+                              titleClassName={previewTitleVariants({
+                                variant: comp.type,
+                              })}
+                            />
+                          </InvitationChapter>
+                        </ScrollFadeIn>
+                      </SortablePreviewBlock>
+                    );
+                  })}
+                </SortableContext>
+              </DndContext>
+            </InvitationBlocksProvider>
           </div>
         </div>
       </div>

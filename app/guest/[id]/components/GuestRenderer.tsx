@@ -14,6 +14,7 @@ import InvitationChapter, {
   getBlockSectionStyle,
 } from '@/components/organisms/invitation-chapter/InvitationChapter';
 import { InvitationVisualEffects } from '@/components/organisms/visualEffects/VisualEffectsPreview';
+import { InvitationBlocksProvider } from '@/features/invitation/blocks/InvitationBlocksProvider';
 import { isBlockEnabled } from '@/shared/data/registry/blockAvailability';
 import { blockRegistry } from '@/shared/data/registry/registry';
 import { getFontFaces } from '@/shared/fonts/fontRegistry';
@@ -148,72 +149,80 @@ function GuestRenderer({
       className="flex flex-col"
       data-invitation-dark={darkCards || undefined}
     >
-      {fontFaceStyles && <style>{fontFaceStyles}</style>}
-      {effects && (
-        <InvitationVisualEffects
-          effects={effects}
-          backgroundColor={bulkData.backgroundColor}
-        />
-      )}
-      {blocks.map(block => {
-        if (block.component === 'visualEffects' || !isBlockEnabled(block.component))
-          return null;
-        if (isGuestPage && !hasGuestBlockContent(block)) return null;
-        const registryItem =
-          blockRegistry[block.component as keyof typeof blockRegistry];
+      <InvitationBlocksProvider blocks={blocks}>
+        {fontFaceStyles && <style>{fontFaceStyles}</style>}
+        {effects && (
+          <InvitationVisualEffects
+            effects={effects}
+            backgroundColor={bulkData.backgroundColor}
+          />
+        )}
+        {blocks.map(block => {
+          if (
+            block.component === 'visualEffects' ||
+            !isBlockEnabled(block.component)
+          )
+            return null;
+          if (isGuestPage && !hasGuestBlockContent(block)) return null;
+          const registryItem =
+            blockRegistry[block.component as keyof typeof blockRegistry];
 
-        if (!registryItem || !registryItem.viewComponent) return null;
+          if (!registryItem || !registryItem.viewComponent) return null;
 
-        const View = registryItem.viewComponent as React.ComponentType<{
-          blockInfo: GuestRendererBlock;
-          className?: string;
-          isGuestPage?: boolean;
-          hideActions?: boolean;
-        }>;
+          const View = registryItem.viewComponent as React.ComponentType<{
+            blockInfo: GuestRendererBlock;
+            className?: string;
+            isGuestPage?: boolean;
+            hideActions?: boolean;
+          }>;
 
-        const hideActions = block.component === 'account'
-          ? activePrivacyFields?.includes('account')
-          : ['phone', 'place'].includes(block.component) && activePrivacyFields?.includes('phone');
-        const view = block.privacyPlaceholder ? (
-          <GuestPrivacyNotice kind={block.privacyPlaceholder} />
-        ) : (
-          <>
-            {block.privacyMediaHidden && <GuestPrivacyNotice kind="photo" />}
-            <View
-              blockInfo={block}
-              className=""
-              {...(hideActions ? { hideActions: true } : {})}
-              {...(isGuestPage && GUEST_PAGE_PROP_COMPONENTS.has(block.component)
-                ? { isGuestPage: true }
-                : {})}
-            />
-          </>
-        );
-        return (
-          <ScrollFadeIn
-            key={block.id}
-            className="w-full"
-            {...scrollAnimation}
-            animationType={
-              getBlockEntrance(block.component, block.props) ??
-              scrollAnimation.animationType
-            }
-          >
-            {renderBlock ? (
-              renderBlock(block, view)
-            ) : (
-              <InvitationChapter
-                component={block.component}
-                collectionStyle={getCollectionStyle(block.props)}
-                sectionStyle={getBlockSectionStyle(block.props)}
-                defaultStyle={bulkData.sectionStyle}
-              >
-                {view}
-              </InvitationChapter>
-            )}
-          </ScrollFadeIn>
-        );
-      })}
+          const hideActions =
+            block.component === 'account'
+              ? activePrivacyFields?.includes('account')
+              : ['phone', 'place'].includes(block.component) &&
+                activePrivacyFields?.includes('phone');
+          const view = block.privacyPlaceholder ? (
+            <GuestPrivacyNotice kind={block.privacyPlaceholder} />
+          ) : (
+            <>
+              {block.privacyMediaHidden && <GuestPrivacyNotice kind="photo" />}
+              <View
+                blockInfo={block}
+                className=""
+                {...(hideActions ? { hideActions: true } : {})}
+                {...(isGuestPage &&
+                GUEST_PAGE_PROP_COMPONENTS.has(block.component)
+                  ? { isGuestPage: true }
+                  : {})}
+              />
+            </>
+          );
+          return (
+            <ScrollFadeIn
+              key={block.id}
+              className="w-full"
+              {...scrollAnimation}
+              animationType={
+                getBlockEntrance(block.component, block.props) ??
+                scrollAnimation.animationType
+              }
+            >
+              {renderBlock ? (
+                renderBlock(block, view)
+              ) : (
+                <InvitationChapter
+                  component={block.component}
+                  collectionStyle={getCollectionStyle(block.props)}
+                  sectionStyle={getBlockSectionStyle(block.props)}
+                  defaultStyle={bulkData.sectionStyle}
+                >
+                  {view}
+                </InvitationChapter>
+              )}
+            </ScrollFadeIn>
+          );
+        })}
+      </InvitationBlocksProvider>
     </div>
   );
 }
