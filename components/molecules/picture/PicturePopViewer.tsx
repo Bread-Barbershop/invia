@@ -158,9 +158,12 @@ export const PicturePopViewer = ({
   const currentImageSrc =
     images[Math.min(selectedIndex, Math.max(0, images.length - 1))] ?? '';
 
-  // 하단에 저장·공유 버튼이 붙는 하객 화면에서는 사진 영역을 살짝 줄여
+  // 하단에 저장·공유 버튼이 붙는 하객 화면에서는 사진 높이를 화면에 맞춰 줄여
   // 작은 휴대폰에서도 컨트롤이 화면 밖으로 밀리지 않게 합니다.
-  const viewerMaxHeightVh = showPhotoActions ? 74 : 85;
+  // (넉넉한 화면에서는 기존과 같은 85vh를 유지)
+  const viewerMaxHeight = showPhotoActions
+    ? 'min(85vh, calc(100vh - 150px))'
+    : '85vh';
 
   const portalElement =
     document.getElementById('preview-container') ||
@@ -211,7 +214,7 @@ export const PicturePopViewer = ({
         )}
         style={{
           ...ratioData.style,
-          maxWidth: `calc(${viewerMaxHeightVh}vh * ${ratioData.value})`,
+          maxWidth: `calc(${viewerMaxHeight} * ${ratioData.value})`,
         }}
         onClick={e => e.stopPropagation()}
       >
