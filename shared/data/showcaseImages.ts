@@ -12,6 +12,32 @@ export const SHOWCASE_PHOTOS = {
   augustFlowers: 'https://lh3.googleusercontent.com/d/18givuCJzpJ50fe2G28rtVvjU2MqGqr4N',
   augustFruit: 'https://lh3.googleusercontent.com/d/13po16881oRh4H5npKt_cuJEWgtp_XZy6',
   augustWatermelon: 'https://lh3.googleusercontent.com/d/101QcV61j4ydO0tiIep0hdqZ2FNLJH6s8',
+  b1GardenBench:
+    'https://lh3.googleusercontent.com/d/1WjACLAl2YXLZcVihF9XNRoypCQv3mYjh',
+  b1GardenBride:
+    'https://lh3.googleusercontent.com/d/1tiDnIsFUlCK-hEGxW1_8ZBvyQzvf-WLg',
+  b1GardenDetail:
+    'https://lh3.googleusercontent.com/d/1m2JvgOXPqAjuaPVmDuk5vM3xo_k12v5u',
+  b1GardenTable:
+    'https://lh3.googleusercontent.com/d/1Tid7XipZzHZKefhQcA0YE03rodKIQ81p',
+  b1GardenToast:
+    'https://lh3.googleusercontent.com/d/10e3w1hIAzcDUaXeyKoda9MEaEBnGLvWE',
+  b2HotelBed: 'https://lh3.googleusercontent.com/d/1A34zsjclfCjk8Fqr7h3g3NwiHYCY95oe',
+  b2HotelBride:
+    'https://lh3.googleusercontent.com/d/1u-eoOuHpcSKpULA-FLGqBwSMwl1FoWGr',
+  b2HotelDetail:
+    'https://lh3.googleusercontent.com/d/13GLja7Ef9poKUvHhskIRV-VqWM1QCZxH',
+  b2HotelSnack:
+    'https://lh3.googleusercontent.com/d/130fNGu6yAaaP2rRRLLnSFBAJQbGpTM7n',
+  b2HotelWindow:
+    'https://lh3.googleusercontent.com/d/1VWKhRP6Arwt5dRH7RTlNKqsfvqPiaS7y',
+  b3TeaBride: 'https://lh3.googleusercontent.com/d/1ehyNqO8zPiuTfuXCsfoIEbelsOw0OOqj',
+  b3TeaFriends:
+    'https://lh3.googleusercontent.com/d/1kLxo-XZx-5umGqb1g7PHuyfz_GAj80Vs',
+  b3TeaPour: 'https://lh3.googleusercontent.com/d/1adIt2w0I5UpDx3mSt90WE0QncY5fcgtz',
+  b3TeaRibbon:
+    'https://lh3.googleusercontent.com/d/1CnlEznZOkB9FX5cAZXHFjyLjkv7qDU4z',
+  b3TeaTable: 'https://lh3.googleusercontent.com/d/1ljja5Dj1sM3BBJbT3JfRAZW2mTu1FLcX',
   birthdayCamp: 'https://lh3.googleusercontent.com/d/1IbJutIqX3VbS6aJ5l7QaXnjTBiMDW7IH',
   birthdayCinema: 'https://lh3.googleusercontent.com/d/1jhGlxNYEzZzjOhjRREsz7UF6ZteLJuMt',
   brickAlley: 'https://lh3.googleusercontent.com/d/1ZcQnOdO_of6hWNnWbpoV6fFKQXX0hsRV',

@@ -27,6 +27,7 @@ const TEMPLATE_TYPES: InvitationTemplateType[] = [
   'wedding',
   'firstBirthday',
   'birthday',
+  'bridalShower',
   'seminar',
 ];
 
@@ -157,7 +158,7 @@ function InvitationTemplatePicker({
 
       <nav
         aria-label="초대장 종류"
-        className="mx-7 grid shrink-0 grid-cols-4 rounded-full bg-neutral-100 p-1"
+        className="mx-7 grid shrink-0 grid-cols-5 rounded-full bg-neutral-100 p-1"
       >
         {TEMPLATE_TYPES.map(templateType => {
           const isActive = type === templateType;
