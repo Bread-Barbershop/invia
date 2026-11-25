@@ -4,6 +4,9 @@ import { PreviewTitle } from '@/components/atoms/preview-title/PreviewTitle';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
 
+import { useIsGuestSurface } from './GuestSurfaceContext';
+import { resolveSectionTitleRenderState } from './sectionTitle';
+
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -41,29 +44,31 @@ export const MiddlePreviewWrapper = ({
   const bodyFontSize = useEditorStore(state =>
     matchBodyFontSize ? state.bodyData?.fontSize : undefined
   );
+  const isGuestSurface = useIsGuestSurface();
+  // 하객 화면에서는 비어 있는 제목에 편집 안내문 대신 기본 문구를 쓰고, 기본 문구도 없으면 제목 줄을 그리지 않는다.
+  const mainTitleState = resolveSectionTitleRenderState(
+    checkedMainTitle ? mainTitle : '',
+    checkedMainTitle ? mainTitleDefault : '',
+    isGuestSurface
+  );
+  const subTitleState = resolveSectionTitleRenderState(
+    checkedSubTitle ? subTitle : '',
+    checkedSubTitle ? subTitleDefault : '',
+    isGuestSurface
+  );
+  const showMainTitle = checkedMainTitle && mainTitleState.visible;
+  const showSubTitle = checkedSubTitle === true && subTitleState.visible;
 
   return (
     <div
       className={cn('flex flex-col items-center py-8 px-5 gap-6', className)}
       {...rest}
     >
-      {!noTitle && (
+      {!noTitle && (showMainTitle || showSubTitle) && (
         <PreviewTitle
-          isMainTitle={checkedMainTitle}
-          subTitle={
-            checkedSubTitle
-              ? subTitle && subTitle.length >= 1
-                ? subTitle
-                : subTitleDefault
-              : ''
-          }
-          mainTitle={
-            checkedMainTitle
-              ? mainTitle && mainTitle.length >= 1
-                ? mainTitle
-                : mainTitleDefault
-              : ''
-          }
+          isMainTitle={showMainTitle}
+          subTitle={showSubTitle ? subTitleState.text : ''}
+          mainTitle={mainTitleState.text}
           titleClassName={titleClassName}
         />
       )}

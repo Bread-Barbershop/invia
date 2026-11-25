@@ -2,11 +2,13 @@
 
 import { InvitationBackgroundTexture } from '@/components/molecules/invitation-background-texture/InvitationBackgroundTexture';
 import { AmbientParticles } from '@/components/organisms/visualEffects/ParticleLayer';
+import { GuestSurfaceProvider } from '@/components/organisms/wrapper/GuestSurfaceContext';
 import InviaLogo from '@/shared/assets/logo/invia-logo.svg';
 import { DriveImageResolveModeProvider } from '@/shared/hooks/useDriveImageResolveMode';
 import { cn } from '@/shared/utils/cn';
 import { isDarkInvitationBackground } from '@/shared/utils/invitationBackgroundColor';
 import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
+import { titleFromSavedInvitation } from '@/shared/utils/invitationTitle';
 
 import GuestBgm from './GuestBgm';
 import { GuestMainPoster } from './GuestMainPoster';
@@ -47,6 +49,8 @@ function GuestInvitationView({
     mode === 'guest'
       ? 'relative isolate mx-auto w-full min-w-[375px] max-w-[430px] shadow-sm'
       : 'relative isolate mx-auto w-full max-w-[430px] shadow-sm';
+  // 대표 이미지 alt가 모든 초대장에 같은 문구로 읽히지 않도록, 저장된 초대장에서 이름을 뽑아 넘긴다.
+  const invitationTitle = titleFromSavedInvitation(payload);
 
   return (
     <DriveImageResolveModeProvider
@@ -74,6 +78,7 @@ function GuestInvitationView({
               <GuestMainPoster
                 onReady={onMainPosterReady}
                 thumbnailFileId={payload.mainPoster.thumbnailFileId ?? ''}
+                title={invitationTitle}
                 fitToViewport={fitPosterToViewport}
               />
               <AmbientParticles
@@ -83,14 +88,16 @@ function GuestInvitationView({
             </div>
           )}
           <div className="mx-auto w-full">
-            <GuestRenderer
-              blocks={payload.blocks}
-              bulkData={payload.bulkData}
-              renderHints={payload.renderHints}
-              activePrivacyFields={payload.activePrivacyFields}
-              {...(showScreenEffects === false && { showVisualEffects: false })}
-              isGuestPage
-            />
+            <GuestSurfaceProvider>
+              <GuestRenderer
+                blocks={payload.blocks}
+                bulkData={payload.bulkData}
+                renderHints={payload.renderHints}
+                activePrivacyFields={payload.activePrivacyFields}
+                {...(showScreenEffects === false && { showVisualEffects: false })}
+                isGuestPage
+              />
+            </GuestSurfaceProvider>
           </div>
           <GuestInvitationFooter
             darkBackground={isDarkInvitationBackground(

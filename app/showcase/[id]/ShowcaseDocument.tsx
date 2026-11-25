@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 
 import GuestRenderer from '@/app/guest/[id]/components/GuestRenderer';
+import { GuestSurfaceProvider } from '@/components/organisms/wrapper/GuestSurfaceContext';
 import type { buildShowcaseInvitation } from '@/shared/data/buildShowcaseInvitation';
 import { INVITATION_TEMPLATES } from '@/shared/data/invitationTemplates/catalog';
 import type { ShowcaseInvitation } from '@/shared/data/showcaseInvitations';
@@ -44,7 +45,9 @@ export default function ShowcaseDocument({ design, blocks, bulkData }: Props) {
         <h1 className="sr-only">{design.name}</h1>
         <InvitationTemplatePoster template={template} />
       </header>
-      <GuestRenderer blocks={blocks} bulkData={bulkData} isGuestPage />
+      <GuestSurfaceProvider>
+        <GuestRenderer blocks={blocks} bulkData={bulkData} isGuestPage />
+      </GuestSurfaceProvider>
       <footer className="px-6 pb-10 text-center text-[10px] text-black/45">
         디자인 예시 · 이름, 일정, 장소는 자유롭게 바꿀 수 있어요.
       </footer>
