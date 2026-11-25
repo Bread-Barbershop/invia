@@ -3,6 +3,7 @@ import type { InvitationType } from '@/shared/types/block';
 import { birthdayCollection } from './showcaseBirthdayCollection';
 import { familyCelebrationCollection } from './showcaseFamilyCelebrationCollection';
 import { firstBirthdayCollection } from './showcaseFirstBirthdayCollection';
+import { SHOWCASE_PHOTOS } from './showcaseImages';
 import { seminarCollection } from './showcaseSeminarCollection';
 
 import type { SectionStyle } from './sectionStyles';
@@ -85,13 +86,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '두 분의 첫 대화는 기억나나요?',
         answer:
           '비가 오던 날, 버스 정류장에서 우산을 같이 썼어요. 버스가 한 대 더 지나갈 때까지 이야기했지요.',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.classicRings,
       },
       {
         component: 'picture',
         title: '사진으로 전하는 한 컷',
         image:
-          '/samples/wedding_14/images/04_779358cc-330b-4bb4-818b-6b1c2e91958c.jpg',
+          SHOWCASE_PHOTOS.classicNewspaper,
         caption:
           '촬영을 마치려던 참에 해가 났습니다. 그날 가장 좋아하게 된 사진이에요.',
       },
@@ -123,7 +124,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         message:
           '두 사람의 인터뷰와 웨딩 촬영 사진을 실은 작은 신문을 접수대에 두었습니다. 집에 가는 길에 펼쳐 보세요.',
         preset: 'time',
-        image: '/images/showcase/vow-rings.webp',
+        image: SHOWCASE_PHOTOS.classicEnvelope,
       },
       {
         component: 'closingComment',
@@ -150,7 +151,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '우리의 반지',
-        image: '/images/showcase/vow-rings.webp',
+        image: SHOWCASE_PHOTOS.monoRings,
         caption: '두 사람이 고른, 장식 없는 한 쌍.',
       },
       { component: 'greeting' },
@@ -169,6 +170,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '가족사진은 흑백으로도 한 장 남겨요. 평소 좋아하는 편한 옷으로 와 주세요.',
         ],
       },
+      {
+        component: 'gallery',
+        title: '도시의 아침, 두 장',
+        template: 'galleryType5',
+        ratio: '4:3',
+        images: [SHOWCASE_PHOTOS.monoCrosswalk, SHOWCASE_PHOTOS.monoWindow],
+      },
       { component: 'place', title: '만나는 곳' },
       {
         component: 'transportation',
@@ -177,6 +185,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '11번 출구',
         subwayWalk:
           '테헤란로1길 입구에서 건물 로비로 들어와 8층으로 올라오세요.',
+      },
+      {
+        component: 'faq',
+        title: '흑백 사진에 대해',
+        items: [
+          {
+            question: '사진은 언제 찍나요?',
+            answer: '서약이 끝나면 홀 앞에서 한 장씩 찍어요. 흑백으로 인화해 신혼집 벽에 걸어 두겠습니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -209,8 +227,15 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'picture',
         title: '봄바람 불던 오후',
         image:
-          '/samples/wedding_14/images/05_b1c68d54-033d-4053-9dc6-f9b05cc6b9ef.jpg',
+          SHOWCASE_PHOTOS.skyBalcony,
         caption: '바람이 불 때마다 웃음이 났던 촬영 날입니다.',
+      },
+      {
+        component: 'gallery',
+        title: '같은 하늘 아래, 두 장',
+        template: 'galleryType2',
+        ratio: '1:1',
+        images: [SHOWCASE_PHOTOS.skyHydrangea, SHOWCASE_PHOTOS.skyLinen],
       },
       { component: 'place', title: '예식이 열리는 곳' },
       {
@@ -267,7 +292,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '나무 그늘 아래 차린 식탁',
-        image: '/images/showcase/garden-table.webp',
+        image: SHOWCASE_PHOTOS.gardenTable,
       },
       { component: 'greeting' },
       {
@@ -336,7 +361,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '봉투를 닫기 전에',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.letterPaper,
         caption: '말로는 쑥스러웠던 감사 인사도 함께 담았습니다.',
       },
       {
@@ -345,7 +370,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '첫 편지에는 무슨 말을 썼나요?',
         answer:
           '아현이 감기에 걸렸을 때 민성이 죽 통에 쪽지를 붙였어요. 다 먹으면 냉장고에 귤도 있다는 말. 아직 서랍 안에 있어요.',
-        image: '/images/showcase/vow-rings.webp',
+        image: SHOWCASE_PHOTOS.letterRings,
       },
       { component: 'calendar', title: '편지에 적어 둔 날' },
       {
@@ -402,9 +427,9 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         template: 'galleryType6',
         ratio: '3:4',
         images: [
-          '/samples/wedding_14/images/03_2eb9460b-b5ed-470c-beff-a088f65983f9.jpg',
-          '/samples/wedding_14/images/04_779358cc-330b-4bb4-818b-6b1c2e91958c.jpg',
-          '/samples/wedding_14/images/05_b1c68d54-033d-4053-9dc6-f9b05cc6b9ef.jpg',
+          SHOWCASE_PHOTOS.augustWatermelon,
+          SHOWCASE_PHOTOS.augustCurtain,
+          SHOWCASE_PHOTOS.augustFruit,
         ],
       },
       {
@@ -413,7 +438,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '함께 처음 맞는 여름, 무엇을 하고 싶나요?',
         answer:
           '수박 한 통을 사서 냉장고에 넣어 두고, 친구들이 들를 때마다 한 조각씩 내주고 싶어요.',
-        image: '/images/showcase/vow-rings.webp',
+        image: SHOWCASE_PHOTOS.augustFlowers,
       },
       {
         component: 'timeline',
@@ -470,11 +495,27 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '서약을 쓰던 밤',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.quietCups,
         caption:
           '한 문장씩 고쳐 쓰다가 둘 다 같은 말을 남겼습니다. 잘 듣고, 자주 웃자고요.',
       },
       { component: 'calendar', title: '예식 일시' },
+      {
+        component: 'mealMenu',
+        title: '서약 뒤의 저녁',
+        subtitle: 'Quiet Dinner',
+        style: 'minimal',
+        courses: [
+          {
+            name: '따뜻한 접시',
+            dishes: ['버섯 수프와 구운 빵'],
+          },
+          {
+            name: '마지막 잔',
+            dishes: ['배와 꿀을 곁들인 차'],
+          },
+        ],
+      },
       {
         component: 'wreath',
         title: '마음만 전해 주세요',
@@ -482,6 +523,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '작은 예식이라 축하 화환은 사양합니다. 두 사람이 서약을 읽는 순간 함께 앉아 주시면 기쁘겠습니다.',
       },
       { component: 'place', title: '예식 장소' },
+      {
+        component: 'faq',
+        title: '조용한 예식이라',
+        items: [
+          {
+            question: '아이와 함께 가도 괜찮을까요?',
+            answer: '물론입니다. 다만 서약 낭독 동안에는 조용히 앉아 주시면 두 사람이 마음을 다해 읽을 수 있어요.',
+          },
+        ],
+      },
       {
         component: 'afterParty',
         title: '서약 뒤의 식탁',
@@ -511,9 +562,9 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         template: 'galleryType7',
         ratio: '3:4',
         images: [
-          '/samples/wedding_14/images/03_2eb9460b-b5ed-470c-beff-a088f65983f9.jpg',
-          '/samples/wedding_14/images/04_779358cc-330b-4bb4-818b-6b1c2e91958c.jpg',
-          '/samples/wedding_14/images/06_b2cf8c86-2b11-4f18-b2de-bfc8fa5c08f4.jpg',
+          SHOWCASE_PHOTOS.summerField,
+          SHOWCASE_PHOTOS.summerWildflowers,
+          SHOWCASE_PHOTOS.summerRoad,
         ],
       },
       { component: 'greeting' },
@@ -523,7 +574,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '세 컷 중 가장 오래 기다린 장면은요?',
         answer:
           '언덕 위에 해가 걸린 순간이요. 자리를 잡고 기다리다가 둘 다 풀밭에 누워 버렸어요.',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.summerPicnic,
       },
       { component: 'calendar', title: '상영일처럼 기다린 날' },
       {
@@ -578,6 +629,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '도시에서 만난 두 사람',
         story:
           '퇴근 시간이 자주 겹쳐 같은 골목을 걸었습니다. 어느 날부터는 먼저 도착한 쪽이 가로등 아래서 기다렸어요.',
+      },
+      {
+        component: 'gallery',
+        title: '해 질 무렵의 도시',
+        template: 'galleryType7',
+        ratio: '3:4',
+        images: [SHOWCASE_PHOTOS.amberBar, SHOWCASE_PHOTOS.amberWindow, SHOWCASE_PHOTOS.amberGlass],
       },
       {
         component: 'afterParty',
@@ -645,7 +703,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         answer:
           '토요일 아침이면 집 앞 빵집까지 걸어요. 돌아오는 길에는 빵이 꼭 하나씩 줄어 있어요.',
         image:
-          '/samples/wedding_14/images/06_b2cf8c86-2b11-4f18-b2de-bfc8fa5c08f4.jpg',
+          SHOWCASE_PHOTOS.weekendBakery,
       },
       { component: 'greeting' },
       {
@@ -654,8 +712,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         template: 'galleryType7',
         ratio: '4:3',
         images: [
-          '/samples/wedding_14/images/03_2eb9460b-b5ed-470c-beff-a088f65983f9.jpg',
-          '/samples/wedding_14/images/05_b1c68d54-033d-4053-9dc6-f9b05cc6b9ef.jpg',
+          SHOWCASE_PHOTOS.weekendPath,
+          SHOWCASE_PHOTOS.weekendBench,
         ],
       },
       { component: 'calendar', title: '우리의 만남' },
@@ -670,6 +728,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'place', title: '산책의 출발점' },
+      {
+        component: 'notice',
+        title: '걷기 좋은 신발',
+        heading: '앞마당 산책 안내',
+        message: '식사 후 앞마당을 한 바퀴 돌 예정이에요. 굽이 낮은 신발이면 더 편합니다.',
+        preset: 'clothes',
+      },
       {
         component: 'afterParty',
         title: '식후에 가볍게 한 바퀴',
@@ -715,13 +780,19 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       { component: 'greeting' },
       {
+        component: 'picture',
+        title: '신발부터 편하게',
+        image: SHOWCASE_PHOTOS.streetSneakers,
+        caption: '운동화도 좋아요. 계단이 조금 있으니 발이 편한 신발이면 더 좋습니다.',
+      },
+      {
         component: 'interview',
         title: '민성과 아현에게 한 질문',
         question: '입장할 때 꼭 하고 싶은 일이 있나요?',
         answer:
           '눈이 마주치는 친구에게 손을 흔들기로 했어요. 앞자리든 뒷자리든 우리를 보면 먼저 흔들어 주세요.',
         image:
-          '/samples/wedding_14/images/06_b2cf8c86-2b11-4f18-b2de-bfc8fa5c08f4.jpg',
+          SHOWCASE_PHOTOS.streetBistro,
       },
       { component: 'calendar', title: '우리가 결혼하는 날' },
       {
@@ -787,8 +858,26 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'picture',
         title: '숲에서 고른 한 장',
         image:
-          '/samples/wedding_14/images/03_2eb9460b-b5ed-470c-beff-a088f65983f9.jpg',
+          SHOWCASE_PHOTOS.forestPath,
         caption: '나란히 걷다가 뒤를 돌아본 순간을 남겼습니다.',
+      },
+      {
+        component: 'timeline',
+        title: '숲에서 보내는 오후',
+        items: [
+          {
+            time: '14:40',
+            title: '가든홀 입구에서 인사',
+          },
+          {
+            time: '15:00',
+            title: '나무 아래에서 서약',
+          },
+          {
+            time: '15:40',
+            title: '숲 식탁으로 이동',
+          },
+        ],
       },
       { component: 'calendar', title: '서약의 오후' },
       { component: 'place', title: '가든홀 입구' },
@@ -852,7 +941,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '기조 강연자',
         name: 'Andrew Jackson',
         bio: '시장 신호를 읽고 팀의 우선순위를 다시 정했던 두 사례를 비교합니다. 어느 시점에 결정을 내렸는지 들어보세요.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.businessStage,
       },
       { component: 'greeting' },
       {
@@ -910,7 +999,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '테이블 대화의 첫 질문',
         name: 'Andrew Jackson',
         bio: '업계가 다른 두 팀이 같은 문제를 푼 사례를 소개합니다. 강연이 끝나면 여러분의 선택도 궁금합니다.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.horizonSpeaker,
       },
       { component: 'calendar', title: '포럼 일시' },
       {
@@ -998,7 +1087,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '함께 스케치할 진행자',
         name: 'Andrew Jackson',
         bio: 'Andrew Jackson이 관찰한 불편 하나를 그림으로 바꾸는 과정을 먼저 보여 드립니다. 그다음은 각자 가져온 사례를 펼칠 차례입니다.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.sparkSketch,
       },
       {
         component: 'notice',
@@ -1007,7 +1096,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         message:
           '평소 쓰는 펜을 가져와 주세요. 스케치할 종이는 현장에서 나눠 드립니다.',
         preset: 'time',
-        image: '/images/showcase/conference-hall.webp',
+        image: SHOWCASE_PHOTOS.sparkRoom,
       },
       {
         component: 'faq',
@@ -1055,7 +1144,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '무대에 오르는 연사',
         name: 'Andrew Jackson',
         bio: '전략을 실행에 옮길 때 리더가 마주하는 선택을 다룹니다. 발표 후에는 청중의 사례를 함께 살펴봅니다.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.redMic,
       },
       {
         component: 'timeline',
@@ -1071,9 +1160,25 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '질문이 시작되는 객석',
-        image: '/images/showcase/conference-hall.webp',
+        image: SHOWCASE_PHOTOS.redSeats,
         caption:
           '질문하실 때는 자리에 앉아 손을 들어 주세요. 진행자가 마이크를 가져갑니다.',
+      },
+      {
+        component: 'mealMenu',
+        title: '강연 뒤의 커피',
+        subtitle: 'Break & Coffee',
+        style: 'minimal',
+        courses: [
+          {
+            name: '쉬는 시간',
+            dishes: ['드립커피', '보리차'],
+          },
+          {
+            name: '곁들임',
+            dishes: ['아몬드 비스코티'],
+          },
+        ],
       },
       { component: 'place', title: '강연장' },
       {
@@ -1121,7 +1226,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '오늘의 대화 상대',
         name: 'Andrew Jackson',
         bio: '팀의 의견이 갈리던 날 한 동료가 건넨 질문에서 이야기를 시작합니다. 여러분이 기억하는 한마디도 들려주세요.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.warmConversation,
       },
       {
         component: 'mealMenu',
@@ -1160,6 +1265,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'notice',
+        title: '자리에 앉는 방법',
+        heading: '이름표 없이 편하게',
+        message: '입구에서 커피를 받고 아무 자리에나 앉아 주세요. 테이블마다 진행자가 첫 질문을 건넵니다.',
+        preset: 'time',
+      },
+      {
         component: 'closingComment',
         message: '조금 일찍 오셔도 좋아요. 따뜻한 잔을 준비해 두겠습니다.',
       },
@@ -1182,7 +1294,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '잔을 맞댈 자리',
-        image: '/images/showcase/birthday-evening.webp',
+        image: SHOWCASE_PHOTOS.cheersGlasses,
         caption: '생일잔은 가볍고 잔 부딪치는 소리는 크게!',
       },
       {
@@ -1207,6 +1319,12 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:30', title: '스물일곱 초 불기' },
           { time: '16:00', title: '앉은 자리에서 느긋한 식사' },
         ],
+      },
+      {
+        component: 'dressCode',
+        title: '오늘의 색',
+        colors: ['#D8A657', '#8C5A3C', '#FFF6E6'],
+        guidelines: ['금색이나 갈색 포인트 하나면 사진이 잘 나와요. 편한 옷 그대로 오셔도 좋습니다.'],
       },
       { component: 'place', title: '예약해 둔 테이블' },
       {
@@ -1246,8 +1364,9 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'gallery',
         title: '작년 생일에 남긴 두 컷',
         images: [
-          '/images/showcase/birthday-table.webp',
-          '/images/showcase/birthday-evening.webp',
+          SHOWCASE_PHOTOS.dayPhotoPolaroid,
+          SHOWCASE_PHOTOS.dayPhotoCake,
+          SHOWCASE_PHOTOS.dayPhotoTable,
         ],
         template: 'galleryType5',
         ratio: '4:3',
@@ -1259,7 +1378,6 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         message:
           '인화할 필요 없어. 차례가 오면 화면을 보여 주면서 사진을 찍은 날 얘기를 들려줘.',
         preset: 'shooting',
-        image: '/samples/seminar_01/images/08_포토부스_1.png',
       },
       { component: 'calendar', title: '사진 찍는 날' },
       {
@@ -1327,7 +1445,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '티 테이블을 차렸어요',
-        image: '/images/showcase/birthday-table.webp',
+        image: SHOWCASE_PHOTOS.pinkCake,
         caption: '찻잔을 놓고 고깔모자도 하나씩 꺼내 뒀어요.',
       },
       {
@@ -1349,6 +1467,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'place', title: '우리의 케이크 테이블' },
+      {
+        component: 'notice',
+        title: '선물은 마음만',
+        heading: '케이크와 차로 충분해요',
+        message: '딸기 케이크와 차를 넉넉히 준비했어요. 선물은 마음만 받을게요.',
+        preset: 'party',
+      },
       {
         component: 'faq',
         title: '디저트 한 조각 더',
@@ -1388,7 +1513,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         message:
           '입구에 있는 카드에 적어서 턴테이블 옆 바구니에 넣어 줘. 사연 한 줄도 대환영!',
         preset: 'party',
-        image: '/images/showcase/birthday-evening.webp',
+        image: SHOWCASE_PHOTOS.clubTurntable,
       },
       {
         component: 'dressCode',
@@ -1457,7 +1582,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '수첩에 붙일 첫돌 케이크',
-        image: '/images/showcase/first-cake.webp',
+        image: SHOWCASE_PHOTOS.littleCake,
         caption: '초 한 개를 꽂고 민준이의 첫 생일 노래를 연습했어요.',
       },
       { component: 'greeting' },
@@ -1532,7 +1657,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         birthday: '2025.08.11',
         message:
           '누가 손뼉을 치면 저도 두 손을 마주쳐요. 요즘 제일 신나는 놀이예요.',
-        image: '/templates/thumbnails/firstBirthday_02.webp',
+        image: SHOWCASE_PHOTOS.minjunShoes,
       },
       {
         component: 'timeline',
@@ -1552,6 +1677,22 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
             question: '유모차는 어디에 두면 될까요?',
             answer:
               '8층 패밀리룸 입구에 유모차를 둘 공간이 있어요. 잠든 아이는 그대로 데리고 들어오셔도 괜찮아요.',
+          },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '돌잔치 식탁',
+        subtitle: 'First Birthday Table',
+        style: 'classic',
+        courses: [
+          {
+            name: '어른 식사',
+            dishes: ['떡갈비와 계절 나물'],
+          },
+          {
+            name: '아이 간식',
+            dishes: ['간을 약하게 한 채소죽'],
           },
         ],
       },
@@ -1593,8 +1734,9 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         template: 'galleryType5',
         ratio: '4:3',
         images: [
-          '/samples/wedding_14/images/03_2eb9460b-b5ed-470c-beff-a088f65983f9.jpg',
-          '/samples/wedding_14/images/06_b2cf8c86-2b11-4f18-b2de-bfc8fa5c08f4.jpg',
+          SHOWCASE_PHOTOS.alpineRidge,
+          SHOWCASE_PHOTOS.alpineFlowers,
+          SHOWCASE_PHOTOS.alpineCabin,
         ],
       },
       { component: 'place', title: '마운틴홀에서 만나요' },
@@ -1667,12 +1809,18 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       { component: 'greeting' },
       {
+        component: 'picture',
+        title: '골목 끝 빵집',
+        image: SHOWCASE_PHOTOS.brickBakery,
+        caption: '마지막 소금빵을 반씩 나눠 먹던 골목의 빵집이에요.',
+      },
+      {
         component: 'interview',
         title: '동네에서 보낸 첫날',
         question: '첫 식사 뒤에는 어디로 갔나요?',
         answer:
           '골목 끝 작은 빵집이요. 마지막 남은 소금빵을 반씩 나누고 다음 주에도 같이 오자고 했어요.',
-        image: '/images/showcase/love-letter.webp',
+        image: SHOWCASE_PHOTOS.brickAlley,
       },
       {
         component: 'coupleIntroduction',

@@ -1,3 +1,5 @@
+import { SHOWCASE_PHOTOS } from './showcaseImages';
+
 import type { ShowcaseInvitation } from './showcaseInvitations';
 
 export const seminarCollection: ShowcaseInvitation[] = [
@@ -25,14 +27,14 @@ export const seminarCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '물레 위의 손',
         caption: '속도를 낮추고 양손의 압력을 맞추는 과정부터 살펴봅니다.',
-        image: '/images/showcase/clay.webp',
+        image: SHOWCASE_PHOTOS.clayHands,
       },
       {
         component: 'speakerInformation',
         title: '물레 시연과 작업 지도',
         name: '정우진 도예가',
         bio: '생활 도자기를 만드는 도예가입니다. 오늘은 손에 닿는 흙의 밀도로 물레 속도와 힘을 조절하는 방법을 보여 드립니다.',
-        image: '/images/showcase/conference-speaker.webp',
+        image: SHOWCASE_PHOTOS.clayPottery,
       },
       {
         component: 'timeline',
@@ -126,7 +128,7 @@ export const seminarCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '한 줄기 빛의 경로',
         caption: '입사각을 바꿀 때마다 색 띠가 이동하는 모습을 살펴봅니다.',
-        image: '/images/showcase/prism.webp',
+        image: SHOWCASE_PHOTOS.prismLight,
       },
       {
         component: 'calendar',
@@ -145,6 +147,32 @@ export const seminarCollection: ShowcaseInvitation[] = [
         component: 'place',
         title: '실험실 안내',
         detail: '광학실 입구에서 팀 번호와 테이블을 확인해 주세요.',
+      },
+      {
+        component: 'mealMenu',
+        title: '실험 뒤의 커피',
+        subtitle: 'Lab Break',
+        style: 'minimal',
+        courses: [
+          {
+            name: '마실 것',
+            dishes: ['드립커피', '캐모마일'],
+          },
+          {
+            name: '곁들임',
+            dishes: ['아몬드 비스코티'],
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '실험실 안내',
+        items: [
+          {
+            question: '준비물이 있나요?',
+            answer: '연필과 종이만 있으면 됩니다. 프리즘과 광원은 실험실에서 나눠 드려요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -289,6 +317,32 @@ export const seminarCollection: ShowcaseInvitation[] = [
         component: 'place',
         title: '로스터리 커핑룸',
         detail: '로스팅 기계 옆 유리문에서 명단을 확인합니다.',
+      },
+      {
+        component: 'mealMenu',
+        title: '커핑 테이블',
+        subtitle: 'Cupping Flight',
+        style: 'tasting',
+        courses: [
+          {
+            name: '첫 잔',
+            dishes: ['에티오피아 워시드'],
+          },
+          {
+            name: '두 번째 잔',
+            dishes: ['콜롬비아 내추럴'],
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '커핑 전에',
+        items: [
+          {
+            question: '커피를 잘 몰라도 괜찮을까요?',
+            answer: '전혀 문제없습니다. 향과 온도만 느껴 보셔도 충분해요. 향수는 하루 쉬어 주세요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
