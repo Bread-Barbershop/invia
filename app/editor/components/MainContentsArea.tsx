@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { EditorBgmPlayerProvider } from '@/components/organisms/bgm/context/EditorBgmPlayerContext';
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
+import type { EditorDraftKey } from '@/features/editor/draft/editorDraft';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 import { usePreventBack } from '@/shared/hooks/usePreventBack';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -18,7 +19,13 @@ import { useEditorDirtyTracker } from '../hooks/useEditorDirtyTracker';
 
 import type { SavedData } from '../[id]/types/savedata';
 
-function MainContentsArea({ savedData }: { savedData?: SavedData | null }) {
+function MainContentsArea({
+  savedData,
+  draftKey,
+}: {
+  savedData?: SavedData | null;
+  draftKey: EditorDraftKey;
+}) {
   usePreventBack();
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [isDirtyTrackerEnabled, setIsDirtyTrackerEnabled] = useState(
@@ -80,7 +87,7 @@ function MainContentsArea({ savedData }: { savedData?: SavedData | null }) {
           <div className="pl-[clamp(0px,calc(144*((100vw-1340px)/(1920-1340))),144px)]">
             <Preview toolbarRef={toolbarRef} />
           </div>
-          <MenuPanel toolbarRef={toolbarRef} />
+          <MenuPanel toolbarRef={toolbarRef} draftKey={draftKey} />
         </div>
 
         <RightPanel />

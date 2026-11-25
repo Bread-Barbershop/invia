@@ -1,5 +1,9 @@
 import React, { useRef, useState } from 'react';
 
+import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
+import LoginModal from '@/features/session/components/LoginModal';
+import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
+import { useAuthGate } from '@/features/session/hooks/useAuthGate';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useFabricViewContext } from '@/widgets/mainPoster/context/FabricContext';
 
@@ -20,6 +24,8 @@ function UploadButton({
     handleUpload,
     isLoading,
     isFail,
+    isAuthRequired,
+    isDraftPersisted,
     isCleaningUp,
     pendingInvitation,
     loadingMessage,
@@ -27,12 +33,24 @@ function UploadButton({
   } = upload;
   const { confirm } = useConfirm();
   const { canvas } = useFabricViewContext();
+  const auth = useAuthGate();
 
   const handleClose = () => {
     if (!isLoading) {
       setIsModalOpen(false);
     }
   };
+
+  const handleGoogleLogin = () => {
+    auth.runAfterReauth(async () => {
+      await handleUpload();
+    });
+  };
+
+  const authDialogOpen =
+    auth.isLoginOpen ||
+    auth.isPrivacyNoticeOpen ||
+    auth.isDrivePermissionRequiredOpen;
 
   return (
     <div ref={tabRef}>
@@ -49,7 +67,11 @@ function UploadButton({
           const isConfirm = await confirm({
             ...(examples.length
               ? {
-                  message: ['표지에 예시 문구가 남아 있어요.', ...shown, '본문을 바꿔도 표지 문구는 그대로 발행돼요. 이대로 저장할까요?'].join('\n'),
+                  message: [
+                    '표지에 예시 문구가 남아 있어요.',
+                    ...shown,
+                    '본문을 바꿔도 표지 문구는 그대로 발행돼요. 이대로 저장할까요?',
+                  ].join('\n'),
                   confirmText: '그대로 저장',
                   cancelText: '돌아가기',
                 }
@@ -75,6 +97,10 @@ function UploadButton({
           ref={modalRef}
           isLoading={isLoading}
           isFail={isFail}
+          authRequired={isAuthRequired}
+          isDraftPersisted={isDraftPersisted}
+          onGoogleLogin={handleGoogleLogin}
+          escapeDisabled={authDialogOpen}
           pendingInvitation={pendingInvitation}
           skipDashboardHandoff={Boolean(pendingInvitation?.audienceSlug)}
           loadingMessage={loadingMessage}
@@ -83,6 +109,23 @@ function UploadButton({
           onClose={handleClose}
         />
       )}
+      <LoginModal
+        open={auth.isLoginOpen}
+        isLoading={auth.isLoginPending}
+        onClose={auth.closeLogin}
+        onGoogleLogin={auth.loginWithGoogle}
+      />
+      <PrivacyNoticeModal
+        open={auth.isPrivacyNoticeOpen}
+        onClose={auth.closePrivacyNotice}
+        onConfirm={auth.confirmPrivacyNotice}
+      />
+      <DrivePermissionRequiredModal
+        open={auth.isDrivePermissionRequiredOpen}
+        isLoading={auth.isLoginPending}
+        onClose={auth.closeDrivePermissionRequired}
+        onRetry={auth.retryDrivePermission}
+      />
     </div>
   );
 }
