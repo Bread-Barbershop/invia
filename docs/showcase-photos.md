@@ -34,5 +34,10 @@
 | `public/images/showcase/conference-hall.webp` | 합성 느낌의 대형 홀 | 세미나별 실제 같은 공간 사진 |
 
 돌잔치 7종(`hanbok`, `orchard`, `sea`, `moon`, `portrait`, `dino`, `post`)과 `clay`, `prism`, `citrus`,
-`cinema`, `flowers`, `camp` 사진은 본문에서는 새 사진으로 교체했지만, **템플릿 표지(포스터 JSON과 썸네일)에
-그대로 쓰이고 있어 파일은 유지**합니다. 표지까지 바꾸려면 포스터를 다시 렌더링해야 합니다.
+`cinema`, `flowers`, `camp` 사진은 본문과 **템플릿 표지(포스터·썸네일)에서 모두** 새 사진으로 교체했습니다.
+
+- 포스터 JSON(`public/templates/json/*.v1.json`)의 사진 슬롯 `src`를 Drive 주소로 바꾸고,
+  슬롯 프레임 좌표는 그대로 두어 기존 레이아웃이 유지됩니다.
+- 썸네일(`public/templates/thumbnails/*.webp`)은 포스터 프레임 영역만 새 사진으로 다시 채워
+  글자·테두리 등 나머지 디자인은 그대로입니다.
+- 위 파일들은 더 이상 참조되지 않아 `public/images/showcase/`에서 삭제했습니다.
