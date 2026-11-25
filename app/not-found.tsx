@@ -18,8 +18,8 @@ const QUICK_LINKS = [
   },
   {
     href: '/editor',
-    label: '새 초대장 만들기',
-    description: '빈 초대장에서 바로 제작을 시작합니다.',
+    label: '데스크톱에서 초대장 만들기',
+    description: '가로 1,340px 이상인 브라우저에서 제작할 수 있어요.',
     icon: PenLine,
   },
   {
