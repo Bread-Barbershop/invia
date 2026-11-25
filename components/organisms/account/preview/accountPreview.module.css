@@ -1,0 +1,59 @@
+/*
+  계좌번호 블록.
+  어두운 초대장 배경에서는 흰 카드가 눈에 튀고 #444 계좌 정보가 보이지 않으므로,
+  [data-invitation-dark] 표식(편집기 미리보기·게스트 페이지가 함께 붙임)에 맞춰
+  배경과 글자색을 함께 바꿉니다.
+*/
+
+.card {
+  border-color: var(--color-border-button);
+}
+
+.groupButton {
+  color: var(--color-text-secondary);
+}
+
+.panel {
+  background-color: #ffffff;
+}
+
+/* 계좌 정보는 기존 --color-border-liner(#444444) 값을 그대로 사용합니다. */
+.holder,
+.accountValue {
+  color: var(--color-border-liner);
+}
+
+.copyButton {
+  color: var(--color-text-tertiary);
+}
+
+.copyIcon path {
+  stroke: var(--color-text-tertiary);
+}
+
+:global([data-invitation-dark]) .card {
+  border-color: rgb(255 255 255 / 28%);
+}
+
+:global([data-invitation-dark]) .groupButton {
+  color: #e2e6ed;
+}
+
+/* 초대장 다크 카드(surface)와 같은 반투명 검정 면을 사용합니다. */
+:global([data-invitation-dark]) .panel {
+  background-color: rgb(0 0 0 / 12%);
+}
+
+:global([data-invitation-dark]) .holder,
+:global([data-invitation-dark]) .accountValue {
+  color: #f2f4f8;
+}
+
+:global([data-invitation-dark]) .copyIcon path {
+  stroke: #e2e6ed;
+}
+
+:global([data-invitation-dark]) .copyButton:enabled:hover,
+:global([data-invitation-dark]) .copyButton:enabled:active {
+  background-color: rgb(255 255 255 / 12%);
+}

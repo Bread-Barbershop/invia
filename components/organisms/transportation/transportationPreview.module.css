@@ -1,0 +1,59 @@
+/*
+  교통·주차 안내 블록.
+  흰 안내 카드(#FAFAFB)는 어두운 초대장 배경에서 눈에 튀고 검은 글자가 사라지므로,
+  [data-invitation-dark] 표식(편집기 미리보기·게스트 페이지가 함께 붙임)에 맞춰
+  카드 면과 글자색을 함께 바꿉니다.
+*/
+
+.section {
+  background-color: #fafafb;
+}
+
+.heading {
+  color: var(--color-text-primary);
+}
+
+.line {
+  color: var(--color-text-secondary);
+}
+
+.navigationLink {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.secondaryAction {
+  border-color: var(--color-border-neutral);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.secondaryAction:hover {
+  background-color: rgb(0 0 0 / 4%);
+}
+
+:global([data-invitation-dark]) .section {
+  background-color: rgb(255 255 255 / 8%);
+}
+
+:global([data-invitation-dark]) .heading {
+  color: #f2f4f8;
+}
+
+:global([data-invitation-dark]) .line {
+  color: #dfe4ec;
+}
+
+:global([data-invitation-dark]) .navigationLink {
+  border-color: #9dc0ff;
+  color: #cfe0ff;
+}
+
+:global([data-invitation-dark]) .secondaryAction {
+  border-color: rgb(255 255 255 / 32%);
+  color: #dfe4ec;
+}
+
+:global([data-invitation-dark]) .secondaryAction:hover {
+  background-color: rgb(255 255 255 / 12%);
+}
