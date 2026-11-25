@@ -30,7 +30,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         birthday: '2026.02.20',
         message:
           '옷고름을 매어 주면 손뼉부터 쳐요. 오늘은 그 작은 손으로 돌잡이도 합니다.',
-        image: SHOWCASE_PHOTOS.dolHanbok,
+        image: SHOWCASE_PHOTOS.dolHanbokChild,
       },
       {
         component: 'calendar',
@@ -129,7 +129,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '사과나무 아래에서',
         caption: '처음 만져 본 사과를 한참이나 놓지 않던 오후예요.',
-        image: SHOWCASE_PHOTOS.dolOrchard,
+        image: SHOWCASE_PHOTOS.dolOrchardChild,
       },
       {
         component: 'greeting',
@@ -244,7 +244,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.06.12',
         message: '작은 배를 밀어 주면 파도 소리를 흉내 내며 방긋 웃어요.',
-        image: SHOWCASE_PHOTOS.dolSailboat,
+        image: SHOWCASE_PHOTOS.dolSailboatChild,
       },
       {
         component: 'place',
@@ -319,7 +319,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.01.16',
         message: '별 무늬 이불 끝을 쥐면 금세 편안한 표정이 돼요.',
-        image: SHOWCASE_PHOTOS.dolMoonlamp,
+        image: SHOWCASE_PHOTOS.dolMoonlampChild,
       },
       {
         component: 'greeting',
@@ -415,7 +415,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '첫 전시의 대표 사진',
         caption: '셔터 소리에 웃음이 터진 순간을 골랐습니다.',
-        image: SHOWCASE_PHOTOS.dolStudio,
+        image: SHOWCASE_PHOTOS.dolStudioChild,
       },
       {
         component: 'gallery',
@@ -506,7 +506,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         name: '민준',
         birthday: '2026.04.17',
         message: '목이 긴 초록 공룡을 가장 먼저 데려와 손님들에게 건넵니다.',
-        image: SHOWCASE_PHOTOS.dolDino,
+        image: SHOWCASE_PHOTOS.dolDinoChild,
       },
       {
         component: 'notice',
@@ -614,7 +614,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '편지가 도착했어요',
         caption: '봉투를 한참 들여다보던 민준이의 오후.',
-        image: SHOWCASE_PHOTOS.dolAirmail,
+        image: SHOWCASE_PHOTOS.dolAirmailChild,
       },
       {
         component: 'calendar',

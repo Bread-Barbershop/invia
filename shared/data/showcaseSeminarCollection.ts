@@ -34,7 +34,7 @@ export const seminarCollection: ShowcaseInvitation[] = [
         title: '물레 시연과 작업 지도',
         name: '정우진 도예가',
         bio: '생활 도자기를 만드는 도예가입니다. 오늘은 손에 닿는 흙의 밀도로 물레 속도와 힘을 조절하는 방법을 보여 드립니다.',
-        image: SHOWCASE_PHOTOS.clayPottery,
+        image: SHOWCASE_PHOTOS.clayPotter,
       },
       {
         component: 'timeline',

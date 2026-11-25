@@ -86,7 +86,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '두 분의 첫 대화는 기억나나요?',
         answer:
           '비가 오던 날, 버스 정류장에서 우산을 같이 썼어요. 버스가 한 대 더 지나갈 때까지 이야기했지요.',
-        image: SHOWCASE_PHOTOS.classicRings,
+        image: SHOWCASE_PHOTOS.cityCouple,
       },
       {
         component: 'picture',
@@ -175,7 +175,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '도시의 아침, 두 장',
         template: 'galleryType5',
         ratio: '4:3',
-        images: [SHOWCASE_PHOTOS.monoCrosswalk, SHOWCASE_PHOTOS.monoWindow],
+        images: [
+          SHOWCASE_PHOTOS.monoCouple,
+          SHOWCASE_PHOTOS.monoCrosswalk,
+          SHOWCASE_PHOTOS.monoWindow,
+        ],
       },
       { component: 'place', title: '만나는 곳' },
       {
@@ -941,7 +945,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '기조 강연자',
         name: 'Andrew Jackson',
         bio: '시장 신호를 읽고 팀의 우선순위를 다시 정했던 두 사례를 비교합니다. 어느 시점에 결정을 내렸는지 들어보세요.',
-        image: SHOWCASE_PHOTOS.businessStage,
+        image: SHOWCASE_PHOTOS.businessSpeaker,
       },
       { component: 'greeting' },
       {
@@ -999,7 +1003,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '테이블 대화의 첫 질문',
         name: 'Andrew Jackson',
         bio: '업계가 다른 두 팀이 같은 문제를 푼 사례를 소개합니다. 강연이 끝나면 여러분의 선택도 궁금합니다.',
-        image: SHOWCASE_PHOTOS.horizonSpeaker,
+        image: SHOWCASE_PHOTOS.horizonSpeakerStage,
       },
       { component: 'calendar', title: '포럼 일시' },
       {
@@ -1087,7 +1091,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '함께 스케치할 진행자',
         name: 'Andrew Jackson',
         bio: 'Andrew Jackson이 관찰한 불편 하나를 그림으로 바꾸는 과정을 먼저 보여 드립니다. 그다음은 각자 가져온 사례를 펼칠 차례입니다.',
-        image: SHOWCASE_PHOTOS.sparkSketch,
+        image: SHOWCASE_PHOTOS.sparkSpeaker,
       },
       {
         component: 'notice',
@@ -1144,7 +1148,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '무대에 오르는 연사',
         name: 'Andrew Jackson',
         bio: '전략을 실행에 옮길 때 리더가 마주하는 선택을 다룹니다. 발표 후에는 청중의 사례를 함께 살펴봅니다.',
-        image: SHOWCASE_PHOTOS.redMic,
+        image: SHOWCASE_PHOTOS.redSpeaker,
       },
       {
         component: 'timeline',
@@ -1226,7 +1230,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '오늘의 대화 상대',
         name: 'Andrew Jackson',
         bio: '팀의 의견이 갈리던 날 한 동료가 건넨 질문에서 이야기를 시작합니다. 여러분이 기억하는 한마디도 들려주세요.',
-        image: SHOWCASE_PHOTOS.warmConversation,
+        image: SHOWCASE_PHOTOS.warmConversationPair,
       },
       {
         component: 'mealMenu',
@@ -1582,7 +1586,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '수첩에 붙일 첫돌 케이크',
-        image: SHOWCASE_PHOTOS.littleCake,
+        image: SHOWCASE_PHOTOS.littleCakeChild,
         caption: '초 한 개를 꽂고 민준이의 첫 생일 노래를 연습했어요.',
       },
       { component: 'greeting' },
@@ -1657,7 +1661,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         birthday: '2025.08.11',
         message:
           '누가 손뼉을 치면 저도 두 손을 마주쳐요. 요즘 제일 신나는 놀이예요.',
-        image: SHOWCASE_PHOTOS.minjunShoes,
+        image: SHOWCASE_PHOTOS.minjunLift,
       },
       {
         component: 'timeline',
@@ -1734,6 +1738,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         template: 'galleryType5',
         ratio: '4:3',
         images: [
+          SHOWCASE_PHOTOS.alpineCouple,
           SHOWCASE_PHOTOS.alpineRidge,
           SHOWCASE_PHOTOS.alpineFlowers,
           SHOWCASE_PHOTOS.alpineCabin,
