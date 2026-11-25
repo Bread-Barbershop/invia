@@ -208,7 +208,7 @@ function ShowcasePreviewModal({
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <p className="mt-3 text-[11px] leading-5 text-black/45">
-                로그인 후 이 디자인으로 바로 시작해요.
+                로그인 후 이 디자인으로 바로 시작해요.{' '}
                 <br />
                 사진과 문구는 자유롭게 바꿀 수 있어요.
               </p>

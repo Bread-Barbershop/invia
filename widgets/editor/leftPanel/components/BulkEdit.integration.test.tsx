@@ -189,7 +189,7 @@ describe('일괄 편집 즉시 반영', () => {
   it('제목과 본문 편집에서 직접 선택한 글자색을 어두운 배경에서도 유지한다', () => {
     render(<BulkEdit />);
     const [titleColor, bodyColor] = screen.getAllByRole('button', {
-      name: 'Font color',
+      name: /글자 색상/,
     });
 
     fireEvent.click(titleColor);

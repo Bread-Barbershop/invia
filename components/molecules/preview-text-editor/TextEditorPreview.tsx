@@ -24,6 +24,7 @@ import { resolveFontFamily } from '@/shared/fonts/fontRegistry';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { BulkData } from '@/shared/types/block';
 import { cn } from '@/shared/utils/cn';
+import { getColorLabel } from '@/shared/utils/colorName';
 
 import { Selector } from '../selector';
 import {
@@ -63,6 +64,7 @@ export function TextEditorPreview({
   onActiveColorPickerChange,
 }: TextEditorPreviewProps) {
   const textLabel = colorPickerId === 'title' ? '제목' : '본문';
+  const colorLabel = getColorLabel(value.color);
   const colorPickerOpen = activeColorPickerId === colorPickerId;
   const backgroundColor = useEditorStore(state => state.backgroundColor);
   const [customFontSizeInput, setCustomFontSizeInput] = useState<string | null>(
@@ -235,7 +237,7 @@ export function TextEditorPreview({
           <div className="relative">
             <button
               type="button"
-              aria-label="Font color"
+              aria-label={`${textLabel} 글자 색상 ${colorLabel}`}
               aria-pressed={colorPickerOpen}
               onMouseDown={event => event.preventDefault()}
               onClick={handleColorPickerToggle}

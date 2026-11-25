@@ -67,7 +67,7 @@ function NotFound() {
             not gone.
           </h1>
           <p className="mt-8 max-w-lg text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
-            요청하신 페이지를 찾을 수 없습니다.
+            요청하신 페이지를 찾을 수 없습니다.{' '}
             <br />
             주소가 변경되었거나 삭제된 페이지일 수 있습니다.
           </p>
@@ -88,6 +88,7 @@ function NotFound() {
               <Link
                 key={href}
                 href={href}
+                aria-label={label}
                 className="group flex cursor-pointer items-center gap-4 border-b border-black/15 py-5 transition-colors hover:border-black"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-black/15 transition-colors group-hover:bg-black group-hover:text-white">
@@ -97,7 +98,10 @@ function NotFound() {
                   <span className="block text-base font-semibold tracking-[-0.02em]">
                     {label}
                   </span>
-                  <span className="mt-1 block text-[15px] leading-6 text-black/50">
+                  <span
+                    aria-hidden="true"
+                    className="mt-1 block text-[15px] leading-6 text-black/50"
+                  >
                     {description}
                   </span>
                 </span>

@@ -41,6 +41,7 @@ import {
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
+import { getColorLabel } from '@/shared/utils/colorName';
 import { isDarkInvitationBackground } from '@/shared/utils/invitationBackgroundColor';
 
 import { Selector } from '../selector';
@@ -751,7 +752,7 @@ export const TextEditor = forwardRef<TextEditorRef, TextEditorProps>(
             <div className="relative" ref={colorPickerContainerRef}>
               <button
                 type="button"
-                aria-label="Font color"
+                aria-label={`글자 색상 ${getColorLabel(activeColor)}`}
                 aria-pressed={colorPickerOpen}
                 onMouseDown={event => event.preventDefault()}
                 onClick={handleColorPickerToggle}

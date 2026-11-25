@@ -167,7 +167,7 @@ export default function TemplateEditorEntry({
               {template.name}
             </h1>
             <p className="mt-4 text-sm leading-6 text-text-secondary">
-              로그인하면 이 디자인으로 바로 시작해요.
+              로그인하면 이 디자인으로 바로 시작해요.{' '}
               <br />
               사진과 문구를 바꾸면 같은 디자인으로 완성할 수 있어요.
             </p>
