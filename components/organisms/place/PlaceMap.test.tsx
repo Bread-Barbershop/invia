@@ -26,6 +26,7 @@ describe('PlaceMap', () => {
   const mockSetOptions = jest.fn();
   const mockSetCenter = jest.fn();
   const mockSetPosition = jest.fn();
+  const mockSetMap = jest.fn();
   const mockDestroy = jest.fn();
   const mockMapConstructor = jest.fn();
 
@@ -41,13 +42,17 @@ describe('PlaceMap', () => {
       maps: {
         Map: mockMapConstructor,
         LatLng: jest.fn((lat, lng) => ({ lat, lng })),
-        Marker: jest.fn(() => ({ setPosition: mockSetPosition, setMap: jest.fn() })),
+        Marker: jest.fn(() => ({
+          setPosition: mockSetPosition,
+          setMap: mockSetMap,
+        })),
       },
     };
   });
 
   afterEach(() => {
     delete (window as unknown as { naver?: unknown }).naver;
+    jest.restoreAllMocks();
   });
 
   it('does not render lock button when locked is false', () => {
@@ -118,6 +123,47 @@ describe('PlaceMap', () => {
     expect(mockSetOptions).toHaveBeenCalledWith(expect.objectContaining({ draggable: true }));
     unmount();
     expect(mockDestroy).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['marker', 'map'] as const)(
+    'continues cleanup when the SDK throws while disposing the %s',
+    resource => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const failingMethod = resource === 'marker' ? mockSetMap : mockDestroy;
+      failingMethod.mockImplementationOnce(() => {
+        throw new TypeError(
+          "Cannot read properties of null (reading 'capitalize')"
+        );
+      });
+      const { rerender } = render(<PlaceMap lng={127.04} lat={37.54} />);
+
+      rerender(<p>지도 설정을 계속 편집할 수 있어요.</p>);
+
+      expect(mockSetMap).toHaveBeenCalledWith(null);
+      expect(mockDestroy).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByText('지도 설정을 계속 편집할 수 있어요.')
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('shows the error within the map and retries when the coordinates change', () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    mockMapConstructor.mockImplementationOnce(() => {
+      throw new Error('Naver map initialization failed');
+    });
+    const { rerender } = render(<PlaceMap lng={127.04} lat={37.54} locked />);
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '네이버 지도를 불러오지 못했어요.'
+    );
+    expect(screen.queryByTestId('map-lock-button')).not.toBeInTheDocument();
+
+    rerender(<PlaceMap lng={127.05} lat={37.55} locked />);
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByTestId('map-lock-button')).toBeInTheDocument();
   });
 
   it('reacts to prop changes for locked', () => {

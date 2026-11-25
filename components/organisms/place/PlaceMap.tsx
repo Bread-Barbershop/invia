@@ -26,64 +26,102 @@ export function PlaceMap({
   const [prevLocked, setPrevLocked] = useState(locked);
   const [isLocked, setIsLocked] = useState(locked);
   const isLockedRef = useRef(locked);
+  const [mapFailed, setMapFailed] = useState(false);
+
+  const disposeMap = useCallback(() => {
+    const currentMarker = marker.current;
+    const currentMap = mapInstance.current;
+    marker.current = null;
+    mapInstance.current = null;
+
+    try {
+      currentMarker?.setMap(null);
+    } catch (error) {
+      console.warn('[PlaceMap] Failed to detach the Naver map marker.', error);
+    }
+
+    try {
+      currentMap?.destroy();
+    } catch (error) {
+      console.warn('[PlaceMap] Failed to destroy the Naver map.', error);
+    }
+  }, []);
+
+  const showMapError = useCallback(
+    (error: unknown) => {
+      console.warn('[PlaceMap] Failed to display the Naver map.', error);
+      disposeMap();
+      setMapFailed(true);
+    },
+    [disposeMap]
+  );
 
   if (prevLocked !== locked) {
     setPrevLocked(locked);
     setIsLocked(locked);
   }
 
-  const applyLockOptions = useCallback((targetLocked: boolean) => {
-    if (!mapInstance.current) return;
-    mapInstance.current.setOptions({
-      draggable: !targetLocked,
-      scrollWheel: !targetLocked,
-      pinchZoom: !targetLocked,
-      keyboardShortcuts: !targetLocked,
-      disableDoubleClickZoom: targetLocked,
-      disableDoubleTapZoom: targetLocked,
-      disableTwoFingerTapZoom: targetLocked,
-    });
-  }, []);
-
   useEffect(() => {
     isLockedRef.current = isLocked;
-    applyLockOptions(isLocked);
-  }, [isLocked, applyLockOptions]);
+    if (!mapInstance.current) return;
+
+    try {
+      mapInstance.current.setOptions({
+        draggable: !isLocked,
+        scrollWheel: !isLocked,
+        pinchZoom: !isLocked,
+        keyboardShortcuts: !isLocked,
+        disableDoubleClickZoom: isLocked,
+        disableDoubleTapZoom: isLocked,
+        disableTwoFingerTapZoom: isLocked,
+      });
+    } catch (error) {
+      showMapError(error);
+    }
+  }, [isLocked, showMapError]);
 
   useEffect(() => {
-    if (!mapRef.current || !window.naver || !window.naver.maps) return;
-    const center = new naver.maps.LatLng(lat, lng);
-    if (mapInstance.current) {
-      mapInstance.current.setCenter(center);
-      marker.current?.setPosition(center);
+    const container = mapRef.current;
+    if (!container) return;
+    const maps = window.naver?.maps;
+    if (!maps) {
+      setMapFailed(true);
       return;
     }
-    const initialLocked = isLockedRef.current;
-    mapInstance.current = new naver.maps.Map(mapRef.current, {
-      center,
-      zoom: 15,
-      scaleControl: false,
-      draggable: !initialLocked,
-      scrollWheel: !initialLocked,
-      pinchZoom: !initialLocked,
-      keyboardShortcuts: !initialLocked,
-      disableDoubleClickZoom: initialLocked,
-      disableDoubleTapZoom: initialLocked,
-      disableTwoFingerTapZoom: initialLocked,
-    });
 
-    marker.current = new naver.maps.Marker({
-      map: mapInstance.current,
-      position: center,
-    });
-  }, [lng, lat]);
+    try {
+      const center = new maps.LatLng(lat, lng);
+      if (mapInstance.current) {
+        mapInstance.current.setCenter(center);
+        marker.current?.setPosition(center);
+        return;
+      }
 
-  useEffect(() => () => {
-    marker.current?.setMap(null);
-    mapInstance.current?.destroy();
-    marker.current = null;
-    mapInstance.current = null;
-  }, []);
+      const initialLocked = isLockedRef.current;
+      mapInstance.current = new maps.Map(container, {
+        center,
+        zoom: 15,
+        scaleControl: false,
+        draggable: !initialLocked,
+        scrollWheel: !initialLocked,
+        pinchZoom: !initialLocked,
+        keyboardShortcuts: !initialLocked,
+        disableDoubleClickZoom: initialLocked,
+        disableDoubleTapZoom: initialLocked,
+        disableTwoFingerTapZoom: initialLocked,
+      });
+
+      marker.current = new maps.Marker({
+        map: mapInstance.current,
+        position: center,
+      });
+      setMapFailed(false);
+    } catch (error) {
+      showMapError(error);
+    }
+  }, [lng, lat, showMapError]);
+
+  useEffect(() => disposeMap, [disposeMap]);
 
   const toggleLock = useCallback(() => {
     setIsLocked(prev => !prev);
@@ -103,7 +141,15 @@ export function PlaceMap({
       </Label>
       <div className="relative isolate z-0 h-64.5 w-full overflow-hidden rounded-lg">
         <div ref={mapRef} className="h-full w-full" />
-        {locked && (
+        {mapFailed && (
+          <p
+            role="status"
+            className="absolute inset-0 grid place-items-center bg-bg-sub px-4 text-center text-sm text-text-secondary"
+          >
+            네이버 지도를 불러오지 못했어요.
+          </p>
+        )}
+        {locked && !mapFailed && (
           <button
             type="button"
             onClick={handleToggleLock}
