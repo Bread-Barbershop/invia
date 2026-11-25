@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import React, { useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/shallow';
 
+import { PreviewTitleHeadingProvider } from '@/components/atoms/preview-title/PreviewTitleHeadingContext';
 import {
   getBlockEntrance,
   resolveScrollAnimation,
@@ -143,7 +144,7 @@ function GuestRenderer({
       );
     }
   }, [bulkData.isZoom]);
-  return (
+  const invitation = (
     <div
       className="flex flex-col"
       data-invitation-dark={darkCards || undefined}
@@ -215,6 +216,16 @@ function GuestRenderer({
         );
       })}
     </div>
+  );
+
+  // 하객 화면·쇼케이스처럼 초대장이 한 장의 문서로 읽히는 화면에서만
+  // 섹션 제목을 h2로 올린다. 편집 미리보기 안에서는 기존 <p> 그대로 둔다.
+  if (!isGuestPage) return invitation;
+
+  return (
+    <PreviewTitleHeadingProvider level={2}>
+      {invitation}
+    </PreviewTitleHeadingProvider>
   );
 }
 

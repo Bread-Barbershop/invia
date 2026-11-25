@@ -9,6 +9,7 @@ import { isDarkInvitationBackground } from '@/shared/utils/invitationBackgroundC
 import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
 
 import GuestBgm from './GuestBgm';
+import { GuestDocumentHeading } from './GuestDocumentHeading';
 import { GuestMainPoster } from './GuestMainPoster';
 import { GuestPrivacyNotice } from './GuestPrivacyNotice';
 import GuestRenderer from './GuestRenderer';
@@ -54,6 +55,7 @@ function GuestInvitationView({
       mode={imageResolveMode}
     >
       <Root className={rootClassName}>
+        {mode === 'guest' && <GuestDocumentHeading payload={payload} />}
         <div id="preview-container" className={containerClassName}>
           <InvitationBackgroundTexture
             color={payload.bulkData.backgroundColor}
