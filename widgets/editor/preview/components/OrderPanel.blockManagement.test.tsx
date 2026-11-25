@@ -31,11 +31,7 @@ jest.mock('./DeleteModal', () => ({
 
 jest.mock('./SortableItems', () => ({
   __esModule: true,
-  default: ({
-    id,
-    onContextMenu,
-    onDuplicateRequest,
-  }: any) => (
+  default: ({ id, onContextMenu }: any) => (
     <div>
       <button type="button" data-order-block-id={id} data-testid={`item-${id}`}>
         {id}
@@ -44,11 +40,6 @@ jest.mock('./SortableItems', () => ({
         type="button"
         aria-label={`${id} 우클릭`}
         onClick={event => onContextMenu(event, id)}
-      />
-      <button
-        type="button"
-        aria-label={`${id} 복제`}
-        onClick={() => onDuplicateRequest?.(id)}
       />
     </div>
   ),
@@ -160,15 +151,6 @@ describe('순서 패널 블록 관리', () => {
     expect(screen.getByTestId('item-greeting-1')).toHaveFocus();
   });
 
-  it('복제 버튼을 누르면 복제본이 생긴다', () => {
-    render(<OrderPanel />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'greeting-1 복제' }));
-
-    expect(getBlockIds()).toHaveLength(3);
-    expect(useEditorStore.getState().block[1].component).toBe('greeting');
-  });
-
   it('Ctrl+D 로 선택한 블록을 복제한다', () => {
     act(() => useEditorStore.getState().selectedBlock('greeting-1'));
     render(<OrderPanel />);
@@ -225,24 +207,25 @@ describe('순서 패널 블록 관리', () => {
   it('블록을 복제하면 스크린리더용 안내를 남긴다', () => {
     render(<OrderPanel />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'greeting-1 복제' }));
+    fireEvent.click(screen.getByRole('button', { name: 'greeting-1 우클릭' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: '복제하기' }));
 
     expect(screen.getByTestId('order-announcement')).toHaveTextContent(
       '인사말 블록을 복제했어요.'
     );
   });
 
-  it('순서를 옮기면 스크린리더용 안내를 남긴다', () => {
+  it('복제한 뒤 다른 블록을 옮기면 스크린리더용 안내가 바뀐다', () => {
     render(<OrderPanel />);
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'transportation-1 복제' })
+      screen.getByRole('button', { name: 'transportation-1 우클릭' })
     );
+    fireEvent.click(screen.getByRole('menuitem', { name: '복제하기' }));
     expect(screen.getByTestId('order-announcement')).toHaveTextContent(
       '교통 / 주차 블록을 복제했어요.'
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'greeting-1 복제' }));
     act(() => useEditorStore.getState().selectedBlock('transportation-1'));
     fireEvent.keyDown(window, { key: 'ArrowUp', altKey: true });
 

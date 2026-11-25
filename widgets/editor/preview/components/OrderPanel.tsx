@@ -382,7 +382,6 @@ function OrderPanel() {
                   onContextMenu={handleContextMenu}
                   onSelect={handleSelect}
                   onDeleteRequest={id => setDeleteTargetId(id)}
-                  onDuplicateRequest={handleDuplicate}
                 />
               ))}
             </SortableContext>

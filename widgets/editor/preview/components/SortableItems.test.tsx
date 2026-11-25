@@ -47,7 +47,6 @@ describe('SortableItems 컴포넌트', () => {
     onSelect: jest.fn(),
     onContextMenu: jest.fn(),
     onDeleteRequest: jest.fn(),
-    onDuplicateRequest: jest.fn(),
   };
 
   beforeEach(() => {
@@ -70,23 +69,9 @@ describe('SortableItems 컴포넌트', () => {
     expect(screen.getByText('인사말 1')).toBeInTheDocument();
   });
 
-  it('호버 시 노출되는 삭제(X)·복제 버튼이 렌더링된다', () => {
+  it('호버 시 노출되는 삭제(X) 버튼이 블록 이름과 함께 렌더링된다', () => {
     render(<SortableItems {...defaultProps} />);
 
-    expect(
-      screen.getByRole('button', { name: /삭제하기/ })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /복제하기/ })
-    ).toBeInTheDocument();
-  });
-
-  it('액션 버튼은 블록 이름을 함께 읽어 준다', () => {
-    render(<SortableItems {...defaultProps} />);
-
-    expect(
-      screen.getByRole('button', { name: '인사말 1 블록 복제하기' })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '인사말 1 블록 삭제하기' })
     ).toBeInTheDocument();
@@ -102,34 +87,15 @@ describe('SortableItems 컴포넌트', () => {
 
     fireEvent.click(deleteBtn);
     expect(defaultProps.onDeleteRequest).toHaveBeenCalledWith('block-1');
-    expect(defaultProps.onDuplicateRequest).not.toHaveBeenCalled();
     expect(defaultProps.onSelect).not.toHaveBeenCalled();
   });
 
-  it('복제 버튼 클릭 시 onDuplicateRequest가 호출되고 onSelect는 호출되지 않는다', () => {
-    render(<SortableItems {...defaultProps} />);
-
-    const duplicateBtn = screen.getByRole('button', { name: /복제하기/ });
-
-    fireEvent.pointerDown(duplicateBtn);
-    fireEvent.click(duplicateBtn);
-
-    expect(defaultProps.onDuplicateRequest).toHaveBeenCalledWith('block-1');
-    expect(defaultProps.onDeleteRequest).not.toHaveBeenCalled();
-    expect(defaultProps.onSelect).not.toHaveBeenCalled();
-  });
-
-  it('복제 핸들러가 없으면 복제 버튼을 노출하지 않는다', () => {
-    render(
-      <SortableItems {...defaultProps} onDuplicateRequest={undefined} />
-    );
+  it('삭제 핸들러가 없으면 X 버튼을 노출하지 않는다', () => {
+    render(<SortableItems {...defaultProps} onDeleteRequest={undefined} />);
 
     expect(
-      screen.queryByRole('button', { name: /복제하기/ })
+      screen.queryByRole('button', { name: /삭제하기/ })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /삭제하기/ })
-    ).toBeInTheDocument();
   });
 
   it('순서 항목에 블록 id를 담아 키보드 포커스로 되돌아올 수 있게 한다', () => {
