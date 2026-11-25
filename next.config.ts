@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
     };
   },
 
+  async redirects() {
+    // 외부에 공유된 제작 시작 주소를 편집기로 연결한다. (내부 링크는 /editor 사용)
+    return [{ source: '/create', destination: '/editor', permanent: true }];
+  },
+
   images: {
     remotePatterns: [
       {
