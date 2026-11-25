@@ -68,14 +68,32 @@ describe('sharePhotoLink', () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
-  it('공유 시트를 닫으면(cancel) 실패 안내 없이 canceled를 돌려준다', async () => {
+  it('공유 시트를 열었다가 닫으면(cancel) 실패 안내 없이 canceled를 돌려준다', async () => {
     const abort = Object.assign(new Error('canceled'), { name: 'AbortError' });
-    defineNavigatorValue('share', jest.fn().mockRejectedValue(abort));
+    defineNavigatorValue(
+      'share',
+      jest.fn().mockImplementation(() => {
+        // 공유 시트가 뜨면 페이지 포커스가 잠시 벗어난다.
+        window.dispatchEvent(new Event('blur'));
+        return Promise.reject(abort);
+      })
+    );
 
     await expect(
       sharePhotoLink({ url: 'https://dev.invia.co.kr/abc' })
     ).resolves.toBe('canceled');
     expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it('공유 시트가 뜨지 않고 abort되면(데스크톱 등) 링크 복사로 폴백한다', async () => {
+    const abort = Object.assign(new Error('canceled'), { name: 'AbortError' });
+    defineNavigatorValue('share', jest.fn().mockRejectedValue(abort));
+    writeText.mockResolvedValue(undefined);
+
+    await expect(
+      sharePhotoLink({ url: 'https://dev.invia.co.kr/abc' })
+    ).resolves.toBe('copied');
+    expect(writeText).toHaveBeenCalledWith('https://dev.invia.co.kr/abc');
   });
 
   it('Web Share API가 없으면 링크를 클립보드에 복사한다', async () => {
