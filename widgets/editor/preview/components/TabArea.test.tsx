@@ -27,6 +27,16 @@ describe('TabArea 컴포넌트', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('onClose를 넘기면 닫기 버튼을 표시하고 누르면 호출한다', () => {
+    const onClose = jest.fn();
+    render(<TabArea {...defaultProps} onClose={onClose} />);
+
+    const closeButton = screen.getByRole('button', { name: '블록 추가 닫기' });
+    fireEvent.click(closeButton);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('검색 인풋에 텍스트 입력 시 onSearchChange가 호출된다', () => {
     render(<TabArea {...defaultProps} />);
 

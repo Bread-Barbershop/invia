@@ -288,6 +288,7 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
                     tabClick={english => handleTabClick(english)}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
+                    onClose={handleClose}
                   />
                 </div>
                 <ContentsArea

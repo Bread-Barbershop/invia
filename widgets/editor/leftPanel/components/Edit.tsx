@@ -25,10 +25,17 @@ function Edit() {
 
   if (!block || !selectedId)
     return (
-      <div className="h-203 flex-center font-semibold text-sm">
-        {isEmpty && !selectedId
-          ? '가운데에서 포스터를 선택해 주세요'
-          : '페이지를 추가해주세요'}
+      <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
+        <p className="text-sm font-semibold text-text-plain">
+          {isEmpty && !selectedId
+            ? '가운데에서 포스터를 선택해 주세요'
+            : '페이지를 추가해주세요'}
+        </p>
+        <p className="text-xs leading-5 text-text-secondary">
+          {isEmpty && !selectedId
+            ? '포스터를 고르면 이곳에서 글꼴과 색상을 바꿀 수 있어요.'
+            : '오른쪽의 +페이지 추가에서 필요한 블록을 골라 보세요.'}
+        </p>
       </div>
     );
 
