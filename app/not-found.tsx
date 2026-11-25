@@ -1,7 +1,8 @@
-import { ArrowUpRight, Home, Search } from 'lucide-react';
+import { ArrowUpRight, Home, LayoutGrid, PenLine, Search } from 'lucide-react';
 import Link from 'next/link';
 
 import HeaderPrivacyNoticeButton from '@/features/session/components/HeaderPrivacyNoticeButton';
+import { DASHBOARD_SHELL_NAV_MENU } from '@/features/session/config/dashboardShell.config';
 import homeBackgroundImage from '@/shared/assets/images/home/home-background.png';
 import InviaLogo from '@/shared/assets/logo/invia-logo.svg';
 
@@ -10,16 +11,28 @@ const HEADER_NAV_LINK_CLASS =
 
 const QUICK_LINKS = [
   {
-    href: '/',
-    label: '홈으로 돌아가기',
-    description: 'Invia 메인 페이지로 이동합니다.',
-    icon: Home,
+    href: '/gallery',
+    label: '초대장 갤러리 둘러보기',
+    description: '디자인을 미리 보고 마음에 드는 초대장을 골라보세요.',
+    icon: LayoutGrid,
+  },
+  {
+    href: '/editor',
+    label: '새 초대장 만들기',
+    description: '빈 초대장에서 바로 제작을 시작합니다.',
+    icon: PenLine,
   },
   {
     href: '/faq',
     label: 'FAQ 살펴보기',
     description: '자주 묻는 질문에서 답변을 찾아보세요.',
     icon: Search,
+  },
+  {
+    href: '/',
+    label: '홈으로 돌아가기',
+    description: 'Invia 메인 페이지로 이동합니다.',
+    icon: Home,
   },
 ] as const;
 
@@ -46,10 +59,16 @@ function NotFound() {
             />
           </Link>
 
-          <nav className="flex h-full items-center gap-6">
-            <Link href="/faq" className={HEADER_NAV_LINK_CLASS}>
-              FAQ
-            </Link>
+          <nav className="hidden h-full items-center gap-6 sm:flex">
+            {DASHBOARD_SHELL_NAV_MENU.map(menu => (
+              <Link
+                key={`${menu.title}-${menu.href}`}
+                href={menu.href}
+                className={HEADER_NAV_LINK_CLASS}
+              >
+                {menu.title}
+              </Link>
+            ))}
           </nav>
         </div>
 

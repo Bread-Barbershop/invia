@@ -206,4 +206,32 @@ describe('EditorViewportGuard & SaveModal layering', () => {
       screen.getByText('소중한 사진을 불러오고 있어요')
     ).toBeInTheDocument();
   });
+
+  it('keeps a way out of the notice: gallery and FAQ links stay reachable', () => {
+    window.innerWidth = 390;
+
+    render(
+      <EditorViewportGuard>
+        <div data-testid="editor-content">Editor Body</div>
+      </EditorViewportGuard>
+    );
+
+    const galleryLink = screen
+      .getAllByRole('link')
+      .find(
+        link =>
+          link.getAttribute('href') === '/gallery' &&
+          link.textContent?.includes('갤러리 둘러보기')
+      );
+    const faqLink = screen
+      .getAllByRole('link')
+      .find(
+        link =>
+          link.getAttribute('href') === '/faq' &&
+          link.textContent?.includes('FAQ 살펴보기')
+      );
+
+    expect(galleryLink).toBeDefined();
+    expect(faqLink).toBeDefined();
+  });
 });
