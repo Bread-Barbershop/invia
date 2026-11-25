@@ -155,13 +155,13 @@ export default function HomeShowcaseCarousel({
           }
         >
           <div className="flex items-center gap-3" aria-hidden="true">
-            <div className="h-1 w-32 overflow-hidden rounded-full bg-black/10">
+            <div className="h-1 w-28 overflow-hidden rounded-full bg-black/15">
               <div
-                className="h-full rounded-full bg-[#252522]/70 transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                className="h-full rounded-full bg-[#252522] transition-[width] duration-300 ease-out motion-reduce:transition-none"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <span className="font-pretendard text-[11px] font-semibold tabular-nums text-[#5B5B57]">
+            <span className="font-pretendard text-[11px] font-semibold tabular-nums text-[#3F3F3B]">
               {String(slideStatus.index + 1).padStart(2, '0')} /{' '}
               {String(slideStatus.total).padStart(2, '0')}
             </span>
