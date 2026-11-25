@@ -24,6 +24,10 @@ export function CalendarType3({
   // Saved times are 12-hour with a period ("오후 06:00") or 24-hour ("18:00").
   // Parse them so the highlighted day never prints "06:00 / 오후" for 6 PM.
   const clock = parseCalendarClock(time);
+  const savedKoreanPeriod = /^\s*오[전후]/.test(time ?? '');
+  const periodLabel = clock
+    ? formatClockPeriod(clock, savedKoreanPeriod ? 'ko' : language)
+    : '';
 
   return (
     <div className="w-full px-4 flex flex-col shadow-edit font-lineseed">
@@ -65,7 +69,7 @@ export function CalendarType3({
                     {formatClock12Digits(clock)}
                   </span>
                   <span className="text-[11px] font-sans leading-[1.1] block">
-                    {formatClockPeriod(clock, language)}
+                    {periodLabel}
                   </span>
                 </div>
               )}

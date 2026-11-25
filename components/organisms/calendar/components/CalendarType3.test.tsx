@@ -44,8 +44,15 @@ describe('CalendarType3 time label', () => {
     expect(screen.getByText('오전')).toBeInTheDocument();
   });
 
-  it('uses AM/PM for English invitations', () => {
+  it('keeps the Korean period an author saved, even on an English template', () => {
     renderType3('오후 06:00', 'en');
+
+    expect(screen.getByText('6:00')).toBeInTheDocument();
+    expect(screen.getByText('오후')).toBeInTheDocument();
+  });
+
+  it('uses AM/PM for a 24-hour value on an English template', () => {
+    renderType3('18:00', 'en');
 
     expect(screen.getByText('PM')).toBeInTheDocument();
   });
