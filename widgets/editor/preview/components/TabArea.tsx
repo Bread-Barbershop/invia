@@ -31,7 +31,7 @@ function TabArea({
         ))}
       </ul>
       <div className="flex shrink-0 items-center">
-        <div className="relative flex w-36 items-center">
+        <div className="relative flex w-32 items-center">
           <Search
             size={14}
             className="pointer-events-none absolute left-2.5 text-neutral-400"
