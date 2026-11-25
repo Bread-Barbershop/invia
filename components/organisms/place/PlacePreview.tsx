@@ -4,6 +4,7 @@ import { HTMLAttributes, useState } from 'react';
 
 import { MiddlePreviewWrapper } from '@/components/organisms/wrapper/MiddlePreviewWrapper';
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
+import { resolveSketchPalette } from '@/shared/map/sketch/palettes';
 import type { EditorBlock } from '@/shared/types/block';
 import { formatPhoneNumber } from '@/shared/utils/phoneNumber';
 import {
@@ -15,6 +16,9 @@ import { NaverMapScript } from './NaverMapScript';
 import { Navigation } from './Navigation';
 import { hasPlaceCoordinates } from './placeCoordinates';
 import { PlaceMap } from './PlaceMap';
+import { SketchErrorBoundary } from './sketch/SketchErrorBoundary';
+import { SketchMapSvg } from './sketch/SketchMapSvg';
+import { resolvePlaceSketchProps } from './sketch/sketchOptionsModel';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   blockInfo: EditorBlock<'place'>;
@@ -43,6 +47,8 @@ export const PlacePreview = ({
     mapLocked,
   } = blockInfo.props;
   const showMap = blockInfo.props.openMap && hasPlaceCoordinates(blockInfo.props.lng, blockInfo.props.lat);
+  const sketchProps = resolvePlaceSketchProps(blockInfo.props);
+  const useSketch = sketchProps.mapStyle === 'sketch' && sketchProps.sketch !== null;
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const { fontFamily, fontSize } = useBodyFontInfo();
   const detailStyle = {
@@ -78,7 +84,21 @@ export const PlacePreview = ({
         </p>
       )}
 
-      {showMap && isScriptLoaded && (
+      {showMap && useSketch && sketchProps.sketch && (
+        <SketchErrorBoundary label="preview" fallback={null}>
+          <SketchMapSvg
+            data={sketchProps.sketch}
+            palette={resolveSketchPalette(sketchProps.sketchPalette)}
+            showStations={sketchProps.sketchShowStations}
+            showVenueLabel={sketchProps.sketchShowLabel}
+            showScale={sketchProps.sketchShowScale}
+            venueLabel={placeName || placeAddress}
+            className="overflow-hidden rounded-lg"
+          />
+        </SketchErrorBoundary>
+      )}
+
+      {showMap && !useSketch && isScriptLoaded && (
         <PlaceMap
           lng={blockInfo.props.lng}
           lat={blockInfo.props.lat}

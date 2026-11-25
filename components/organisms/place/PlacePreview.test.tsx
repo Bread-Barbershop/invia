@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
+import { SKETCH_MAP_VERSION, type SketchMapData } from '@/shared/map/sketch/sketchTypes';
 import type { EditorBlock } from '@/shared/types/block';
 
 jest.mock('@/components/organisms/wrapper/MiddlePreviewWrapper', () => ({
@@ -28,6 +29,17 @@ jest.mock('./Navigation', () => ({
 import { PlacePreview } from './PlacePreview';
 
 describe('PlacePreview', () => {
+  const SKETCH: SketchMapData = {
+    v: SKETCH_MAP_VERSION,
+    lat: 37.54,
+    lng: 127.04,
+    radius: 500,
+    density: 'standard',
+    roads: [{ c: 'major', p: '100,500 900,500' }],
+    areas: [],
+    stations: [{ n: '언주역', code: '926', exits: ['2'], x: 640, y: 420 }],
+  };
+
   const createBlock = (
     propsPartial: Partial<EditorBlock<'place'>['props']> = {}
   ): EditorBlock<'place'> => ({
@@ -83,4 +95,37 @@ describe('PlacePreview', () => {
     expect(screen.queryByText(/TEL\./i)).not.toBeInTheDocument();
   });
 
+  it('미니멀 약도 모드에서는 저장된 약도를 SVG로 그린다', () => {
+    render(
+      <PlacePreview
+        blockInfo={createBlock({
+          openMap: true,
+          mapStyle: 'sketch',
+          sketch: SKETCH,
+          placeName: '라움아트센터',
+        })}
+        className="test-place"
+      />
+    );
+
+    expect(
+      screen.getByRole('img', { name: '라움아트센터 약도' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('언주역')).toBeInTheDocument();
+  });
+
+  it('약도 모드라도 지도를 끄면 약도를 그리지 않는다', () => {
+    render(
+      <PlacePreview
+        blockInfo={createBlock({
+          openMap: false,
+          mapStyle: 'sketch',
+          sketch: SKETCH,
+        })}
+        className="test-place"
+      />
+    );
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
 });
