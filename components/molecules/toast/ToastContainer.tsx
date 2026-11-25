@@ -22,6 +22,10 @@ const toastWrapperClass =
 
 export const ToastContainer = () => {
   const { message, variant, isVisible, options } = useToastStore();
+
+  // 서버 렌더링에서는 포털을 만들 document가 없다.
+  if (typeof document === 'undefined') return null;
+
   const isAssertive = variant === 'error' || variant === 'warning';
   const visibility = getToastVisibilityClass(isVisible, options.animation);
 
