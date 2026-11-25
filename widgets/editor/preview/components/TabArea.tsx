@@ -1,12 +1,19 @@
 import { Search, X } from 'lucide-react';
 
-import { componentCls } from '@/shared/data/componentsInfo/componentInfo';
+import {
+  componentCls,
+  type SampleDataType,
+} from '@/shared/data/componentsInfo/componentInfo';
+import { prioritizeComponentCategories } from '@/shared/data/componentsInfo/componentOrder';
+import type { InvitationType } from '@/shared/types/block';
 
 interface Props {
   active: string;
   tabClick: (english: string) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  /** 지금 편집 중인 초대장 종류. 있으면 그 탭을 맨 앞에 두고 표시한다. */
+  currentType?: InvitationType | null;
 }
 
 function TabArea({
@@ -14,17 +21,32 @@ function TabArea({
   tabClick,
   searchQuery = '',
   onSearchChange,
+  currentType = null,
 }: Props) {
+  const orderedCategories: SampleDataType[] = prioritizeComponentCategories(
+    componentCls,
+    currentType
+  );
+
   return (
     <div className="flex min-w-0 items-center gap-2 px-3">
       <ul className="flex min-w-0 flex-1 overflow-x-auto scrollbar-hide">
-        {componentCls.map((items, index) => (
+        {orderedCategories.map((items, index) => (
           <li
             key={index}
-            className={`w-18 shrink-0 h-11 cursor-pointer select-none flex-center font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
+            className={`w-18 shrink-0 h-11 cursor-pointer select-none flex-center gap-1 font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
             onClick={() => tabClick(items.english)}
           >
             {items.korea}
+            {currentType === items.english && (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-primary"
+                />
+                <span className="sr-only">현재 초대장</span>
+              </>
+            )}
           </li>
         ))}
       </ul>

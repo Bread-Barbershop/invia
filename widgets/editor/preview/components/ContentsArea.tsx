@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/shallow';
 
 import { UtilityButton } from '@/components/atoms/button';
 import { componentCls } from '@/shared/data/componentsInfo/componentInfo';
+import { prioritizeComponentCategories } from '@/shared/data/componentsInfo/componentOrder';
 import { filterComponentCategories } from '@/shared/data/componentsInfo/componentSearch';
 import type { InvitationTemplateType } from '@/shared/data/invitationTemplates';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -26,6 +27,8 @@ interface Props {
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   sectionRefs: RefObject<Record<string, HTMLDivElement | null>>;
   searchQuery?: string;
+  /** 지금 편집 중인 초대장 종류. 있으면 그 분류를 맨 앞에 보여준다. */
+  currentType?: InvitationType | null;
   onOpenTemplatePicker: (type: InvitationTemplateType) => void;
   onOpenMealMenuPicker: (type: InvitationType) => void;
 }
@@ -34,6 +37,7 @@ function ContentsArea({
   scrollContainerRef,
   sectionRefs,
   searchQuery = '',
+  currentType = null,
   onOpenTemplatePicker,
   onOpenMealMenuPicker,
 }: Props) {
@@ -50,6 +54,11 @@ function ContentsArea({
   const filteredCategories = useMemo(
     () => filterComponentCategories(componentCls, query),
     [query]
+  );
+  const orderedCategories = useMemo(
+    // 검색 중에는 분류를 섞지 않고 원래 순서로 결과만 보여준다.
+    () => prioritizeComponentCategories(filteredCategories, query ? null : currentType),
+    [filteredCategories, query, currentType]
   );
 
   const resolveInvitationType = (
@@ -103,7 +112,7 @@ function ContentsArea({
       className="overflow-y-auto px-5 flex flex-col gap-5 popup-custom-scrollbar"
       ref={scrollContainerRef}
     >
-      {filteredCategories.length === 0 ? (
+      {orderedCategories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-text-tertiary select-none">
           <Search size={32} className="mb-2 text-neutral-300" />
           <p className="text-sm font-medium">검색 결과가 없습니다.</p>
@@ -112,7 +121,7 @@ function ContentsArea({
           </p>
         </div>
       ) : (
-        filteredCategories.map(items => (
+        orderedCategories.map(items => (
           <div
             key={items.english}
             data-type={items.english}
@@ -121,7 +130,14 @@ function ContentsArea({
             }}
           >
             <div className="font-semibold flex justify-between items-center h-11">
-              <h2 className="text-sm font-semibold">{items.korea}</h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-sm font-semibold">{items.korea}</h2>
+                {!query && items.english === currentType && (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    현재 초대장
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 {items.english !== 'etc' && items.english !== 'layout' && (
                   <UtilityButton

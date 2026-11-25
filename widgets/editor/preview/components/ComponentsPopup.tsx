@@ -45,7 +45,10 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
     () => true,
     () => false
   );
-  const [active, setActive] = useState('wedding');
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const currentType = useEditorStore(state => state.block[0]?.type ?? null);
+  // 사용자가 탭을 누르거나 스크롤하기 전에는 지금 만드는 초대장 분류를 보여준다.
+  const active = activeTab ?? currentType ?? 'wedding';
   const [searchQuery, setSearchQuery] = useState('');
   const [templatePickerType, setTemplatePickerType] =
     useState<InvitationTemplateType | null>(null);
@@ -80,6 +83,7 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
     setSearchQuery('');
     setTemplatePickerType(null);
     setMealMenuPickerType(null);
+    setActiveTab(null);
     onPopClose();
   }, [isApplying, onPopClose]);
 
@@ -160,7 +164,7 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type');
-            if (type) setActive(type);
+            if (type) setActiveTab(type);
           }
         });
       },
@@ -195,7 +199,7 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
     }
 
     isManualScrolling.current = true;
-    setActive(english);
+    setActiveTab(english);
     sectionRefs.current[english]?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
@@ -288,12 +292,14 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
                     tabClick={english => handleTabClick(english)}
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
+                    currentType={currentType}
                   />
                 </div>
                 <ContentsArea
                   scrollContainerRef={scrollContainerRef}
                   sectionRefs={sectionRefs}
                   searchQuery={searchQuery}
+                  currentType={currentType}
                   onOpenTemplatePicker={handleOpenTemplatePicker}
                   onOpenMealMenuPicker={setMealMenuPickerType}
                 />
