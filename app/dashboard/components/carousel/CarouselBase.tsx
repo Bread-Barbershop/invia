@@ -152,11 +152,21 @@ function CarouselBase({
     [emblaApi, items.length]
   );
 
+  const hasPrevious = selectedIndex > 0;
+  const hasNext = selectedIndex < items.length - 1;
+
   return (
     <section
+      aria-label="내 초대장"
+      aria-roledescription="캐러셀"
       className="relative left-1/2 w-screen -translate-x-1/2"
       style={{ height: stageHeight, minWidth: DESKTOP_CONTENT_MIN_WIDTH }}
     >
+      <p aria-live="polite" aria-atomic="true" className="sr-only">
+        {items.length > 0
+          ? `초대장 ${Math.min(selectedIndex + 1, items.length)} / ${items.length}`
+          : ''}
+      </p>
       <CarouselTrack
         emblaRef={emblaRef}
         items={items}
@@ -181,7 +191,11 @@ function CarouselBase({
         getVisibilityError={getVisibilityError}
       />
       <div className="absolute inset-x-0 bottom-0 z-10">
-        <CarouselController onMove={handleMove} />
+        <CarouselController
+          onMove={handleMove}
+          canMovePrevious={hasPrevious}
+          canMoveNext={hasNext}
+        />
       </div>
     </section>
   );

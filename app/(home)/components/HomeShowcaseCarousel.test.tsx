@@ -80,6 +80,8 @@ it.each(['클릭', 'Enter'])(
     if (input === '클릭') {
       await user.click(card);
     } else {
+      // 자동 넘김 멈춤 버튼 → 첫 카드 → 두 번째 카드
+      await user.tab();
       await user.tab();
       await user.tab();
       expect(card).toHaveFocus();

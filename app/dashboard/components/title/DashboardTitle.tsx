@@ -8,7 +8,7 @@ function DashboardTitle() {
       }}
     >
       <p className="text-2xl font-medium">Archive</p>
-      <p className="text-[64px] font-black">내 초대장</p>
+      <h1 className="text-[64px] font-black">내 초대장</h1>
       <p className="text-2xl font-medium">
         저장한 초대장을 다시 편집하거나 사용할 수 있어요.
       </p>
