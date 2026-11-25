@@ -47,6 +47,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
 
   const popupRef = useRef<Window | null>(null);
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
+  const requireFreshLoginRef = useRef(false);
   const openLoginAfterNoticeRef = useRef(false);
 
   const releaseLoginPending = useCallback(() => {
@@ -61,6 +62,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
     setIsLoginOpen(false);
     setIsDrivePermissionRequiredOpen(false);
     pendingActionRef.current = null;
+    requireFreshLoginRef.current = false;
     openLoginAfterNoticeRef.current = false;
 
     if (closePopup && popup) {
@@ -74,6 +76,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
 
   const completeLoginSuccess = useCallback(() => {
     popupRef.current = null;
+    requireFreshLoginRef.current = false;
     setIsLoginPending(false);
     setIsLoginOpen(false);
     setIsDrivePermissionRequiredOpen(false);
@@ -117,7 +120,9 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
-      if (!popupRef.current) return;
+      const popup = popupRef.current;
+      if (!popup || (requireFreshLoginRef.current && event.source !== popup))
+        return;
 
       const message = event.data as GoogleOAuthMessage;
 
@@ -147,22 +152,26 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
     if (!isLoginPending) return;
 
     const handleFocus = async () => {
-      try {
-        if (await fetchSessionState()) {
-          completeLoginSuccess();
-          return;
+      const popup = popupRef.current;
+      if (!popup) return;
+
+      // Drive rejected the existing session. Only the OAuth callback can
+      // confirm a fresh login in that case.
+      if (!requireFreshLoginRef.current) {
+        try {
+          if (await fetchSessionState()) {
+            if (popupRef.current === popup) completeLoginSuccess();
+            return;
+          }
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error(err);
       }
 
-      const popup = popupRef.current;
-      if (popup && !popup.closed) {
-        return;
-      }
+      if (!popup.closed) return;
 
       window.setTimeout(() => {
-        if (popupRef.current?.closed) {
+        if (popupRef.current === popup && popup.closed) {
           releaseLoginPending();
         }
       }, 250);
@@ -175,6 +184,12 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
   const login = () => {
     openLoginAfterNoticeRef.current = true;
     setIsPrivacyNoticeOpen(true);
+  };
+
+  const runAfterReauth = (action: () => void | Promise<void>) => {
+    pendingActionRef.current = action;
+    requireFreshLoginRef.current = true;
+    login();
   };
 
   const closeLogin = () => {
@@ -195,9 +210,7 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
   };
 
   const closeDrivePermissionRequired = () => {
-    pendingActionRef.current = null;
-    setIsDrivePermissionRequiredOpen(false);
-    setIsLoginPending(false);
+    clearLoginAttempt();
   };
 
   const retryDrivePermission = () => {
@@ -315,5 +328,6 @@ export function useAuthGate(options: UseAuthGateOptions = {}) {
     retryDrivePermission,
     logout,
     runAfterAuth,
+    runAfterReauth,
   };
 }

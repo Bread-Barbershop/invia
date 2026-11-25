@@ -16,7 +16,7 @@ export function LargePrintFilter({
         onChange={event => onChange(event.target.checked)}
         className="size-5 accent-neutral-900"
       />
-      큰 글씨만 보기
+      읽기 편한 디자인만 보기
     </label>
   );
 }

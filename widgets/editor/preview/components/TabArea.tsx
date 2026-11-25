@@ -7,7 +7,6 @@ interface Props {
   tabClick: (english: string) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
-  onClose?: () => void;
 }
 
 function TabArea({
@@ -15,7 +14,6 @@ function TabArea({
   tabClick,
   searchQuery = '',
   onSearchChange,
-  onClose,
 }: Props) {
   return (
     <div className="flex min-w-0 items-center gap-2 px-3">
@@ -31,7 +29,7 @@ function TabArea({
         ))}
       </ul>
       <div className="flex shrink-0 items-center">
-        <div className="relative flex w-32 items-center">
+        <div className="relative flex w-36 items-center">
           <Search
             size={14}
             className="pointer-events-none absolute left-2.5 text-neutral-400"
@@ -55,16 +53,6 @@ function TabArea({
             </button>
           )}
         </div>
-        {onClose && (
-          <button
-            type="button"
-            aria-label="블록 추가 닫기"
-            onClick={onClose}
-            className="ml-1 grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        )}
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export const INVITATION_TEMPLATES: InvitationTemplate[] =
       largePrint: design.largePrint === true,
       tags: [
         SHOWCASE_CATEGORY_LABELS[design.type],
-        ...(design.largePrint ? ['큰 글씨'] : []),
+        ...(design.largePrint ? ['읽기 편한 디자인'] : []),
         '사진·문구 편집 가능',
       ],
       colors: {

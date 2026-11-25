@@ -9,10 +9,17 @@ import {
   type NormalizedGuestPayload,
 } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
+import {
+  BLANK_EDITOR_DRAFT_KEY,
+  loadEditorDraft,
+  type EditorDraftKey,
+} from '@/features/editor/draft/editorDraft';
+import { useToastStore } from '@/shared/store/useToastStore';
 import type { BgmData } from '@/shared/types/invitationSave';
 import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 import { FabricProvider } from '@/widgets/mainPoster/context/FabricContext';
 
+import { toEditorDraftSavedData } from './draftSavedData';
 import MainContentsArea from './MainContentsArea';
 import TemplateEditorEntry from './TemplateEditorEntry';
 
@@ -131,7 +138,10 @@ function EditorCreate({
 }) {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('template');
-  const sampleId = searchParams.get('sample');
+  const sampleId = searchParams.get('sample') || null;
+  const draftKey: EditorDraftKey = sampleId
+    ? `sample:${sampleId}`
+    : BLANK_EDITOR_DRAFT_KEY;
   return templateId ? (
     <TemplateEditorEntry
       key={templateId}
@@ -139,29 +149,43 @@ function EditorCreate({
       initialIsLoggedIn={initialIsLoggedIn}
     />
   ) : (
-    <SampleEditorCreate key={sampleId ?? 'blank'} sampleId={sampleId} />
+    <SampleEditorCreate
+      key={draftKey}
+      draftKey={draftKey}
+      sampleId={sampleId}
+    />
   );
 }
 
-function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
+function SampleEditorCreate({
+  draftKey,
+  sampleId,
+}: {
+  draftKey: EditorDraftKey;
+  sampleId: string | null;
+}) {
   const [savedData, setSavedData] = useState<SavedData | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(sampleId));
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadSample() {
-      if (!sampleId) {
-        setSavedData(null);
-        setIsLoading(false);
-        setLoadError(false);
-        return;
-      }
-
+    async function loadInitialEditorData() {
       try {
         setIsLoading(true);
         setLoadError(false);
+
+        const draft = await loadEditorDraft(draftKey);
+        if (cancelled) return;
+        if (draft) {
+          setSavedData(toEditorDraftSavedData(draft));
+          showToast('작성 중이던 초대장을 이어서 불러왔어요.', 'info');
+          return;
+        }
+        if (!sampleId) return;
+
         const manifestResponse = await fetch(SAMPLES_MANIFEST_URL);
         if (!manifestResponse.ok) {
           throw new Error(`sample_manifest_failed:${manifestResponse.status}`);
@@ -203,12 +227,12 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
       }
     }
 
-    void loadSample();
+    void loadInitialEditorData();
 
     return () => {
       cancelled = true;
     };
-  }, [sampleId]);
+  }, [draftKey, sampleId, showToast]);
 
   if (isLoading) {
     return <ScreenTransitionLoader label="에디터를 준비하는 중" />;
@@ -221,7 +245,7 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
   return (
     <FabricProvider initialData={savedData?.mainPoster}>
       <div className="w-full h-full bg-[#E7E9EB] flex flex-col gap-13 justify-center overflow-x-auto overflow-y-hidden">
-        <MainContentsArea savedData={savedData} />
+        <MainContentsArea savedData={savedData} draftKey={draftKey} />
       </div>
     </FabricProvider>
   );

@@ -72,7 +72,7 @@ export default function HomeShowcaseCarousel({
   return (
     <section
       aria-label="초대장 디자인"
-      className="relative left-1/2 w-screen -translate-x-1/2"
+      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden"
       style={{ height: dashboardCarouselLayout.stageHeight }}
       onPointerOver={event =>
         setPointerOverCardOrControl(isCarouselControl(event.target))

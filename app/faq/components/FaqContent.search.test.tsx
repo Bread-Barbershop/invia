@@ -2,9 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import FaqContent from './FaqContent';
 
-jest.mock('@/features/contact/components/ContactEmailActions', () => function ContactEmailActions() {
-  return <div>문의</div>;
-});
+jest.mock('@/features/contact/components/ContactEmailActions', () => ({
+  __esModule: true,
+  default: () => <div>문의</div>,
+}));
 
 function searchFaq(query: string) {
   render(<FaqContent />);
@@ -13,28 +14,25 @@ function searchFaq(query: string) {
   });
 }
 
-describe('FAQ 드라이브 검색', () => {
+describe('FAQ 검색', () => {
+  it('화면의 질문과 답변에서 검색어를 찾는다', () => {
+    searchFaq('나의 저장소');
+
+    expect(
+      screen.getByRole('button', { name: /나의 저장소에 있는 모든 파일/ })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /초대장 데이터는 어디에 저장되나요/ })
+    ).toBeInTheDocument();
+  });
+
   it.each(['드라이브', '구글 드라이브', 'Google Drive'])(
-    '%s 검색으로 저장 위치 안내를 찾는다',
+    '질문과 답변에 없는 %s 검색에는 결과가 없다',
     query => {
       searchFaq(query);
 
-      expect(
-        screen.getByRole('button', {
-          name: /초대장 데이터는 어디에 저장되나요/,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole('button', {
-          name: /Invia가 제 Google Drive의 모든 파일에 접근하나요/,
-        })
-      ).toBeInTheDocument();
+      expect(screen.getByText('검색 결과가 없습니다.')).toBeInTheDocument();
+      expect(screen.queryAllByRole('article')).toHaveLength(0);
     }
   );
-
-  it('드라이브 검색으로 저장 위치 관련 문답 6개를 보여준다', () => {
-    searchFaq('드라이브');
-
-    expect(screen.getAllByRole('article')).toHaveLength(6);
-  });
 });

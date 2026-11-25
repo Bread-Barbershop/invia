@@ -173,7 +173,9 @@ export function useAudienceShare({
   function buttonProps(via: ShareChannel, available: boolean) {
     return {
       disabled: !available || loading || isSharing,
-      'aria-busy': loading || (via === 'kakao' && isSharing),
+      'aria-busy':
+        (loading && (via === 'link' ? linkEnabled : canLookUpKakao)) ||
+        (isSharing && via === 'kakao' && available),
       'aria-haspopup':
         options && (via === 'link' || options.length > 1)
           ? ('dialog' as const)
@@ -202,15 +204,22 @@ export function useAudienceShare({
     kakaoLabel:
       error && canLookUpKakao
         ? '카카오톡 공유 다시 준비하기'
-        : isSharing
+        : isSharing && kakaoEnabled
           ? '카카오톡 여는 중…'
-          : '카카오톡 공유하기',
+          : loading && canLookUpKakao
+            ? '카카오톡 준비 중…'
+            : '카카오톡 공유하기',
     linkLabel:
       error && linkEnabled
         ? '공유 다시 준비하기'
-        : loading
+        : loading && linkEnabled
           ? '공유 준비 중…'
           : '링크·QR 공유하기',
+    statusLabel: loading
+      ? '공유 정보를 확인하고 있어요.'
+      : isSharing
+        ? '카카오톡 공유를 준비하고 있어요.'
+        : '',
     picker: invite && options && options.length > 1 && (
       <dialog
         ref={dialog}

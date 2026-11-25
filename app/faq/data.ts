@@ -14,8 +14,6 @@ export type FaqItem = {
   category: FaqItemCategoryId;
   question: string;
   answer: string;
-  /** 본문에 없는 동의어·영문 표기까지 검색되도록 하는 보조 키워드. */
-  keywords?: string[];
 };
 
 export const FAQ_ITEMS: FaqItem[] = [
@@ -66,8 +64,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'editing',
     question: '작성 중인 초대장은 어떻게 저장하나요?',
     answer:
-      '편집기에서 ‘모두 저장하기’를 누르면 현재 작업이 로그인한 Google 계정의 Drive에 저장돼요. 마이페이지에서는 마지막으로 저장한 내용을 다시 열 수 있으니, 편집기를 닫기 전에 저장이 완료됐는지 확인해 주세요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '나의 저장소', '저장'],
+      '편집기에서 ‘모두 저장하기’를 누르면 현재 작업이 로그인한 Google 계정에 연결된 나의 저장소에 저장돼요. 마이페이지에서는 마지막으로 저장한 내용을 다시 열 수 있으니, 편집기를 닫기 전에 저장이 완료됐는지 확인해 주세요.',
   },
   {
     id: 'edit-after-public',
@@ -116,40 +113,35 @@ export const FAQ_ITEMS: FaqItem[] = [
     category: 'account',
     question: '왜 Google 로그인이 필요한가요?',
     answer:
-      'Google 로그인은 내 초대장을 Google Drive에 저장하고 마이페이지에서 다시 불러오는 데 필요해요. 공유받은 초대장을 보는 하객은 Google 계정으로 로그인할 필요가 없어요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '로그인'],
+      'Google 로그인은 나의 저장소에 초대장을 저장하고 마이페이지에서 다시 불러오는 데 필요해요. 나의 저장소는 로그인한 Google 계정에 연결돼 있어요. 공유받은 초대장을 보는 하객은 Google 계정으로 로그인할 필요가 없어요.',
   },
   {
     id: 'drive-access-range',
     category: 'account',
-    question: 'Invia가 제 Google Drive의 모든 파일에 접근하나요?',
+    question: 'Invia가 나의 저장소에 있는 모든 파일에 접근하나요?',
     answer:
-      'Invia는 Google Drive 전체 권한을 요청하지 않아요. Invia에서 만든 파일과 폴더 또는 사용자가 Invia에 공유해 접근을 허용한 파일에 한해 Google Drive의 제한된 권한을 사용해요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '권한', '접근'],
+      'Invia는 나의 저장소 전체에 접근하지 않아요. Invia에서 만든 파일과 폴더 또는 사용자가 Invia에 공유해 접근을 허용한 파일에 한해 제한된 권한을 사용해요.',
   },
   {
     id: 'drive-storage',
     category: 'account',
     question: '초대장 데이터는 어디에 저장되나요?',
     answer:
-      '편집 내용과 업로드한 사진·음원 같은 파일은 저장할 때 로그인한 Google 계정의 Drive에 저장돼요. 마이페이지에서도 해당 계정으로 로그인해 저장한 초대장을 열 수 있어요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '저장소', '저장 위치'],
+      '편집 내용과 업로드한 사진·음원 같은 파일은 저장할 때 로그인한 Google 계정에 연결된 나의 저장소에 저장돼요. 마이페이지에서도 해당 계정으로 로그인해 저장한 초대장을 열 수 있어요.',
   },
   {
     id: 'drive-data-safety',
     category: 'account',
-    question: 'Google Drive에서 Invia가 만든 파일을 직접 수정해도 되나요?',
+    question: '나의 저장소에서 Invia가 만든 파일을 직접 수정해도 되나요?',
     answer:
-      'Invia가 만든 Drive 폴더나 파일을 직접 수정·이동·삭제하면 공유 링크나 편집 기능이 제대로 작동하지 않을 수 있어요. 내용 변경은 편집기에서, 초대장 삭제는 마이페이지에서 해 주세요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '폴더', '파일 수정'],
+      'Invia가 나의 저장소에 만든 폴더나 파일을 직접 수정·이동·삭제하면 공유 링크나 편집 기능이 제대로 작동하지 않을 수 있어요. 내용 변경은 편집기에서, 초대장 삭제는 마이페이지에서 해 주세요.',
   },
   {
     id: 'drive-storage-capacity',
     category: 'account',
-    question: 'Google Drive 저장 공간이 부족하면 어떻게 되나요?',
+    question: '나의 저장소 공간이 부족하면 어떻게 되나요?',
     answer:
-      'Drive 저장 공간이 부족하면 새 초대장이나 사진·음원을 저장하지 못할 수 있어요. 로그인한 Google 계정의 저장 공간을 확보한 뒤 편집기에서 다시 저장해 주세요.',
-    keywords: ['드라이브', '구글 드라이브', 'google drive', '저장 공간', '용량'],
+      '나의 저장소 공간이 부족하면 새 초대장이나 사진·음원을 저장하지 못할 수 있어요. 로그인한 Google 계정의 저장 공간을 확보한 뒤 편집기에서 다시 저장해 주세요.',
   },
   {
     id: 'delete-invitation',

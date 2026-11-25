@@ -95,7 +95,7 @@ function GalleryTemplateCards({
               </span>
               {template.largePrint && (
                 <span className="absolute left-2 top-2 rounded bg-white px-2 py-1 text-sm font-bold text-neutral-900 shadow-sm">
-                  큰 글씨
+                  읽기 편한 디자인
                 </span>
               )}
             </button>
@@ -131,7 +131,7 @@ function GalleryTemplateCards({
       {templates.length === 0 && (
         <div className="col-span-full rounded-2xl bg-white/72 p-8 text-lg font-semibold text-text-secondary shadow-edit backdrop-blur-sm">
           {largePrintOnly
-            ? '이 카테고리에는 아직 큰 글씨 디자인이 없습니다.'
+            ? '이 카테고리에는 아직 읽기 편한 디자인이 없습니다.'
             : '해당 카테고리에 등록된 디자인이 없습니다.'}
         </div>
       )}

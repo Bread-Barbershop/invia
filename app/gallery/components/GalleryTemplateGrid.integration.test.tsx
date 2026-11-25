@@ -79,12 +79,12 @@ describe('초대장 갤러리', () => {
     );
   });
 
-  it('큰 글씨 필터를 켜면 카테고리 안의 큰 글씨 디자인만 보여준다', async () => {
+  it('읽기 편한 디자인 필터를 켜면 카테고리 안의 읽기 편한 디자인만 보여준다', async () => {
     const user = userEvent.setup();
     renderGallery('birthday', 'largePrint=1');
 
     const largePrintLink = screen.getByRole('link', {
-      name: '큰 글씨 디자인만 보기',
+      name: '읽기 편한 디자인만 보기',
     });
     expect(largePrintLink).toHaveAttribute('aria-current', 'true');
     expect(screen.getByRole('link', { name: '생일' })).toHaveAttribute(
@@ -113,15 +113,15 @@ describe('초대장 갤러리', () => {
     expect(screen.getByRole('dialog', { name: '칠순 감사연' })).toBeVisible();
   });
 
-  it('큰 글씨 디자인이 없는 카테고리에서는 안내 문구를 보여준다', () => {
+  it('읽기 편한 디자인이 없는 카테고리에서는 안내 문구를 보여준다', () => {
     renderGallery('seminar', 'largePrint=1');
 
     expect(
-      screen.getByText('이 카테고리에는 아직 큰 글씨 디자인이 없습니다.')
+      screen.getByText('이 카테고리에는 아직 읽기 편한 디자인이 없습니다.')
     ).toBeInTheDocument();
   });
 
-  it('카테고리를 바꿔도 큰 글씨 필터와 다른 검색 매개변수를 유지한다', () => {
+  it('카테고리를 바꿔도 읽기 편한 디자인 필터와 다른 검색 매개변수를 유지한다', () => {
     renderGallery('birthday', 'category=birthday&largePrint=1&source=shared');
 
     expect(screen.getByRole('link', { name: '세미나' })).toHaveAttribute(
@@ -134,11 +134,11 @@ describe('초대장 갤러리', () => {
     );
   });
 
-  it('큰 글씨 필터 링크로 필터를 켜고 끌 수 있다', () => {
+  it('읽기 편한 디자인 필터 링크로 필터를 켜고 끌 수 있다', () => {
     renderGallery('birthday', 'category=birthday&source=shared');
 
     expect(
-      screen.getByRole('link', { name: '큰 글씨 디자인만 보기' })
+      screen.getByRole('link', { name: '읽기 편한 디자인만 보기' })
     ).toHaveAttribute(
       'href',
       '/gallery?category=birthday&source=shared&largePrint=1'

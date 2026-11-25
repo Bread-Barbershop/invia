@@ -42,6 +42,31 @@ import {
   type UploadOk,
 } from './uploadAllSettled';
 
+export const INVITATION_SAVE_AUTH_REQUIRED_CODE =
+  'invitation_save_auth_required';
+
+// 비로그인 상태나 세션이 끊긴 상태에서 저장을 누르면 prepare 단계가 401로 막힌다.
+// 이 경우는 단순 실패가 아니라 로그인 안내가 필요하므로 일반 저장 오류와 구분한다.
+export class InvitationSaveAuthRequiredError extends Error {
+  readonly code = INVITATION_SAVE_AUTH_REQUIRED_CODE;
+
+  constructor(message = '저장을 위해 로그인이 필요합니다.') {
+    super(message);
+    this.name = 'InvitationSaveAuthRequiredError';
+  }
+}
+
+export function isInvitationSaveAuthRequiredError(
+  error: unknown
+): error is InvitationSaveAuthRequiredError {
+  return (
+    error instanceof InvitationSaveAuthRequiredError ||
+    (typeof error === 'object' &&
+      error !== null &&
+      (error as { code?: unknown }).code === INVITATION_SAVE_AUTH_REQUIRED_CODE)
+  );
+}
+
 type SaveInvitationPrepareResponse = {
   workspaceFolderId: string;
   invitationFolderId: string;
@@ -259,6 +284,10 @@ async function requestPrepare(
     body: JSON.stringify({ invitationUuid }),
   });
 
+  if (prepRes.status === 401) {
+    throw new InvitationSaveAuthRequiredError();
+  }
+
   if (!prepRes.ok) {
     throw new Error(`saveInvitation prepare failed: ${prepRes.status}`);
   }
@@ -296,6 +325,7 @@ function createTokenState(prep: PreparedInvitationSave): TokenState {
     refreshedToken: false,
     refreshAccessToken: async () => {
       const r = await fetch('/api/drive/getToken', { method: 'POST' });
+      if (r.status === 401) throw new InvitationSaveAuthRequiredError();
       if (!r.ok) throw new Error(`refresh-token failed: ${r.status}`);
       const j = await r.json();
 
@@ -738,6 +768,7 @@ async function getFreshPreparedAccessToken(
   prepared: PreparedInvitationSave
 ): Promise<PreparedInvitationSave> {
   const r = await fetch('/api/drive/getToken', { method: 'POST' });
+  if (r.status === 401) throw new InvitationSaveAuthRequiredError();
   if (!r.ok) throw new Error(`refresh-token failed: ${r.status}`);
   const j = await r.json();
 
@@ -989,6 +1020,12 @@ export async function saveInvitationFlow(
       error,
       failedStages: [diagnostics.currentStage],
     });
+
+    // 어떤 단계에서든 401로 끝나면 로그인 안내로 이어진다.
+    if (!isInvitationSaveAuthRequiredError(error) && getHttpStatus(error) === 401) {
+      throw new InvitationSaveAuthRequiredError();
+    }
+
     throw error;
   }
 }

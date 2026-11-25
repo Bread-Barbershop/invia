@@ -78,7 +78,7 @@ function GalleryCategoryTabs() {
         replace
         scroll={false}
         prefetch={false}
-        aria-label="큰 글씨 디자인만 보기"
+        aria-label="읽기 편한 디자인만 보기"
         aria-current={largePrintOnly ? 'true' : undefined}
         className="group inline-grid min-h-11 min-w-11 cursor-pointer place-content-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1e5ca9]"
       >
@@ -89,7 +89,7 @@ function GalleryCategoryTabs() {
               : 'bg-[#f2f2f2] text-[#494949] group-hover:bg-black/10 md:bg-white md:text-text-plain md:group-hover:bg-[#FAFAFB]'
           }`}
         >
-          큰 글씨
+          읽기 편한 디자인
         </span>
       </Link>
     </div>

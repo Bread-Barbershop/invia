@@ -76,7 +76,7 @@ describe('InvitationTemplatePicker', () => {
     expect(onSelect).toHaveBeenCalledWith(templates[1].id);
   });
 
-  it('큰 글씨 필터를 켜면 숨겨진 일반 디자인은 적용할 수 없다', () => {
+  it('읽기 편한 디자인 필터를 켜면 숨겨진 일반 디자인은 적용할 수 없다', () => {
     render(
       <InvitationTemplatePicker
         type="birthday"
@@ -89,7 +89,9 @@ describe('InvitationTemplatePicker', () => {
         onApply={jest.fn()}
       />
     );
-    fireEvent.click(screen.getByRole('checkbox', { name: '큰 글씨만 보기' }));
+    fireEvent.click(
+      screen.getByRole('checkbox', { name: '읽기 편한 디자인만 보기' })
+    );
     expect(
       screen.getByRole('button', { name: '칠순 감사연 템플릿 선택' })
     ).toBeVisible();
