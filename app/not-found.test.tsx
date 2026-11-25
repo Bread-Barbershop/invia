@@ -25,3 +25,10 @@ it('404 헤더 메뉴는 다른 화면과 같은 내비게이션을 보여준다
   expect(header).toHaveTextContent('Gallery');
   expect(header).toHaveTextContent('FAQ');
 });
+
+it('줄바꿈으로 나뉜 안내 문장을 복사해도 문장 사이가 붙지 않는다', () => {
+  render(<NotFound />);
+
+  const description = screen.getByText(/주소가 변경되었거나/);
+  expect(description.textContent).toContain('찾을 수 없습니다. 주소가');
+});

@@ -233,5 +233,8 @@ describe('EditorViewportGuard & SaveModal layering', () => {
 
     expect(galleryLink).toBeDefined();
     expect(faqLink).toBeDefined();
+
+    const description = screen.getByText(/섬세한 편집을 위해/);
+    expect(description.textContent).toContain('만들어주세요. 섬세한');
   });
 });

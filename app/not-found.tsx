@@ -86,7 +86,7 @@ function NotFound() {
             not gone.
           </h1>
           <p className="mt-8 max-w-lg text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
-            요청하신 페이지를 찾을 수 없습니다.
+            요청하신 페이지를 찾을 수 없습니다.{' '}
             <br />
             주소가 변경되었거나 삭제된 페이지일 수 있습니다.
           </p>

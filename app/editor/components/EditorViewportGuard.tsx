@@ -69,7 +69,7 @@ function EditorDesktopNotice({
           </h1>
           <p className="mt-8 max-w-xl text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
             초대장은 {DESKTOP_CONTENT_MIN_WIDTH}px 이상의 브라우저에서
-            만들어주세요.
+            만들어주세요.{' '}
             <br />
             섬세한 편집을 위해 {DESKTOP_CONTENT_MIN_WIDTH}px 이상의 브라우저
             너비가 필요합니다.
