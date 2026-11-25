@@ -79,40 +79,69 @@ describe('초대장 갤러리', () => {
     );
   });
 
-  it('예전 큰 글씨 필터 링크에서도 카테고리의 모든 디자인을 탐색한다', async () => {
+  it('큰 글씨 필터를 켜면 카테고리 안의 큰 글씨 디자인만 보여준다', async () => {
     const user = userEvent.setup();
     renderGallery('birthday', 'largePrint=1');
 
+    const largePrintLink = screen.getByRole('link', {
+      name: '큰 글씨 디자인만 보기',
+    });
+    expect(largePrintLink).toHaveAttribute('aria-current', 'true');
     expect(screen.getByRole('link', { name: '생일' })).toHaveAttribute(
       'aria-current',
       'page'
     );
+
+    const largePrintTemplates = INVITATION_TEMPLATES.filter(
+      template => template.type === 'birthday' && template.largePrint
+    );
+    const grid = screen.getByRole('region', { name: '초대장 디자인' });
+    expect(within(grid).getAllByRole('button')).toHaveLength(
+      largePrintTemplates.length
+    );
+    for (const template of largePrintTemplates) {
+      expect(
+        within(grid).getByRole('button', { name: template.name })
+      ).toBeInTheDocument();
+    }
     expect(
-      screen.queryByRole('checkbox', { name: '큰 글씨만 보기' })
+      within(grid).queryByRole('button', { name: '생신 꽃편지' })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: '생신 꽃편지' })
-    ).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '칠순 감사연' }));
     await user.click(screen.getByRole('button', { name: '디자인 미리보기' }));
-    await user.click(screen.getByRole('button', { name: '이전 초대장' }));
-    expect(screen.getByTitle('생신 꽃편지 초대장 내용')).toHaveAttribute(
-      'src',
-      '/showcase/showcase-41'
-    );
+    expect(screen.getByRole('dialog', { name: '칠순 감사연' })).toBeVisible();
   });
 
-  it('카테고리 링크에서 예전 필터를 제거하고 다른 검색 매개변수를 유지한다', () => {
+  it('큰 글씨 디자인이 없는 카테고리에서는 안내 문구를 보여준다', () => {
+    renderGallery('seminar', 'largePrint=1');
+
+    expect(
+      screen.getByText('이 카테고리에는 아직 큰 글씨 디자인이 없습니다.')
+    ).toBeInTheDocument();
+  });
+
+  it('카테고리를 바꿔도 큰 글씨 필터와 다른 검색 매개변수를 유지한다', () => {
     renderGallery('birthday', 'category=birthday&largePrint=1&source=shared');
 
     expect(screen.getByRole('link', { name: '세미나' })).toHaveAttribute(
       'href',
-      '/gallery?category=seminar&source=shared'
+      '/gallery?category=seminar&largePrint=1&source=shared'
     );
     expect(screen.getByRole('link', { name: '전체' })).toHaveAttribute(
       'href',
-      '/gallery?source=shared'
+      '/gallery?largePrint=1&source=shared'
+    );
+  });
+
+  it('큰 글씨 필터 링크로 필터를 켜고 끌 수 있다', () => {
+    renderGallery('birthday', 'category=birthday&source=shared');
+
+    expect(
+      screen.getByRole('link', { name: '큰 글씨 디자인만 보기' })
+    ).toHaveAttribute(
+      'href',
+      '/gallery?category=birthday&source=shared&largePrint=1'
     );
   });
 

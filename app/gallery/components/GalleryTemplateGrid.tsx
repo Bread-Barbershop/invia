@@ -21,22 +21,28 @@ const ACTION_STYLE = {
 export default function GalleryTemplateGrid() {
   const searchParams = useSearchParams();
   const category = searchParams.get('category') || 'all';
-  const templates = getInvitationTemplates(category);
+  const largePrintOnly = searchParams.get('largePrint') === '1';
+  const templates = getInvitationTemplates(category, largePrintOnly);
 
   return (
     <ShowcasePreviewProvider
-      key={category}
+      key={`${category}-${largePrintOnly ? 'large-print' : 'all'}`}
       invitationIds={templates.map(({ id }) => id)}
     >
-      <GalleryTemplateCards templates={templates} />
+      <GalleryTemplateCards
+        templates={templates}
+        largePrintOnly={largePrintOnly}
+      />
     </ShowcasePreviewProvider>
   );
 }
 
 function GalleryTemplateCards({
   templates,
+  largePrintOnly,
 }: {
   templates: InvitationTemplate[];
+  largePrintOnly: boolean;
 }) {
   const openPreview = useShowcasePreview();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -124,7 +130,9 @@ function GalleryTemplateCards({
 
       {templates.length === 0 && (
         <div className="col-span-full rounded-2xl bg-white/72 p-8 text-lg font-semibold text-text-secondary shadow-edit backdrop-blur-sm">
-          해당 카테고리에 등록된 디자인이 없습니다.
+          {largePrintOnly
+            ? '이 카테고리에는 아직 큰 글씨 디자인이 없습니다.'
+            : '해당 카테고리에 등록된 디자인이 없습니다.'}
         </div>
       )}
     </section>
