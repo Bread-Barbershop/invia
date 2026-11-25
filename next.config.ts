@@ -3,7 +3,10 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return [{ source: '/privacy', destination: '/policy', permanent: true }];
+    return [
+      { source: '/privacy', destination: '/policy', permanent: true },
+      { source: '/create', destination: '/editor', permanent: true },
+    ];
   },
 
   async rewrites() {

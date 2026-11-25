@@ -1551,7 +1551,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'afterParty',
         title: '마지막 곡 뒤의 앙코르',
         venue: '프라이빗 다이닝룸',
-        dateTime: '오후 5시부터',
+        dateTime: '오후 4시부터',
         description: '듣지 못한 신청곡을 틀어 놓고 남은 케이크를 같이 먹자.',
       },
       {

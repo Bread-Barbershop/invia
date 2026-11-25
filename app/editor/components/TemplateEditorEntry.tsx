@@ -168,13 +168,13 @@ export default function TemplateEditorEntry({
         <ScreenTransitionLoader label="초대장을 준비하는 중" />
       ) : (
         <section
-          className="m-auto flex items-center gap-10 rounded-3xl bg-white p-8 shadow-edit"
+          className="m-auto flex w-full max-w-[880px] items-center gap-16 rounded-3xl bg-white px-14 py-12 shadow-edit"
           aria-label="선택한 템플릿으로 제작하기"
         >
-          <div className="h-[360px] w-[166px] overflow-hidden rounded-lg shadow-lg">
-            <InvitationTemplatePoster template={template} sizes="166px" />
+          <div className="h-[433px] w-[200px] shrink-0 overflow-hidden rounded-lg shadow-lg">
+            <InvitationTemplatePoster template={template} sizes="200px" />
           </div>
-          <div className="max-w-80">
+          <div className="min-w-0 flex-1">
             <p className="text-xs text-text-secondary">선택한 템플릿</p>
             <h1 className="mt-3 text-3xl font-semibold text-text-plain">
               {template.name}
@@ -188,13 +188,13 @@ export default function TemplateEditorEntry({
               type="button"
               disabled={auth.isBusy || auth.isLoginPending}
               onClick={() => auth.runAfterAuth(beginEditing)}
-              className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-bg-plain px-6 font-semibold text-white hover:bg-[#202020] disabled:opacity-50"
+              className="mt-7 flex h-12 w-full max-w-[320px] items-center justify-center rounded-full bg-bg-plain px-6 font-semibold text-white hover:bg-[#202020] disabled:opacity-50"
             >
               로그인하고 시작하기
             </button>
             <Link
               href="/"
-              className="mt-4 inline-block text-xs text-text-secondary underline underline-offset-4"
+              className="mt-4 block text-xs text-text-secondary underline underline-offset-4"
             >
               다른 디자인 살펴보기
             </Link>
