@@ -131,7 +131,7 @@ function cloneForDraft(value: unknown): unknown {
   if (type === 'string' || type === 'number' || type === 'boolean') {
     return value;
   }
-  if (type === 'bigint') return value.toString();
+  if (type === 'bigint') return String(value);
   if (type === 'undefined' || type === 'function' || type === 'symbol') {
     return undefined;
   }
