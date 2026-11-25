@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { X } from 'lucide-react';
+import { Copy, X } from 'lucide-react';
 import React from 'react';
 
 import { componentCls } from '@/shared/data/componentsInfo/componentInfo';
@@ -16,6 +16,7 @@ interface Props {
   onSelect: (id: string) => void;
   onContextMenu: (e: React.MouseEvent, tabId: string) => void;
   onDeleteRequest?: (id: string) => void;
+  onDuplicateRequest?: (id: string) => void;
 }
 
 const ItemContent = React.memo(
@@ -25,6 +26,9 @@ const ItemContent = React.memo(
 );
 ItemContent.displayName = 'ItemContent';
 
+const ACTION_BUTTON_CLASS =
+  'flex items-center justify-center rounded-full text-white opacity-0 transition-all duration-200 cursor-pointer group-hover:opacity-100 focus-visible:opacity-100';
+
 const SortableItems = React.memo(
   ({
     id,
@@ -33,6 +37,7 @@ const SortableItems = React.memo(
     onSelect,
     onContextMenu,
     onDeleteRequest,
+    onDuplicateRequest,
   }: Props) => {
     const {
       setNodeRef,
@@ -49,6 +54,10 @@ const SortableItems = React.memo(
       componentCls
         .flatMap(category => category.list)
         .find(item => item.component === blockInfo.component);
+    const displayName =
+      typeof componentName?.contents === 'string'
+        ? componentName.contents
+        : '블록';
 
     const style = {
       transform: CSS.Translate.toString(transform),
@@ -70,6 +79,7 @@ const SortableItems = React.memo(
           {...attributes}
           {...listeners}
           role="button"
+          data-order-block-id={id}
           onContextMenu={e => onContextMenu(e, id)}
           onPointerDown={handlePointerDown}
           className={cn(
@@ -80,22 +90,51 @@ const SortableItems = React.memo(
           <BlockLabel component={blockInfo.component}>
             <ItemContent contents={componentName?.contents} />
           </BlockLabel>
-          {!isDragging && onDeleteRequest && (
-            <button
-              type="button"
-              aria-label="삭제하기"
-              onPointerDown={e => {
-                e.stopPropagation();
-              }}
-              onClick={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                onDeleteRequest(id);
-              }}
-              className="absolute right-1 top-1 z-10 flex size-4 items-center justify-center rounded-full bg-neutral-400/80 text-white opacity-0 transition-all duration-200 hover:bg-[#FF4D4D] hover:scale-110 active:scale-95 group-hover:opacity-100 cursor-pointer"
-            >
-              <X size={10} strokeWidth={2.5} />
-            </button>
+          {!isDragging && (onDeleteRequest || onDuplicateRequest) && (
+            <div className="absolute right-1 top-1 z-10 flex items-center gap-0.5">
+              {onDuplicateRequest && (
+                <button
+                  type="button"
+                  aria-label={`${displayName} 블록 복제하기`}
+                  title="복제하기"
+                  onPointerDown={e => {
+                    e.stopPropagation();
+                  }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    onDuplicateRequest(id);
+                  }}
+                  className={cn(
+                    ACTION_BUTTON_CLASS,
+                    'size-4 bg-neutral-400/80 hover:bg-primary hover:scale-110 active:scale-95'
+                  )}
+                >
+                  <Copy size={9} strokeWidth={2.5} aria-hidden="true" />
+                </button>
+              )}
+              {onDeleteRequest && (
+                <button
+                  type="button"
+                  aria-label={`${displayName} 블록 삭제하기`}
+                  title="삭제하기"
+                  onPointerDown={e => {
+                    e.stopPropagation();
+                  }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    onDeleteRequest(id);
+                  }}
+                  className={cn(
+                    ACTION_BUTTON_CLASS,
+                    'size-4 bg-neutral-400/80 hover:bg-[#FF4D4D] hover:scale-110 active:scale-95'
+                  )}
+                >
+                  <X size={10} strokeWidth={2.5} aria-hidden="true" />
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

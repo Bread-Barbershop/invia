@@ -163,7 +163,7 @@ describe('순서 도움말', () => {
     });
 
     expect(screen.getByTestId('order-callout')).toHaveTextContent(
-      '선택한 블록은 Delete 키로 삭제할 수 있어요.'
+      '선택한 블록은 Delete 키로 삭제, Ctrl+D(⌘+D)로 복제할 수 있어요.'
     );
     expect(screen.getByTestId('order-callout')).not.toHaveTextContent('꾹 누른');
   });
@@ -180,7 +180,7 @@ describe('순서 도움말', () => {
     act(() => addBlock('etc', 'divider', 'divider'));
 
     expect(screen.getByTestId('order-callout')).toHaveTextContent(
-      '블록을 꾹 누른 채로 끌면 순서를 바꿀 수 있어요.'
+      '블록을 꾹 누른 채로 끌거나 Alt+↑/↓ 로 순서를 바꿀 수 있어요.'
     );
     expect(useEditorCalloutStore.getState().callouts).toMatchObject({
       'add-page-button': false,

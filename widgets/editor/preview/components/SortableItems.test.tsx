@@ -3,6 +3,8 @@ import React from 'react';
 
 import SortableItems from './SortableItems';
 
+import type { EditorBlock } from '@/shared/types/block';
+
 jest.mock('@dnd-kit/sortable', () => ({
   useSortable: () => ({
     setNodeRef: jest.fn(),
@@ -23,7 +25,7 @@ jest.mock('@/shared/data/componentsInfo/componentInfo', () => ({
       list: [
         {
           component: 'Greeting1',
-          contents: <span>인사말 1</span>,
+          contents: '인사말 1',
         },
       ],
     },
@@ -31,19 +33,21 @@ jest.mock('@/shared/data/componentsInfo/componentInfo', () => ({
 }));
 
 describe('SortableItems 컴포넌트', () => {
+  const blockInfo = {
+    id: 'block-1',
+    type: 'greeting',
+    component: 'Greeting1',
+    props: {},
+  } as unknown as EditorBlock;
+
   const defaultProps = {
     id: 'block-1',
-    blockInfo: {
-      id: 'block-1',
-      type: 'greeting' as const,
-      component: 'Greeting1',
-      order: 1,
-      data: {},
-    },
+    blockInfo,
     isSelected: false,
     onSelect: jest.fn(),
     onContextMenu: jest.fn(),
     onDeleteRequest: jest.fn(),
+    onDuplicateRequest: jest.fn(),
   };
 
   beforeEach(() => {
@@ -60,30 +64,80 @@ describe('SortableItems 컴포넌트', () => {
     render(
       <SortableItems
         {...defaultProps}
-        blockInfo={{ ...defaultProps.blockInfo, type: 'birthday' } as never}
+        blockInfo={{ ...blockInfo, type: 'birthday' } as unknown as EditorBlock}
       />
     );
     expect(screen.getByText('인사말 1')).toBeInTheDocument();
   });
 
-  it('호버 시 노출되는 삭제(X) 버튼이 렌더링된다', () => {
+  it('호버 시 노출되는 삭제(X)·복제 버튼이 렌더링된다', () => {
     render(<SortableItems {...defaultProps} />);
 
-    const deleteBtn = screen.getByRole('button', { name: '삭제하기' });
-    expect(deleteBtn).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /삭제하기/ })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /복제하기/ })
+    ).toBeInTheDocument();
+  });
+
+  it('액션 버튼은 블록 이름을 함께 읽어 준다', () => {
+    render(<SortableItems {...defaultProps} />);
+
+    expect(
+      screen.getByRole('button', { name: '인사말 1 블록 복제하기' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '인사말 1 블록 삭제하기' })
+    ).toBeInTheDocument();
   });
 
   it('삭제(X) 버튼 클릭 시 onDeleteRequest가 호출되고 onSelect는 호출되지 않는다', () => {
     render(<SortableItems {...defaultProps} />);
 
-    const deleteBtn = screen.getByRole('button', { name: '삭제하기' });
+    const deleteBtn = screen.getByRole('button', { name: /삭제하기/ });
 
     fireEvent.pointerDown(deleteBtn);
     expect(defaultProps.onSelect).not.toHaveBeenCalled();
 
     fireEvent.click(deleteBtn);
     expect(defaultProps.onDeleteRequest).toHaveBeenCalledWith('block-1');
+    expect(defaultProps.onDuplicateRequest).not.toHaveBeenCalled();
     expect(defaultProps.onSelect).not.toHaveBeenCalled();
+  });
+
+  it('복제 버튼 클릭 시 onDuplicateRequest가 호출되고 onSelect는 호출되지 않는다', () => {
+    render(<SortableItems {...defaultProps} />);
+
+    const duplicateBtn = screen.getByRole('button', { name: /복제하기/ });
+
+    fireEvent.pointerDown(duplicateBtn);
+    fireEvent.click(duplicateBtn);
+
+    expect(defaultProps.onDuplicateRequest).toHaveBeenCalledWith('block-1');
+    expect(defaultProps.onDeleteRequest).not.toHaveBeenCalled();
+    expect(defaultProps.onSelect).not.toHaveBeenCalled();
+  });
+
+  it('복제 핸들러가 없으면 복제 버튼을 노출하지 않는다', () => {
+    render(
+      <SortableItems {...defaultProps} onDuplicateRequest={undefined} />
+    );
+
+    expect(
+      screen.queryByRole('button', { name: /복제하기/ })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /삭제하기/ })
+    ).toBeInTheDocument();
+  });
+
+  it('순서 항목에 블록 id를 담아 키보드 포커스로 되돌아올 수 있게 한다', () => {
+    render(<SortableItems {...defaultProps} />);
+
+    expect(
+      document.querySelector('[data-order-block-id="block-1"]')
+    ).toBeInTheDocument();
   });
 
   it('우클릭 시 onContextMenu가 호출된다', () => {
