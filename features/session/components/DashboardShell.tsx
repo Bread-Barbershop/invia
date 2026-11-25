@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import { getAuthSession } from '@/app/api/auth/_lib/getAuthSession';
+import EditorSaveStatus from '@/features/editor/save-status/EditorSaveStatus';
 import homeBackgroundImage from '@/shared/assets/images/home/home-background.png';
 import { cn } from '@/shared/utils/cn';
 
@@ -64,7 +65,10 @@ export default async function DashboardShell({
           />
         </div>
 
-        <HeaderPrivacyNoticeButton />
+        <div className="flex items-center gap-4">
+          {isEditor && <EditorSaveStatus />}
+          <HeaderPrivacyNoticeButton />
+        </div>
       </header>
 
       <main className="relative max-w-480 w-full mx-auto min-h-0 flex flex-col justify-end">
