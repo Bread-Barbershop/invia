@@ -304,7 +304,16 @@ describe('useInvitationTemplate', () => {
     });
 
     const state = useEditorStore.getState();
-    expect(setStateSpy).toHaveBeenCalledTimes(1);
+    // 실행 취소 이력 기록도 setState를 한 번 더 호출하므로, 블록을 바꾸는 호출만 센다.
+    const blockStateCalls = setStateSpy.mock.calls.filter(([patch]) => {
+      if (typeof patch === 'function') return true;
+      return (
+        typeof patch === 'object' &&
+        patch !== null &&
+        'block' in (patch as Record<string, unknown>)
+      );
+    });
+    expect(blockStateCalls).toHaveLength(1);
     expect(state.block[0].id).toBe('new-page');
     expect(state.backgroundColor).toBe('#FAF8F2');
     expect(state.backgroundTexture.material).toBe('none');

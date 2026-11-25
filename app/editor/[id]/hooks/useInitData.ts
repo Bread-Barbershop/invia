@@ -66,6 +66,7 @@ export const useInitData = ({
     setHashFiles,
     clearHashFiles,
     clearCleanUpFiles,
+    clearHistory,
   } = useEditorStore(
     useShallow(state => ({
       setBlock: state.setBlock,
@@ -88,6 +89,7 @@ export const useInitData = ({
       setHashFiles: state.setHashFiles,
       clearHashFiles: state.clearHashFiles,
       clearCleanUpFiles: state.clearCleanUpFiles,
+      clearHistory: state.clearHistory,
     }))
   );
 
@@ -103,6 +105,8 @@ export const useInitData = ({
 
     if (blocks) {
       setBlock(blocks);
+      // 불러온 초대장은 실행 취소의 기준점이다. 빈 편집기까지 되돌릴 수 있으면 안 된다.
+      clearHistory();
 
       const imageMap = extractFileGroups(blocks, invitationImage ?? []);
       if (imageMap) {
@@ -169,6 +173,7 @@ export const useInitData = ({
     setHashFiles,
     clearHashFiles,
     clearCleanUpFiles,
+    clearHistory,
   ]);
 
   const initBgmStore = useCallback(() => {

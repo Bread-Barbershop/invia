@@ -54,6 +54,11 @@ export interface BulkData {
   isDefault: boolean;
 }
 
+export type BlockHistorySnapshot = {
+  block: EditorBlock[];
+  selectedId: string | null;
+};
+
 export interface BlockSlice {
   block: EditorBlock[];
   addBlock: <T extends BlockType>(
@@ -194,11 +199,30 @@ export interface ShareUrlSlice {
   setShareUrlTab: (tab: 'url' | 'kakao') => void;
 }
 
+export interface HistorySlice {
+  /** 지금 상태로 오기 직전 상태들. 마지막 항목이 가장 최근이다. */
+  historyPast: BlockHistorySnapshot[];
+  /** 실행 취소로 되돌린 상태들. 첫 항목이 가장 최근이다. */
+  historyFuture: BlockHistorySnapshot[];
+  /** 연속 입력을 한 단계로 묶기 위한 마지막 변경 키. */
+  historyCoalesceKey: string | null;
+  historyRecordedAt: number;
+  /** 되돌릴 블록 상태가 있는지. */
+  canUndo: boolean;
+  /** 다시 실행할 블록 상태가 있는지. */
+  canRedo: boolean;
+  undo: () => void;
+  redo: () => void;
+  /** 템플릿·저장본을 새로 불러올 때처럼 이력의 기준점을 옮길 때 쓴다. */
+  clearHistory: () => void;
+}
+
 export type EditorState = BlockSlice &
   ImageSlice &
   UISlice &
   DriveSlice &
   ShareUrlSlice &
-  BulkSlice & {
+  BulkSlice &
+  HistorySlice & {
     reset: () => void;
   };

@@ -19,6 +19,7 @@ import { useShallow } from 'zustand/shallow';
 import LoadingSpinner from '@/shared/assets/icons/loadingSpinner.svg';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
+import { setCoverCanvasPointerInside } from '@/shared/utils/coverCanvasPointer';
 import { useFabricContext } from '@/widgets/mainPoster/context/FabricContext';
 
 import { useKeyboardEvents } from '../hooks/useKeyboardEvents';
@@ -414,8 +415,14 @@ export const MainPosterPreview = () => {
   useEffect(() => {
     if (!canvas) return;
     const el = canvas.upperCanvasEl;
-    const onEnter = () => (isMouseInCanvasRef.current = true);
-    const onLeave = () => (isMouseInCanvasRef.current = false);
+    const onEnter = () => {
+      isMouseInCanvasRef.current = true;
+      setCoverCanvasPointerInside(true);
+    };
+    const onLeave = () => {
+      isMouseInCanvasRef.current = false;
+      setCoverCanvasPointerInside(false);
+    };
 
     el.addEventListener('mouseenter', onEnter);
     el.addEventListener('mouseleave', onLeave);
@@ -423,6 +430,7 @@ export const MainPosterPreview = () => {
     return () => {
       el.removeEventListener('mouseenter', onEnter);
       el.removeEventListener('mouseleave', onLeave);
+      setCoverCanvasPointerInside(false);
     };
   }, [canvas]);
 
