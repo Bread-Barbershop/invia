@@ -18,7 +18,11 @@ function LeftPanel() {
 
   return (
     <div
-      className="w-93.75 max-h-[810px] ml-5 min-[1540px]:ml-15 flex flex-col gap-4"
+      id="editor-style-panel"
+      role="region"
+      aria-label="편집 도구"
+      tabIndex={-1}
+      className="w-93.75 max-h-[810px] ml-5 min-[1540px]:ml-15 flex flex-col gap-4 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       data-editor-left-panel
     >
       <StylePanelSection
@@ -39,7 +43,7 @@ function LeftPanel() {
         {isEdit ? (
           <button
             type="button"
-            className="flex-center relative w-full h-full font-semibold"
+            className="flex-center relative w-full h-full rounded-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             onClick={() => setIsEdit(false)}
           >
             상세 편집

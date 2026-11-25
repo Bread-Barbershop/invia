@@ -41,7 +41,7 @@ function AddPageButton() {
         aria-haspopup="dialog"
         aria-expanded={isTab}
         type="button"
-        className="w-full h-11 bg-white rounded-lg shadow-edit flex-center gap-2 font-semibold text-sm"
+        className="w-full h-11 bg-white rounded-lg shadow-edit flex-center gap-2 font-semibold text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         onClick={() => setIsTab(props => !props)}
       >
         +페이지 추가

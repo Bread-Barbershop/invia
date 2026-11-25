@@ -95,11 +95,12 @@ export const ShareUrlButton = () => {
       <button
         type="button"
         className={cn(
-          'w-full h-11 rounded-lg shadow-edit flex-center text-sm font-semibold transition-all duration-200 ease-out',
+          'w-full h-11 rounded-lg shadow-edit flex-center text-sm font-semibold transition-all duration-200 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
           isOpen
             ? 'bg-primary text-white hover:bg-primary/90'
             : 'bg-white text-black hover:bg-gray-50'
         )}
+        aria-expanded={isOpen}
         onClick={handleToggle}
       >
         공유 썸네일
