@@ -91,4 +91,23 @@ describe('갤러리 검색 입력', () => {
 
     expect(lastReplaceHref().searchParams.get('q')).toBe('모던');
   });
+
+  it('주소가 늦게 따라와도 이어서 입력한 검색어를 되돌리지 않는다', () => {
+    jest.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
+    const { rerender } = render(<GallerySearchBar />);
+    const input = screen.getByLabelText('템플릿 검색');
+
+    fireEvent.change(input, { target: { value: '브라' } });
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    fireEvent.change(input, { target: { value: '브라이덜' } });
+    jest
+      .mocked(useSearchParams)
+      .mockReturnValue(new URLSearchParams('q=브라'));
+    rerender(<GallerySearchBar />);
+
+    expect(screen.getByLabelText('템플릿 검색')).toHaveValue('브라이덜');
+  });
 });

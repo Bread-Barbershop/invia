@@ -2,7 +2,7 @@
 
 import { Search, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { GALLERY_QUERY_PARAM } from './gallerySearchParams';
 
@@ -16,9 +16,12 @@ function GallerySearchBar() {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get(GALLERY_QUERY_PARAM) ?? '';
   const [value, setValue] = useState(urlQuery);
+  // 우리가 방금 주소에 밀어 넣은 검색어. 주소가 이 값으로 바뀐 것은 되돌리지 않는다.
+  const pushedQuery = useRef<string | null>(null);
 
   // 뒤로가기나 분류 이동처럼 주소의 검색어가 바뀌면 입력창도 따라간다.
   useEffect(() => {
+    if (urlQuery === pushedQuery.current) return;
     setValue(urlQuery);
   }, [urlQuery]);
 
@@ -35,6 +38,7 @@ function GallerySearchBar() {
   };
 
   const replaceQuery = (nextValue: string) => {
+    pushedQuery.current = nextValue.trim();
     router.replace(buildHref(nextValue), { scroll: false });
   };
 
@@ -71,7 +75,7 @@ function GallerySearchBar() {
         value={value}
         onChange={event => setValue(event.target.value)}
         placeholder="이름·분위기로 찾기"
-        className="w-full bg-transparent text-sm text-[#111] outline-none placeholder:text-neutral-400 md:text-base"
+        className="w-full bg-transparent text-sm text-[#111] outline-none placeholder:text-neutral-400 md:text-base [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button
