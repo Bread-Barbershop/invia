@@ -16,11 +16,7 @@ function FaqContent() {
   );
 
   const filteredItems = useMemo(() => {
-    const normalizedQuery = searchQuery
-      .trim()
-      .toLowerCase()
-      .replace(/(?:google\s*)?drive|(?:구글\s*)?드라이브/g, '나의 저장소')
-      .replace(/나의 저장소\s+저장\s*공간/g, '나의 저장소 공간');
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
     return FAQ_ITEMS.filter(item => {
       const matchesCategory =
