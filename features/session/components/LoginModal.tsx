@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import InviaSimpleLogo3d from '@/shared/assets/logo/invia-simple-logo-3d.png';
@@ -31,8 +31,9 @@ function LoginModal({
   const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const googleButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
 
-  const closeWithFade = () => {
+  const closeWithFade = useCallback(() => {
     if (isClosing) return;
 
     setIsClosing(true);
@@ -40,13 +41,17 @@ function LoginModal({
       onClose();
       setIsClosing(false);
     }, FADE_OUT_MS);
-  };
+  }, [isClosing, onClose]);
 
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(closeWithFade);
 
   useEffect(() => {
     if (!open || isClosing) return;
 
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const enableRestore = disableBodyScroll();
     getHiddenRoot();
 
@@ -71,8 +76,9 @@ function LoginModal({
       document.removeEventListener('keydown', handleKeyDown);
       enableRestore();
       removeHiddenRoot();
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
-  }, [open, isClosing]);
+  }, [closeWithFade, open, isClosing]);
 
   if (!open && !isClosing) return null;
 
@@ -85,7 +91,7 @@ function LoginModal({
       {...backdropDismiss}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="login-modal-title"
+      aria-labelledby={titleId}
       tabIndex={-1}
     >
       <div className="pointer-events-none absolute inset-0 bg-[rgb(0_0_0_/_8%)]" />
@@ -98,6 +104,9 @@ function LoginModal({
         }`}
         onClick={e => e.stopPropagation()}
       >
+        <h2 id={titleId} className="sr-only">
+          Invia 로그인
+        </h2>
         <Image
           src={InviaSimpleLogo3d}
           alt="Invia"
@@ -112,6 +121,7 @@ function LoginModal({
           type="button"
           onClick={onGoogleLogin}
           disabled={isLoading}
+          aria-busy={isLoading}
           className="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-[8px] bg-white px-2 py-1.5 text-[15px] font-medium text-[#111827] ring-1 ring-[#EBEBEB] ring-inset enabled:hover:bg-[#FAFAFB] enabled:active:bg-[#F5F8FF] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Image
@@ -121,7 +131,7 @@ function LoginModal({
             height={32}
             className="absolute left-2"
           />
-          <p>{isLoading ? '로그인중..' : 'Google로 계속하기'}</p>
+          <p>{isLoading ? '로그인 중…' : 'Google로 계속하기'}</p>
         </button>
       </div>
     </div>,
