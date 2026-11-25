@@ -23,6 +23,7 @@ const upload = {
   isLoading: false,
   isFail: false,
   isAuthRequired: false,
+  isDraftPersisted: false,
   isCleaningUp: false,
   pendingInvitation: null,
   loadingMessage: '',

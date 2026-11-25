@@ -19,6 +19,7 @@ interface Props {
   isLoading: boolean;
   isFail: boolean;
   authRequired?: boolean;
+  isDraftPersisted?: boolean;
   onGoogleLogin?: () => void;
   escapeDisabled?: boolean;
   pendingInvitation:
@@ -229,9 +230,11 @@ const ModalFrame = forwardRef<
 ModalFrame.displayName = 'ModalFrame';
 
 const SaveAuthRequiredView = ({
+  isDraftPersisted,
   onGoogleLogin,
   onClose,
 }: {
+  isDraftPersisted: boolean;
   onGoogleLogin?: () => void;
   onClose: () => void;
 }) => (
@@ -244,7 +247,9 @@ const SaveAuthRequiredView = ({
         저장을 위해 Google 로그인이 필요해요
       </p>
       <p className="text-sm leading-6 text-neutral-600">
-        지금까지 작업한 내용은 이 브라우저에 임시로 보관했어요.
+        {isDraftPersisted
+          ? '지금까지 작업한 내용은 이 브라우저에 임시로 보관했어요.'
+          : '지금까지 작업한 내용은 이 화면에 남아 있어요.'}
         <br />
         로그인하면 그대로 이어서 저장할 수 있어요.
       </p>
@@ -352,6 +357,7 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
       isLoading,
       isFail,
       authRequired = false,
+      isDraftPersisted = false,
       onGoogleLogin,
       escapeDisabled,
       pendingInvitation,
@@ -412,6 +418,7 @@ export const SaveModal = forwardRef<HTMLDivElement, Props>(
       >
         {authRequired ? (
           <SaveAuthRequiredView
+            isDraftPersisted={isDraftPersisted}
             onGoogleLogin={onGoogleLogin}
             onClose={onClose}
           />

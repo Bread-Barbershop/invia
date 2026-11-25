@@ -7,6 +7,7 @@ import {
   clearEditorDraft,
   saveEditorDraft,
   type EditorDraftInput,
+  type EditorDraftKey,
 } from '@/features/editor/draft/editorDraft';
 import {
   isInvitationSaveAuthRequiredError,
@@ -41,7 +42,10 @@ type SavedEditorInvitation = DashboardPendingInvitation & {
 
 type UploadOptions = { preserveVisibility?: boolean };
 
-export const useInvitationUpload = (audienceName?: string) => {
+export const useInvitationUpload = (
+  audienceName?: string,
+  draftKey?: EditorDraftKey
+) => {
   const editorData = useEditorStore(useShallow(selectUploadData));
   const {
     hashFiles,
@@ -87,6 +91,7 @@ export const useInvitationUpload = (audienceName?: string) => {
   const isSaveLoadingRef = useRef(false);
   const [isFail, setIsFail] = useState(false);
   const [isAuthRequired, setIsAuthRequired] = useState(false);
+  const [isDraftPersisted, setIsDraftPersisted] = useState(false);
   const [isCleaningUp, setIsCleaningUp] = useState(false);
   const [pendingInvitation, setPendingInvitation] =
     useState<SavedEditorInvitation | null>(null);
@@ -214,6 +219,9 @@ export const useInvitationUpload = (audienceName?: string) => {
   const handleUpload = async ({ preserveVisibility }: UploadOptions = {}) => {
     if (isSaveLoadingRef.current || isCleaningUp) return null;
 
+    const newInvitationDraftKey = editorData.invitationUuid
+      ? undefined
+      : draftKey;
     let draftInput: EditorDraftInput | null = null;
 
     try {
@@ -222,6 +230,7 @@ export const useInvitationUpload = (audienceName?: string) => {
       setIsLoading(true);
       setIsFail(false);
       setIsAuthRequired(false);
+      setIsDraftPersisted(false);
       setPendingInvitation(null);
 
       // Bundled sample URLs and existing URL references stay in block props.
@@ -322,7 +331,7 @@ export const useInvitationUpload = (audienceName?: string) => {
         onProgress: (step, photos) => setProgress({ step, photos }),
       });
       const savedInvitation = await applySaveResult(saveResult, allTasks);
-      void clearEditorDraft();
+      if (newInvitationDraftKey) await clearEditorDraft(newInvitationDraftKey);
       if (useBgmStore.getState().userFile === userFile) {
         useEditorStore.getState().setIsDirty(false);
       }
@@ -349,11 +358,14 @@ export const useInvitationUpload = (audienceName?: string) => {
       console.error('[uploadFlow] 저장 중 오류 발생:', error);
 
       if (isInvitationSaveAuthRequiredError(error)) {
-        // 작성한 내용을 브라우저에 남겨 두고 로그인 안내로 넘긴다.
-        setIsAuthRequired(true);
-        if (draftInput) {
-          void saveEditorDraft(draftInput);
+        if (newInvitationDraftKey && draftInput) {
+          const persisted = await saveEditorDraft(
+            newInvitationDraftKey,
+            draftInput
+          );
+          setIsDraftPersisted(persisted);
         }
+        setIsAuthRequired(true);
         return null;
       }
 
@@ -370,6 +382,7 @@ export const useInvitationUpload = (audienceName?: string) => {
     isLoading,
     isFail,
     isAuthRequired,
+    isDraftPersisted,
     isCleaningUp,
     pendingInvitation,
     photoProgress: progress.photos,

@@ -6,6 +6,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
 import { DEFAULT_SCROLL_ANIMATION } from '@/components/molecules/scroll-fade-in/animationConfig';
+import {
+  loadEditorDraft,
+  type EditorDraftKey,
+} from '@/features/editor/draft/editorDraft';
 import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
 import LoginModal from '@/features/session/components/LoginModal';
 import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
@@ -18,6 +22,7 @@ import { createDefaultShareUrlState } from '@/shared/utils/shareUrlDefaults';
 import InvitationTemplatePoster from '@/widgets/editor/preview/components/InvitationTemplatePoster';
 import { FabricProvider } from '@/widgets/mainPoster/context/FabricContext';
 
+import { toEditorDraftSavedData } from './draftSavedData';
 import MainContentsArea from './MainContentsArea';
 
 import type { SavedData } from '../[id]/types/savedata';
@@ -54,6 +59,7 @@ export default function TemplateEditorEntry({
   initialIsLoggedIn: boolean;
 }) {
   const template = INVITATION_TEMPLATES.find(item => item.id === templateId);
+  const draftKey: EditorDraftKey = `template:${templateId}`;
   const router = useRouter();
   const auth = useAuthGate({ initialIsLoggedIn, stayOnSessionExpiry: true });
   const [readyTemplateId, setReadyTemplateId] = useState<string | null>(null);
@@ -82,7 +88,14 @@ export default function TemplateEditorEntry({
 
     if (!template) return;
 
-    void prepareTemplateEditorData(templateId).then(
+    async function loadInitialData() {
+      const draft = await loadEditorDraft(draftKey);
+      return draft
+        ? toEditorDraftSavedData(draft)
+        : prepareTemplateEditorData(templateId);
+    }
+
+    void loadInitialData().then(
       data => {
         if (isCurrent) setPreparedData({ templateId, data });
       },
@@ -95,7 +108,7 @@ export default function TemplateEditorEntry({
     return () => {
       isCurrent = false;
     };
-  }, [loadAttempt, template, templateId]);
+  }, [draftKey, loadAttempt, template, templateId]);
 
   useEffect(() => {
     if (!template || !savedData || startedTemplateIdRef.current === templateId)
@@ -141,7 +154,7 @@ export default function TemplateEditorEntry({
     return (
       <FabricProvider initialData={savedData.mainPoster}>
         <div className="flex h-full w-full flex-col justify-center overflow-x-auto overflow-y-hidden bg-[#E7E9EB]">
-          <MainContentsArea savedData={savedData} />
+          <MainContentsArea savedData={savedData} draftKey={draftKey} />
         </div>
       </FabricProvider>
     );

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 
 import { useBgmStore } from '@/components/organisms/bgm/store/useBgmStore';
 import { rememberSavedAudioFile } from '@/features/invitation/save/savedAudioFiles';
@@ -13,6 +13,7 @@ import UploadButton from './UploadButton';
 
 jest.mock('@/features/invitation/save/uploadFileToDrive');
 jest.mock('@/features/invitation/save/updateFileToDrive');
+jest.mock('@/shared/assets/logo/invia-simple-logo-3d.png', () => '/test-logo.png');
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace: jest.fn() }),
 }));
@@ -47,11 +48,86 @@ describe('모두 저장하기 진행 단계', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+    jest.restoreAllMocks();
     act(() => {
       useEditorStore.getState().reset();
       useBgmStore.getState().reset();
     });
     jest.useRealTimers();
+  });
+
+  it('기존 세션이 남아 있어도 OAuth 팝업 인증이 끝난 뒤에만 저장을 다시 시도한다', async () => {
+    const prepareUrl = '/api/drive/saveInvitation';
+    let saveAttempts = 0;
+    global.fetch = jest.fn(async (input, init) => {
+      if (input === '/api/auth/session') {
+        return {
+          ok: true,
+          json: async () => ({ isLoggedIn: true }),
+        } as Response;
+      }
+      if (input === prepareUrl) {
+        saveAttempts += 1;
+        if (saveAttempts === 1) return { ok: false, status: 401 } as Response;
+      }
+      return mockBgmSaveApi(input, init);
+    });
+    const popupFrame = document.body.appendChild(
+      document.createElement('iframe')
+    );
+    const popup = popupFrame.contentWindow;
+    jest.spyOn(window, 'open').mockReturnValue(popup);
+
+    try {
+      render(<EditorSaveButton />);
+      fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+      await tick(0);
+
+      const saveDialog = screen.getByRole('dialog', {
+        name: '저장을 위해 Google 로그인이 필요해요',
+      });
+      fireEvent.click(
+        within(saveDialog).getByRole('button', { name: /계속하기/ })
+      );
+      fireEvent.click(screen.getByRole('button', { name: '알겠어요' }));
+      const loginButtons = screen
+        .getAllByRole('button', { name: /계속하기/ })
+        .filter(button => !saveDialog.contains(button));
+      expect(loginButtons).toHaveLength(1);
+      fireEvent.click(loginButtons[0]);
+
+      fireEvent.focus(window);
+      await tick(0);
+      expect(saveAttempts).toBe(1);
+
+      fireEvent(
+        window,
+        new MessageEvent('message', {
+          origin: window.location.origin,
+          source: window,
+          data: { type: 'GOOGLE_OAUTH_SUCCESS' },
+        })
+      );
+      await tick(0);
+      expect(saveAttempts).toBe(1);
+
+      fireEvent(
+        window,
+        new MessageEvent('message', {
+          origin: window.location.origin,
+          source: popup,
+          data: { type: 'GOOGLE_OAUTH_SUCCESS' },
+        })
+      );
+      await tick(100);
+
+      expect(saveAttempts).toBe(2);
+      expect(
+        screen.getByText('성공적으로 저장되었습니다!')
+      ).toBeInTheDocument();
+    } finally {
+      popupFrame.remove();
+    }
   });
 
   it('새 사진과 음원을 전송하는 시점에 문구를 바꾸고 사진 수량을 별도로 표시한다', async () => {

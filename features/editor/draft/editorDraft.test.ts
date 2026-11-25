@@ -3,6 +3,7 @@
  */
 
 import {
+  BLANK_EDITOR_DRAFT_KEY,
   EDITOR_DRAFT_MAX_AGE_MS,
   clearEditorDraft,
   createEditorDraftSnapshot,
@@ -70,7 +71,7 @@ function createInput(file: File): EditorDraftInput {
 }
 
 beforeEach(async () => {
-  await clearEditorDraft();
+  await clearEditorDraft(BLANK_EDITOR_DRAFT_KEY);
 });
 
 it('사진 파일을 잃지 않고 초안 스냅샷을 만든다', () => {
@@ -85,13 +86,32 @@ it('사진 파일을 잃지 않고 초안 스냅샷을 만든다', () => {
 it('저장한 초안을 다시 불러오고 지울 수 있다', async () => {
   const file = new File(['photo'], 'photo.png', { type: 'image/png' });
 
-  await saveEditorDraft(createInput(file));
-  const restored = await loadEditorDraft();
+  await saveEditorDraft(BLANK_EDITOR_DRAFT_KEY, createInput(file));
+  const restored = await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY);
 
   expect(restored?.images[0].file).toBe(file);
 
-  await clearEditorDraft();
-  expect(await loadEditorDraft()).toBeNull();
+  await clearEditorDraft(BLANK_EDITOR_DRAFT_KEY);
+  expect(await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY)).toBeNull();
+});
+
+it('같은 이름의 샘플과 템플릿에서 보관한 초안을 따로 불러오고 지운다', async () => {
+  const sampleFile = new File(['sample'], 'sample.png');
+  const templateFile = new File(['template'], 'template.png');
+  const sampleKey = 'sample:wedding_14';
+  const templateKey = 'template:wedding_14';
+
+  await saveEditorDraft(sampleKey, createInput(sampleFile));
+  await saveEditorDraft(templateKey, createInput(templateFile));
+
+  expect(await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY)).toBeNull();
+  expect((await loadEditorDraft(sampleKey))?.images[0].file).toBe(sampleFile);
+  await clearEditorDraft(sampleKey);
+  expect(await loadEditorDraft(sampleKey)).toBeNull();
+  expect((await loadEditorDraft(templateKey))?.images[0].file).toBe(
+    templateFile
+  );
+  await clearEditorDraft(templateKey);
 });
 
 it('일주일이 지난 초안은 되살리지 않는다', () => {

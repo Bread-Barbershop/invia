@@ -3,7 +3,6 @@ import React, { useRef, useState } from 'react';
 import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
 import LoginModal from '@/features/session/components/LoginModal';
 import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
-import { fetchSessionState } from '@/features/session/hooks/fetchSessionState';
 import { useAuthGate } from '@/features/session/hooks/useAuthGate';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useFabricViewContext } from '@/widgets/mainPoster/context/FabricContext';
@@ -26,6 +25,7 @@ function UploadButton({
     isLoading,
     isFail,
     isAuthRequired,
+    isDraftPersisted,
     isCleaningUp,
     pendingInvitation,
     loadingMessage,
@@ -33,7 +33,7 @@ function UploadButton({
   } = upload;
   const { confirm } = useConfirm();
   const { canvas } = useFabricViewContext();
-  const auth = useAuthGate({ stayOnSessionExpiry: true });
+  const auth = useAuthGate();
 
   const handleClose = () => {
     if (!isLoading) {
@@ -41,23 +41,10 @@ function UploadButton({
     }
   };
 
-  // 로그인이 끝나면 팝업에서 돌아온 즉시 같은 저장을 다시 시도한다.
   const handleGoogleLogin = () => {
-    void (async () => {
-      try {
-        // 세션이 살아 있는데 401이 났다면 로그인 창을 또 띄우지 않고 바로 다시 저장한다.
-        if (await fetchSessionState()) {
-          void handleUpload();
-          return;
-        }
-      } catch (error) {
-        console.error(error);
-      }
-
-      void auth.runAfterAuth(() => {
-        void handleUpload();
-      });
-    })();
+    auth.runAfterReauth(async () => {
+      await handleUpload();
+    });
   };
 
   const authDialogOpen =
@@ -80,7 +67,11 @@ function UploadButton({
           const isConfirm = await confirm({
             ...(examples.length
               ? {
-                  message: ['표지에 예시 문구가 남아 있어요.', ...shown, '본문을 바꿔도 표지 문구는 그대로 발행돼요. 이대로 저장할까요?'].join('\n'),
+                  message: [
+                    '표지에 예시 문구가 남아 있어요.',
+                    ...shown,
+                    '본문을 바꿔도 표지 문구는 그대로 발행돼요. 이대로 저장할까요?',
+                  ].join('\n'),
                   confirmText: '그대로 저장',
                   cancelText: '돌아가기',
                 }
@@ -107,6 +98,7 @@ function UploadButton({
           isLoading={isLoading}
           isFail={isFail}
           authRequired={isAuthRequired}
+          isDraftPersisted={isDraftPersisted}
           onGoogleLogin={handleGoogleLogin}
           escapeDisabled={authDialogOpen}
           pendingInvitation={pendingInvitation}

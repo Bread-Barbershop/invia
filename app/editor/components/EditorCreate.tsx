@@ -9,7 +9,11 @@ import {
   type NormalizedGuestPayload,
 } from '@/app/guest/[id]/validation/parseGuestPayload';
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
-import { loadEditorDraft } from '@/features/editor/draft/editorDraft';
+import {
+  BLANK_EDITOR_DRAFT_KEY,
+  loadEditorDraft,
+  type EditorDraftKey,
+} from '@/features/editor/draft/editorDraft';
 import { useToastStore } from '@/shared/store/useToastStore';
 import type { BgmData } from '@/shared/types/invitationSave';
 import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
@@ -134,7 +138,10 @@ function EditorCreate({
 }) {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('template');
-  const sampleId = searchParams.get('sample');
+  const sampleId = searchParams.get('sample') || null;
+  const draftKey: EditorDraftKey = sampleId
+    ? `sample:${sampleId}`
+    : BLANK_EDITOR_DRAFT_KEY;
   return templateId ? (
     <TemplateEditorEntry
       key={templateId}
@@ -142,11 +149,21 @@ function EditorCreate({
       initialIsLoggedIn={initialIsLoggedIn}
     />
   ) : (
-    <SampleEditorCreate key={sampleId ?? 'blank'} sampleId={sampleId} />
+    <SampleEditorCreate
+      key={draftKey}
+      draftKey={draftKey}
+      sampleId={sampleId}
+    />
   );
 }
 
-function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
+function SampleEditorCreate({
+  draftKey,
+  sampleId,
+}: {
+  draftKey: EditorDraftKey;
+  sampleId: string | null;
+}) {
   const [savedData, setSavedData] = useState<SavedData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -156,24 +173,19 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
     let cancelled = false;
 
     async function loadInitialEditorData() {
-      // 샘플 없이 새로 시작할 때는 저장 직전에 로그인으로 끊긴 초안을 먼저 살핀다.
-      if (!sampleId) {
-        const draft = await loadEditorDraft();
-        if (cancelled) return;
-
-        setSavedData(draft ? toEditorDraftSavedData(draft) : null);
-        setLoadError(false);
-        setIsLoading(false);
-
-        if (draft) {
-          showToast('작성 중이던 초대장을 이어서 불러왔어요.', 'info');
-        }
-        return;
-      }
-
       try {
         setIsLoading(true);
         setLoadError(false);
+
+        const draft = await loadEditorDraft(draftKey);
+        if (cancelled) return;
+        if (draft) {
+          setSavedData(toEditorDraftSavedData(draft));
+          showToast('작성 중이던 초대장을 이어서 불러왔어요.', 'info');
+          return;
+        }
+        if (!sampleId) return;
+
         const manifestResponse = await fetch(SAMPLES_MANIFEST_URL);
         if (!manifestResponse.ok) {
           throw new Error(`sample_manifest_failed:${manifestResponse.status}`);
@@ -220,7 +232,7 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
     return () => {
       cancelled = true;
     };
-  }, [sampleId, showToast]);
+  }, [draftKey, sampleId, showToast]);
 
   if (isLoading) {
     return <ScreenTransitionLoader label="에디터를 준비하는 중" />;
@@ -233,7 +245,7 @@ function SampleEditorCreate({ sampleId }: { sampleId: string | null }) {
   return (
     <FabricProvider initialData={savedData?.mainPoster}>
       <div className="w-full h-full bg-[#E7E9EB] flex flex-col gap-13 justify-center overflow-x-auto overflow-y-hidden">
-        <MainContentsArea savedData={savedData} />
+        <MainContentsArea savedData={savedData} draftKey={draftKey} />
       </div>
     </FabricProvider>
   );

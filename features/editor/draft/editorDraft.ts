@@ -10,8 +10,13 @@ import type {
 const DRAFT_DATABASE_NAME = 'invia-editor-drafts';
 const DRAFT_DATABASE_VERSION = 1;
 const DRAFT_STORE_NAME = 'drafts';
-const DRAFT_KEY = 'editor-create';
 const DRAFT_VERSION = 1;
+
+export const BLANK_EDITOR_DRAFT_KEY = 'editor-create';
+export type EditorDraftKey =
+  | typeof BLANK_EDITOR_DRAFT_KEY
+  | `sample:${string}`
+  | `template:${string}`;
 
 // 로그인 전에 끊긴 작업은 일주일까지 되살린다. 그보다 오래된 초안은 새 작업으로 본다.
 export const EDITOR_DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -34,21 +39,23 @@ export type EditorDraftSnapshot = EditorDraftInput & {
   savedAt: number;
 };
 
-let memoryDraft: EditorDraftSnapshot | null = null;
+const memoryDrafts = new Map<EditorDraftKey, EditorDraftSnapshot>();
 let databasePromise: Promise<IDBDatabase | null> | null = null;
 
 // 사진 File까지 그대로 담아야 하므로 localStorage 대신 구조화 복제가 되는
 // IndexedDB를 쓴다. 브라우저가 막아 두면 메모리 보관으로 대신한다.
 function openDatabase(): Promise<IDBDatabase | null> {
-  if (typeof indexedDB === 'undefined') {
-    return Promise.resolve(null);
-  }
   if (databasePromise) {
     return databasePromise;
   }
 
   databasePromise = new Promise<IDBDatabase | null>(resolve => {
     try {
+      if (typeof indexedDB === 'undefined') {
+        resolve(null);
+        return;
+      }
+
       const request = indexedDB.open(
         DRAFT_DATABASE_NAME,
         DRAFT_DATABASE_VERSION
@@ -72,13 +79,28 @@ function openDatabase(): Promise<IDBDatabase | null> {
   return databasePromise;
 }
 
-function readDatabaseDraft(database: IDBDatabase): Promise<unknown> {
+function readDatabaseDraft(
+  database: IDBDatabase,
+  key: EditorDraftKey
+): Promise<EditorDraftSnapshot | null> {
   return new Promise(resolve => {
     try {
-      const transaction = database.transaction(DRAFT_STORE_NAME, 'readonly');
-      const request = transaction.objectStore(DRAFT_STORE_NAME).get(DRAFT_KEY);
+      const transaction = database.transaction(DRAFT_STORE_NAME, 'readwrite');
+      const drafts = transaction.objectStore(DRAFT_STORE_NAME);
+      const request = drafts.get(key);
 
-      request.onsuccess = () => resolve(request.result ?? null);
+      request.onsuccess = () => {
+        const stored: unknown = request.result;
+        if (!isEditorDraftSnapshot(stored)) {
+          resolve(null);
+        } else if (!isEditorDraftUsable(stored)) {
+          // Read and remove the expired entry in the same transaction.
+          drafts.delete(key);
+          resolve(null);
+        } else {
+          resolve(stored);
+        }
+      };
       request.onerror = () => resolve(null);
       transaction.onabort = () => resolve(null);
     } catch (error) {
@@ -90,12 +112,13 @@ function readDatabaseDraft(database: IDBDatabase): Promise<unknown> {
 
 function writeDatabaseDraft(
   database: IDBDatabase,
+  key: EditorDraftKey,
   snapshot: EditorDraftSnapshot
 ): Promise<boolean> {
   return new Promise(resolve => {
     try {
       const transaction = database.transaction(DRAFT_STORE_NAME, 'readwrite');
-      transaction.objectStore(DRAFT_STORE_NAME).put(snapshot, DRAFT_KEY);
+      transaction.objectStore(DRAFT_STORE_NAME).put(snapshot, key);
 
       transaction.oncomplete = () => resolve(true);
       transaction.onerror = () => resolve(false);
@@ -107,11 +130,14 @@ function writeDatabaseDraft(
   });
 }
 
-function deleteDatabaseDraft(database: IDBDatabase): Promise<void> {
+function deleteDatabaseDraft(
+  database: IDBDatabase,
+  key: EditorDraftKey
+): Promise<void> {
   return new Promise(resolve => {
     try {
       const transaction = database.transaction(DRAFT_STORE_NAME, 'readwrite');
-      transaction.objectStore(DRAFT_STORE_NAME).delete(DRAFT_KEY);
+      transaction.objectStore(DRAFT_STORE_NAME).delete(key);
 
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => resolve();
@@ -211,47 +237,47 @@ export function createEditorDraftSnapshot(
 }
 
 export async function saveEditorDraft(
+  key: EditorDraftKey,
   input: EditorDraftInput
-): Promise<EditorDraftSnapshot | null> {
-  const snapshot = createEditorDraftSnapshot(input);
-  memoryDraft = snapshot;
+): Promise<boolean> {
+  let snapshot: EditorDraftSnapshot;
+  try {
+    snapshot = createEditorDraftSnapshot(input);
+  } catch (error) {
+    console.warn('[editorDraft] 초안을 복제하지 못했습니다.', error);
+    return false;
+  }
+  memoryDrafts.set(key, snapshot);
 
   const database = await openDatabase();
-  if (!database) return snapshot;
+  if (!database) return false;
 
-  const saved = await writeDatabaseDraft(database, snapshot);
-
-  return saved ? snapshot : null;
-}
-
-export async function loadEditorDraft(): Promise<EditorDraftSnapshot | null> {
-  const stored = memoryDraft ?? (await readStoredDraft());
-  if (!stored) return null;
-
-  memoryDraft = stored;
-
-  if (!isEditorDraftUsable(stored)) {
-    await clearEditorDraft();
-    return null;
+  const persisted = await writeDatabaseDraft(database, key, snapshot);
+  if (persisted && memoryDrafts.get(key) === snapshot) {
+    memoryDrafts.delete(key);
   }
 
-  return stored;
+  return persisted;
 }
 
-export async function clearEditorDraft(): Promise<void> {
-  memoryDraft = null;
+export async function loadEditorDraft(
+  key: EditorDraftKey
+): Promise<EditorDraftSnapshot | null> {
+  const memoryDraft = memoryDrafts.get(key);
+  if (memoryDraft) {
+    if (isEditorDraftUsable(memoryDraft)) return memoryDraft;
+    memoryDrafts.delete(key);
+  }
+
+  const database = await openDatabase();
+  return database ? readDatabaseDraft(database, key) : null;
+}
+
+export async function clearEditorDraft(key: EditorDraftKey): Promise<void> {
+  memoryDrafts.delete(key);
 
   const database = await openDatabase();
   if (!database) return;
 
-  await deleteDatabaseDraft(database);
-}
-
-async function readStoredDraft(): Promise<EditorDraftSnapshot | null> {
-  const database = await openDatabase();
-  if (!database) return null;
-
-  const stored = await readDatabaseDraft(database);
-
-  return isEditorDraftSnapshot(stored) ? stored : null;
+  await deleteDatabaseDraft(database, key);
 }
