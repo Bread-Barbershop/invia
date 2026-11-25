@@ -2,6 +2,13 @@ import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/privacy', destination: '/policy', permanent: true },
+      { source: '/create', destination: '/editor', permanent: true },
+    ];
+  },
+
   async rewrites() {
     // 기존 초대장에 저장된 파일 경로도 새 포맷으로 제공한다.
     return {
@@ -18,11 +25,6 @@ const nextConfig: NextConfig = {
         },
       ],
     };
-  },
-
-  async redirects() {
-    // 외부에 공유된 제작 시작 주소를 편집기로 연결한다. (내부 링크는 /editor 사용)
-    return [{ source: '/create', destination: '/editor', permanent: true }];
   },
 
   images: {

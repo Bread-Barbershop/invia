@@ -1,5 +1,7 @@
 'use client';
 
+import type { EditorDraftKey } from '@/features/editor/draft/editorDraft';
+
 import InvitationSettingsButton from '../preview/components/AdditionalFeaturesButton';
 import AddPageButton from '../preview/components/AddPageButton';
 import InvitationAudiencesButton from '../preview/components/InvitationAudiencesButton';
@@ -13,12 +15,14 @@ import type { RefObject } from 'react';
 
 function MenuPanel({
   audienceName,
+  draftKey,
   toolbarRef,
 }: {
   audienceName?: string;
+  draftKey?: EditorDraftKey;
   toolbarRef: RefObject<HTMLDivElement | null>;
 }) {
-  const upload = useInvitationUpload(audienceName);
+  const upload = useInvitationUpload(audienceName, draftKey);
 
   return (
     <div ref={toolbarRef} className="w-28 flex flex-col gap-4">

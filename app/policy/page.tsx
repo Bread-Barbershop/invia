@@ -1,6 +1,7 @@
 import { ShieldCheck } from 'lucide-react';
 
 import ContactEmailActions from '@/features/contact/components/ContactEmailActions';
+import { CONTACT_EMAIL } from '@/features/contact/contactEmail';
 import DashboardShell from '@/features/session/components/DashboardShell';
 
 import type { Metadata } from 'next';
@@ -283,10 +284,10 @@ const policySections: PolicySection[] = [
         items: [
           <a
             key="owner-email"
-            href="mailto:teambread.official@gmail.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             className="font-medium underline underline-offset-4"
           >
-            teambread.official@gmail.com
+            {CONTACT_EMAIL}
           </a>,
         ],
       },
