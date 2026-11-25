@@ -32,10 +32,12 @@ type GuestRendererBulkData = NormalizedGuestPayload['bulkData'];
 type GuestRendererRenderHints = NormalizedGuestPayload['renderHints'];
 
 const GUEST_PAGE_PROP_COMPONENTS = new Set<GuestRendererBlock['component']>([
+  'checklist',
   'coupleIntroduction',
   'countdown',
   'calendar',
   'divider',
+  'eventGuide',
   'faq',
   'guestbook',
   'afterParty',

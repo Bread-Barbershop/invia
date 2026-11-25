@@ -35,6 +35,8 @@ describe('블록 검색 별칭과 복합 검색', () => {
     'countdown',
     'timeline',
     'dressCode',
+    'eventGuide',
+    'checklist',
     'divider',
     'spacer',
   ];
@@ -105,6 +107,33 @@ describe('블록 검색 별칭과 복합 검색', () => {
       '에티켓',
       '화환사양',
       'dresscode',
+    ],
+    eventGuide: [
+      '이벤트',
+      '이벤트 안내',
+      '행사 이벤트',
+      '프로그램',
+      '경품',
+      '경품 추첨',
+      '추첨',
+      '게임',
+      '포토부스',
+      '포토 타임',
+      '돌잡이',
+      '부케 토스',
+      'event',
+      'program',
+    ],
+    checklist: [
+      '준비물',
+      '준비물 안내',
+      '체크리스트',
+      '체크',
+      '챙길 것',
+      '할 일',
+      '투두',
+      'checklist',
+      'todo',
     ],
     divider: [
       '선',
@@ -207,6 +236,21 @@ describe('블록 검색 별칭과 복합 검색', () => {
     ).toBe(true);
     expect(
       findComponents('D-Day 카운트다운').some(item => item.type === 'countdown')
+    ).toBe(true);
+  });
+
+  it('새 이벤트·준비물 블록도 이름과 별칭으로 검색한다', () => {
+    expect(findComponents('이벤트').some(item => item.type === 'eventGuide')).toBe(
+      true
+    );
+    expect(
+      findComponents('돌잡이').some(item => item.type === 'eventGuide')
+    ).toBe(true);
+    expect(findComponents('준비물').some(item => item.type === 'checklist')).toBe(
+      true
+    );
+    expect(
+      findComponents('체크리스트').some(item => item.type === 'checklist')
     ).toBe(true);
   });
 
