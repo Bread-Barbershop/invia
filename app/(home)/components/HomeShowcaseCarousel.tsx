@@ -2,8 +2,7 @@
 
 import AutoScroll from 'embla-carousel-auto-scroll';
 import useEmblaCarousel from 'embla-carousel-react';
-import { Pause, Play } from 'lucide-react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { dashboardCarouselLayout } from '@/app/dashboard/components/carousel/carouselLayout';
 import CarouselTrack from '@/app/dashboard/components/carousel/CarouselTrack';
@@ -17,6 +16,12 @@ import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 
 import type { showcaseItems } from './showcaseItems';
 
+function isCarouselControl(target: EventTarget | null) {
+  return (
+    target instanceof Element && !!target.closest('button, [role="button"]')
+  );
+}
+
 export default function HomeShowcaseCarousel({
   items,
 }: {
@@ -25,14 +30,9 @@ export default function HomeShowcaseCarousel({
   const openPreview = useShowcasePreview();
   const isPreviewOpen = useContext(ShowcasePreviewOpenContext);
   const reducedMotion = usePrefersReducedMotion();
-  const [isPointerInside, setIsPointerInside] = useState(false);
-  const [isFocusWithin, setIsFocusWithin] = useState(false);
-  const [isPausedByUser, setIsPausedByUser] = useState(false);
-  const pauseToggleRef = useRef<HTMLButtonElement>(null);
-  const [slideStatus, setSlideStatus] = useState({
-    index: 0,
-    total: items.length,
-  });
+  const [pointerOverCardOrControl, setPointerOverCardOrControl] =
+    useState(false);
+  const [keyboardFocused, setKeyboardFocused] = useState(false);
   const [plugins] = useState(() => [
     AutoScroll({ speed: 0.45, startDelay: 0, playOnInit: false }),
   ]);
@@ -40,8 +40,7 @@ export default function HomeShowcaseCarousel({
     {
       loop: true,
       dragFree: true,
-      // 자동으로 흐르는 트랙에서는 드래그를 받지 않아 카드 클릭이 그대로 전달된다.
-      watchDrag: false,
+      watchDrag: (_, event) => isCarouselControl(event.target),
       active: false,
       breakpoints: {
         [`(min-width: ${DESKTOP_CONTENT_MIN_WIDTH}px)`]: { active: true },
@@ -51,9 +50,8 @@ export default function HomeShowcaseCarousel({
   );
   const paused =
     reducedMotion ||
-    isPointerInside ||
-    isFocusWithin ||
-    isPausedByUser ||
+    pointerOverCardOrControl ||
+    keyboardFocused ||
     isPreviewOpen;
 
   useEffect(() => {
@@ -71,54 +69,19 @@ export default function HomeShowcaseCarousel({
     };
   }, [emblaApi, paused]);
 
-  useEffect(() => {
-    if (!emblaApi) return;
-    const syncSlideStatus = () => {
-      setSlideStatus({
-        index: emblaApi.selectedScrollSnap(),
-        total: emblaApi.scrollSnapList().length,
-      });
-    };
-    syncSlideStatus();
-    emblaApi.on('select', syncSlideStatus);
-    emblaApi.on('reInit', syncSlideStatus);
-    return () => {
-      emblaApi.off('select', syncSlideStatus);
-      emblaApi.off('reInit', syncSlideStatus);
-    };
-  }, [emblaApi]);
-
-  const progressPercent =
-    slideStatus.total > 1
-      ? ((slideStatus.index + 1) / slideStatus.total) * 100
-      : 100;
-
   return (
     <section
       aria-label="초대장 디자인"
       className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden"
       style={{ height: dashboardCarouselLayout.stageHeight }}
-      onPointerEnter={() => setIsPointerInside(true)}
-      onPointerLeave={() => setIsPointerInside(false)}
-      onFocus={event => {
-        // 키보드로 카드·화살표에 포커스가 있을 때만 멈추고,
-        // 자동 넘김 토글에 포커스가 있어도 다시 시작할 수 있게 한다.
-        const target = event.target;
-        setIsFocusWithin(
-          target instanceof Element &&
-            target !== pauseToggleRef.current &&
-            target.matches(':focus-visible')
-        );
-      }}
-      onBlur={event => {
-        if (
-          event.relatedTarget instanceof Node &&
-          event.currentTarget.contains(event.relatedTarget)
-        ) {
-          return;
-        }
-        setIsFocusWithin(false);
-      }}
+      onPointerOver={event =>
+        setPointerOverCardOrControl(isCarouselControl(event.target))
+      }
+      onPointerLeave={() => setPointerOverCardOrControl(false)}
+      onFocus={event =>
+        setKeyboardFocused(event.target.matches(':focus-visible'))
+      }
+      onBlur={() => setKeyboardFocused(false)}
     >
       <CarouselTrack
         emblaRef={emblaRef}
@@ -135,49 +98,7 @@ export default function HomeShowcaseCarousel({
             if (direction === 'left') emblaApi?.scrollPrev(reducedMotion);
             else emblaApi?.scrollNext(reducedMotion);
           }}
-          trailing={
-            reducedMotion ? null : (
-              <button
-                type="button"
-                ref={pauseToggleRef}
-                aria-label={
-                  isPausedByUser ? '자동 넘김 다시 시작' : '자동 넘김 일시정지'
-                }
-                onClick={() => setIsPausedByUser(previous => !previous)}
-                className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-[#EEEEF2] transition-colors hover:bg-[#E5E7EB]"
-              >
-                {isPausedByUser ? (
-                  <Play
-                    size={16}
-                    strokeWidth={2.5}
-                    className="text-[#6B7280]"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <Pause
-                    size={16}
-                    strokeWidth={2.5}
-                    className="text-[#6B7280]"
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-            )
-          }
-        >
-          <div className="flex items-center gap-3" aria-hidden="true">
-            <div className="h-1 w-28 overflow-hidden rounded-full bg-black/15">
-              <div
-                className="h-full rounded-full bg-[#252522] transition-[width] duration-300 ease-out motion-reduce:transition-none"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="font-pretendard text-[11px] font-semibold tabular-nums text-[#3F3F3B]">
-              {String(slideStatus.index + 1).padStart(2, '0')} /{' '}
-              {String(slideStatus.total).padStart(2, '0')}
-            </span>
-          </div>
-        </CarouselController>
+        />
       </div>
     </section>
   );

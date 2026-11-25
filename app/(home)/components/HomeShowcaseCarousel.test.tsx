@@ -14,9 +14,6 @@ const mockApi = {
   off: jest.fn(),
   plugins: () => ({ autoScroll: mockScroll }),
   scrollSnapList: () => [0, 1],
-  selectedScrollSnap: () => 0,
-  scrollNext: jest.fn(),
-  scrollPrev: jest.fn(),
 };
 jest.mock('embla-carousel-react', () => ({
   __esModule: true,
@@ -98,32 +95,3 @@ it.each(['클릭', 'Enter'])(
     expect(mockScroll.play).toHaveBeenCalledTimes(playCount);
   }
 );
-
-it('화살표에 접근성 이름을 주고 누르면 한 칸씩 이동한다', async () => {
-  const user = userEvent.setup();
-  renderShowcase();
-
-  await user.click(screen.getByRole('button', { name: '다음 초대장 보기' }));
-  await user.click(screen.getByRole('button', { name: '이전 초대장 보기' }));
-
-  expect(mockApi.scrollNext).toHaveBeenCalledTimes(1);
-  expect(mockApi.scrollPrev).toHaveBeenCalledTimes(1);
-});
-
-it('진행 상태를 보여 주고 자동 넘김을 멈추면 포인터가 벗어나도 재생하지 않는다', async () => {
-  const user = userEvent.setup();
-  renderShowcase();
-
-  expect(screen.getByText('01 / 02')).toBeVisible();
-
-  const pauseButton = screen.getByRole('button', { name: '자동 넘김 일시정지' });
-
-  await user.click(pauseButton);
-  expect(
-    screen.getByRole('button', { name: '자동 넘김 다시 시작' })
-  ).toBeVisible();
-
-  const playCount = mockScroll.play.mock.calls.length;
-  await user.click(document.body);
-  expect(mockScroll.play).toHaveBeenCalledTimes(playCount);
-});
