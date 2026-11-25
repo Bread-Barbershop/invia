@@ -152,6 +152,7 @@ export const etcComponents: ListType[] = withSearchAliases([
   { contents: '이벤트 안내', component: 'eventGuide', isType: false },
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
   { contents: '세로 구분선', component: 'divider', isType: false },
+  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
   { contents: '여백', component: 'spacer', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
 ]);
