@@ -100,8 +100,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '사진으로 전하는 한 컷',
-        image:
-          SHOWCASE_PHOTOS.classicNewspaper,
+        image: SHOWCASE_PHOTOS.classicNewspaper,
         caption:
           '촬영을 마치려던 참에 해가 났습니다. 그날 가장 좋아하게 된 사진이에요.',
       },
@@ -133,7 +132,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '3번 출구',
         subwayWalk:
           '한강진역 3번 출구에서 남산 순환로를 따라 도보 약 20분입니다. 언덕길이니 택시를 이용하셔도 좋습니다.',
-        parkingHours: '예식 참석 차량은 호텔 지하 주차장에 두시고, 접수대에서 차량 번호를 등록해 주세요.',
+        parkingHours:
+          '예식 참석 차량은 호텔 지하 주차장에 두시고, 접수대에서 차량 번호를 등록해 주세요.',
       },
       {
         component: 'account',
@@ -239,7 +239,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '15번 출구',
         subwayWalk:
           '서울역 15번 출구에서 구 역사 방향으로 도보 약 13분입니다. 1층 안내 데스크에서 대합실 홀로 안내해 드립니다.',
-        parkingHours: '서울역 서부 주차장을 이용하시고, 예식 참석 차량은 접수대에서 등록해 주세요.',
+        parkingHours:
+          '서울역 서부 주차장을 이용하시고, 예식 참석 차량은 접수대에서 등록해 주세요.',
       },
       {
         component: 'account',
@@ -275,7 +276,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         items: [
           {
             question: '사진은 언제 찍나요?',
-            answer: '서약이 끝나면 홀 앞에서 한 장씩 찍어요. 흑백으로 인화해 신혼집 벽에 걸어 두겠습니다.',
+            answer:
+              '서약이 끝나면 홀 앞에서 한 장씩 찍어요. 흑백으로 인화해 신혼집 벽에 걸어 두겠습니다.',
           },
         ],
       },
@@ -313,8 +315,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '봄바람 불던 오후',
-        image:
-          SHOWCASE_PHOTOS.skyBalcony,
+        image: SHOWCASE_PHOTOS.skyBalcony,
         caption: '바람이 불 때마다 웃음이 났던 촬영 날입니다.',
       },
       {
@@ -332,7 +333,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '6번 출구',
         subwayWalk:
           '동대입구역 6번 출구에서 장충단로를 따라 도보 약 20분입니다. 오르막이 이어지니 택시나 호텔 셔틀을 이용하셔도 좋습니다.',
-        parkingHours: '호텔 발렛과 지하 주차장을 이용하실 수 있습니다. 접수대에 차량 번호를 알려 주세요.',
+        parkingHours:
+          '호텔 발렛과 지하 주차장을 이용하실 수 있습니다. 접수대에 차량 번호를 알려 주세요.',
       },
       {
         component: 'timeline',
@@ -429,7 +431,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:40', title: '정원 식탁으로 이동' },
         ],
       },
-      { component: 'calendar', title: '가든 세리머니', template: 'calendarType8' },
+      {
+        component: 'calendar',
+        title: '가든 세리머니',
+        template: 'calendarType8',
+      },
       { component: 'place', title: '정원 입구', detail: '1층 안내 데스크 앞' },
       {
         component: 'transportation',
@@ -438,7 +444,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '4번 출구',
         subwayWalk:
           '신반포역 4번 출구에서 한강공원으로 내려와 세빛섬 방향으로 도보 약 25분입니다. 예식 한 시간 전부터 가빛섬 입구까지 셔틀을 운행합니다.',
-        parkingHours: '세빛섬 주차장을 이용하시고, 접수대에서 차량 번호를 말씀해 주세요.',
+        parkingHours:
+          '세빛섬 주차장을 이용하시고, 접수대에서 차량 번호를 말씀해 주세요.',
       },
       {
         component: 'mealMenu',
@@ -546,7 +553,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '아현이 감기에 걸렸을 때 민성이 죽 통에 쪽지를 붙였어요. 다 먹으면 냉장고에 귤도 있다는 말. 아직 서랍 안에 있어요.',
         image: SHOWCASE_PHOTOS.letterRings,
       },
-      { component: 'calendar', title: '편지에 적어 둔 날', template: 'calendarType7' },
+      {
+        component: 'calendar',
+        title: '편지에 적어 둔 날',
+        template: 'calendarType7',
+      },
       {
         component: 'notice',
         title: '답장을 남기는 자리',
@@ -563,7 +574,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         subwayExit: '5번 출구',
         subwayWalk:
           '삼성역 5번 출구에서 지하 연결통로로 호텔 로비까지 도보 4분입니다. 엘리베이터로 2층에 오르면 그랜드볼룸입니다.',
-        parkingHours: '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
       },
       {
         component: 'mealMenu',
@@ -674,7 +686,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '디저트', dishes: ['바닐라 아이스크림과 자두'] },
         ],
       },
-      { component: 'place', title: '그랜드볼룸으로 오시는 길', detail: '호텔 3층' },
+      {
+        component: 'place',
+        title: '그랜드볼룸으로 오시는 길',
+        detail: '호텔 3층',
+      },
       {
         component: 'transportation',
         title: '여의도로 오시는 길',
@@ -823,7 +839,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         items: [
           {
             question: '아이와 함께 가도 괜찮을까요?',
-            answer: '물론입니다. 다만 서약 낭독 동안에는 조용히 앉아 주시면 두 사람이 마음을 다해 읽을 수 있어요.',
+            answer:
+              '물론입니다. 다만 서약 낭독 동안에는 조용히 앉아 주시면 두 사람이 마음을 다해 읽을 수 있어요.',
           },
         ],
       },
@@ -966,7 +983,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '해 질 무렵의 도시',
         template: 'galleryType7',
         ratio: '3:4',
-        images: [SHOWCASE_PHOTOS.amberBar, SHOWCASE_PHOTOS.amberWindow, SHOWCASE_PHOTOS.amberGlass],
+        images: [
+          SHOWCASE_PHOTOS.amberBar,
+          SHOWCASE_PHOTOS.amberWindow,
+          SHOWCASE_PHOTOS.amberGlass,
+        ],
       },
       {
         component: 'afterParty',
@@ -1068,8 +1089,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '둘이 자주 가는 곳이 있나요?',
         answer:
           '토요일 아침이면 집 앞 빵집까지 걸어요. 돌아오는 길에는 빵이 꼭 하나씩 줄어 있어요.',
-        image:
-          SHOWCASE_PHOTOS.weekendBakery,
+        image: SHOWCASE_PHOTOS.weekendBakery,
       },
       { component: 'greeting' },
       {
@@ -1077,10 +1097,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '산책하다 멈춘 자리',
         template: 'galleryType7',
         ratio: '4:3',
-        images: [
-          SHOWCASE_PHOTOS.weekendPath,
-          SHOWCASE_PHOTOS.weekendBench,
-        ],
+        images: [SHOWCASE_PHOTOS.weekendPath, SHOWCASE_PHOTOS.weekendBench],
       },
       { component: 'calendar', title: '우리의 만남' },
       {
@@ -1108,7 +1125,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'notice',
         title: '걷기 좋은 신발',
         heading: '앞마당 산책 안내',
-        message: '식사 후 앞마당을 한 바퀴 돌 예정이에요. 굽이 낮은 신발이면 더 편합니다.',
+        message:
+          '식사 후 앞마당을 한 바퀴 돌 예정이에요. 굽이 낮은 신발이면 더 편합니다.',
         preset: 'clothes',
       },
       {
@@ -1188,7 +1206,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'picture',
         title: '신발부터 편하게',
         image: SHOWCASE_PHOTOS.streetSneakers,
-        caption: '운동화도 좋아요. 계단이 조금 있으니 발이 편한 신발이면 더 좋습니다.',
+        caption:
+          '운동화도 좋아요. 계단이 조금 있으니 발이 편한 신발이면 더 좋습니다.',
       },
       {
         component: 'interview',
@@ -1196,8 +1215,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         question: '입장할 때 꼭 하고 싶은 일이 있나요?',
         answer:
           '눈이 마주치는 친구에게 손을 흔들기로 했어요. 앞자리든 뒷자리든 우리를 보면 먼저 흔들어 주세요.',
-        image:
-          SHOWCASE_PHOTOS.streetBistro,
+        image: SHOWCASE_PHOTOS.streetBistro,
       },
       { component: 'calendar', title: '우리가 결혼하는 날' },
       {
@@ -1300,8 +1318,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'picture',
         title: '숲에서 고른 한 장',
-        image:
-          SHOWCASE_PHOTOS.forestPath,
+        image: SHOWCASE_PHOTOS.forestPath,
         caption: '나란히 걷다가 뒤를 돌아본 순간을 남겼습니다.',
       },
       {
@@ -1322,8 +1339,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           },
         ],
       },
-      { component: 'calendar', title: '서약의 오후', template: 'calendarType4' },
-      { component: 'place', title: '가든홀 입구', detail: '매표소에서 안내 표지를 따라오세요' },
+      {
+        component: 'calendar',
+        title: '서약의 오후',
+        template: 'calendarType4',
+      },
+      {
+        component: 'place',
+        title: '가든홀 입구',
+        detail: '매표소에서 안내 표지를 따라오세요',
+      },
       {
         component: 'transportation',
         title: '숲으로 오시는 길',
@@ -1734,7 +1759,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'notice',
         title: '자리에 앉는 방법',
         heading: '이름표 없이 편하게',
-        message: '입구에서 커피를 받고 아무 자리에나 앉아 주세요. 테이블마다 진행자가 첫 질문을 건넵니다.',
+        message:
+          '입구에서 커피를 받고 아무 자리에나 앉아 주세요. 테이블마다 진행자가 첫 질문을 건넵니다.',
         preset: 'time',
       },
       {
@@ -1751,6 +1777,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#FFFAF1', '#96702E', '#51462E'],
     eyebrow: 'CHEERS TO TWENTY-SEVEN',
     heading: '첫 잔은 같이 들어요',
+    venue: '언오디너리',
+    venueAddress: '서울 중구 수표로 48-17',
+    venueLat: 37.5654675,
+    venueLng: 126.9908707,
+    venueTel: '010-9974-4817',
     message: [
       '스물일곱 생일에는 다 같이 모여 잔 부딪치는 소리를 듣고 싶어요. 빈손으로 와 주세요. 민혁 드림',
     ],
@@ -1776,7 +1807,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '곁들임', dishes: ['올리브와 치즈'] },
         ],
       },
-      { component: 'calendar', title: '건배하는 시간' },
+      {
+        component: 'calendar',
+        title: '건배하는 시간',
+        template: 'calendarType4',
+      },
       {
         component: 'timeline',
         title: '우리의 건배 순서',
@@ -1790,9 +1825,34 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         component: 'dressCode',
         title: '오늘의 색',
         colors: ['#D8A657', '#8C5A3C', '#FFF6E6'],
-        guidelines: ['금색이나 갈색 포인트 하나면 사진이 잘 나와요. 편한 옷 그대로 오셔도 좋습니다.'],
+        guidelines: [
+          '금색이나 갈색 포인트 하나면 사진이 잘 나와요. 편한 옷 그대로 오셔도 좋습니다.',
+        ],
       },
-      { component: 'place', title: '예약해 둔 테이블' },
+      {
+        component: 'place',
+        title: '예약해 둔 테이블',
+        detail:
+          '문 앞에 생일 표지를 걸어 둘게요. 예약한 긴 테이블로 안내해 드립니다.',
+      },
+      {
+        component: 'transportation',
+        title: '을지로까지 오는 길',
+        subwayLine: '2호선·3호선',
+        subwayStation: '을지로3가역',
+        subwayExit: '11번 출구',
+        subwayWalk: '을지로3가역 11번 출구에서 을지로를 따라 도보 5분입니다.',
+        busRoutes: '을지로3가 정류장에서 내리면 골목 입구가 바로 보여요.',
+        parkingHours:
+          '을지로 골목은 주차가 어려워요. 을지로 공영주차장을 이용하시고 5분 걸어오세요.',
+      },
+      {
+        component: 'notice',
+        preset: 'party',
+        title: '선물은 마음만',
+        heading: '잔 하나로 충분해요',
+        message: '안주와 잔은 넉넉히 준비했어요. 손은 가볍게 오셔도 됩니다.',
+      },
       {
         component: 'faq',
         title: '빈손으로 와도 될까?',
@@ -1801,6 +1861,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
             question: '케이크나 선물을 가져갈까?',
             answer:
               '케이크는 이미 예약했어. 그날 같이 웃었던 얘기 하나만 들려줘!',
+          },
+          {
+            question: '술을 못 마셔도 괜찮아?',
+            answer:
+              '무알코올 잔도 똑같이 준비했어. 건배 소리만 같이 내 주면 돼.',
           },
         ],
       },
@@ -1820,6 +1885,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#FBF6F0', '#8A5C3B', '#4F4135'],
     eyebrow: '27TH BIRTHDAY · FOR MINHYUK',
     heading: '휴대폰 속 사진 한 장만 골라 와',
+    venue: '어니언 성수',
+    venueAddress: '서울 성동구 아차산로9길 8',
+    venueLat: 37.5447608,
+    venueLng: 127.058199,
+    venueTel: '070-4353-3238',
     message: [
       '작년 생일 사진을 넘겨 보다가 다들 보고 싶어졌어. 같이 찍은 사진 하나씩 골라 와. 케이크 먹으면서 그날 얘기도 듣고 싶어.',
     ],
@@ -1828,7 +1898,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       { component: 'greeting' },
       {
         component: 'gallery',
-        title: '작년 생일에 남긴 두 컷',
+        title: '작년 생일에 남긴 세 컷',
         images: [
           SHOWCASE_PHOTOS.dayPhotoPolaroid,
           SHOWCASE_PHOTOS.dayPhotoCake,
@@ -1845,7 +1915,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '인화할 필요 없어. 차례가 오면 화면을 보여 주면서 사진을 찍은 날 얘기를 들려줘.',
         preset: 'shooting',
       },
-      { component: 'calendar', title: '사진 찍는 날' },
+      {
+        component: 'calendar',
+        title: '사진 찍는 날',
+        template: 'calendarType3',
+      },
       {
         component: 'mealMenu',
         title: '사진 보면서 먹을 것',
@@ -1856,7 +1930,23 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '디저트', dishes: ['초콜릿 생일 케이크'] },
         ],
       },
-      { component: 'place', title: '모일 곳' },
+      {
+        component: 'place',
+        title: '모일 곳',
+        detail:
+          '성수 골목의 붉은 벽돌 건물 2층이에요. 창가 긴 테이블을 잡아 두었습니다.',
+      },
+      {
+        component: 'transportation',
+        title: '성수까지 오는 길',
+        subwayLine: '2호선',
+        subwayStation: '성수역',
+        subwayWalk:
+          '성수역에서 아차산로9길로 들어와 도보 10분입니다. 붉은 벽돌 건물이 보이면 2층으로 올라와 주세요.',
+        busRoutes: '성수사거리 정류장에서 내리면 골목 입구가 가까워요.',
+        parkingHours:
+          '골목 안 주차는 어려워요. 성수 근처 공영주차장을 이용하시고 5분 걸어오세요.',
+      },
       {
         component: 'timeline',
         title: '같이 남길 장면들',
@@ -1867,6 +1957,14 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'dressCode',
+        title: '사진에 남아도 괜찮은 옷',
+        colors: ['#FBF6F0', '#8A5C3B', '#4F4135'],
+        guidelines: [
+          '평소 입던 옷 그대로 와. 다만 단체 사진은 창가에서 찍으니 너무 어두운 색은 피해 줘.',
+        ],
+      },
+      {
         component: 'faq',
         title: '사진에 관해',
         items: [
@@ -1874,6 +1972,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
             question: '우리 사진은 어디에 올려?',
             answer:
               '그날 온 친구들끼리 먼저 나눌게. 밖에 올릴 사진은 사진 속 친구에게 물어보고 고르자.',
+          },
+          {
+            question: '사진을 못 찾으면?',
+            answer:
+              '빈손으로 와도 돼. 그 자리에서 한 장 찍으면 그게 올해 사진이야.',
           },
         ],
       },
@@ -1892,6 +1995,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#FFF1F4', '#AD526E', '#68434E'],
     eyebrow: 'A LITTLE CAKE, A LOT OF LOVE',
     heading: '케이크 자를 때 같이 있어 줘',
+    venue: '베니 케이크',
+    venueAddress: '서울 마포구 동막로15길 17',
+    venueLat: 37.5484909,
+    venueLng: 126.9219406,
+    venueTel: '010-4504-8814',
     message: [
       '딸기를 얹고 초를 꽂으면 우리 생일상이 완성돼요. 차 한 잔씩 들고 천천히 놀다 가세요.',
     ],
@@ -1915,6 +2023,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         caption: '찻잔을 놓고 고깔모자도 하나씩 꺼내 뒀어요.',
       },
       {
+        component: 'gallery',
+        title: '케이크 두 접시',
+        template: 'galleryType2',
+        ratio: '1:1',
+        images: [SHOWCASE_PHOTOS.pinkCake, SHOWCASE_PHOTOS.dayPhotoCake],
+      },
+      {
         component: 'dressCode',
         title: '작은 핑크 포인트',
         colors: ['#EEA9BD', '#C95775', '#FFF0E4'],
@@ -1922,7 +2037,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '양말이나 머리핀에 분홍색 한 점이면 충분해요. 편한 차림도 환영해요.',
         ],
       },
-      { component: 'calendar', title: '티 파티 시간' },
+      {
+        component: 'calendar',
+        title: '티 파티 시간',
+        template: 'calendarType2',
+      },
       {
         component: 'timeline',
         title: '케이크를 나누는 오후',
@@ -1932,12 +2051,30 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:45', title: '핑크 포인트 단체 사진' },
         ],
       },
-      { component: 'place', title: '우리의 케이크 테이블' },
+      {
+        component: 'place',
+        title: '우리의 케이크 테이블',
+        detail:
+          '케이크 진열장 옆 창가 자리를 잡아 두었어요. 들어오시면 이름을 말씀해 주세요.',
+      },
+      {
+        component: 'transportation',
+        title: '망원동까지 오는 길',
+        subwayLine: '2호선·6호선',
+        subwayStation: '합정역',
+        subwayWalk:
+          '합정역에서 망원동 방향으로 걸어 20분입니다. 케이크를 들고 걷기엔 멀어서 버스나 택시를 권해요.',
+        busRoutes:
+          '합정역에서 망원동 방면 버스로 5분, 동막로15길 입구에서 내려요.',
+        parkingHours:
+          '가게 앞 주차는 한 대뿐이에요. 근처 공영주차장을 이용해 주세요.',
+      },
       {
         component: 'notice',
         title: '선물은 마음만',
         heading: '케이크와 차로 충분해요',
-        message: '딸기 케이크와 차를 넉넉히 준비했어요. 선물은 마음만 받을게요.',
+        message:
+          '딸기 케이크와 차를 넉넉히 준비했어요. 선물은 마음만 받을게요.',
         preset: 'party',
       },
       {
@@ -1951,6 +2088,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           },
         ],
       },
+      {
+        component: 'closingComment',
+        message: '마지막 조각은 접시에 남겨 두고, 다음에 또 만나요. 민혁이가',
+      },
     ],
   },
   {
@@ -1961,6 +2102,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#FFF5F7', '#9F4968', '#473A41'],
     eyebrow: 'INVITE YOU · TWENTY SEVEN',
     heading: '스물일곱의 플레이리스트',
+    venue: '턴 다운 서비스',
+    venueAddress: '서울 마포구 동교로50길 7',
+    venueLat: 37.5637778,
+    venueLng: 126.9265864,
+    venueTel: '0507-1341-8605',
     message: [
       '올해는 축하 노래 뒤에 너희가 고른 곡을 듣고 싶어. 요즘 자주 듣는 한 곡의 제목을 기억해 와!',
     ],
@@ -1989,7 +2135,25 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '밴드 티셔츠나 자주 입는 청바지도 좋아. 단체 사진은 우리 앨범 표지처럼 찍자.',
         ],
       },
+      {
+        component: 'gallery',
+        title: '바늘과 잔',
+        template: 'galleryType7',
+        ratio: '1:1',
+        images: [SHOWCASE_PHOTOS.clubTurntable, SHOWCASE_PHOTOS.cheersGlasses],
+      },
       { component: 'place', title: '오늘의 클럽하우스' },
+      {
+        component: 'transportation',
+        title: '연남동까지 오는 길',
+        subwayLine: '2호선·공항철도·경의중앙선',
+        subwayStation: '홍대입구역',
+        subwayWalk:
+          '홍대입구역에서 동교로50길로 들어와 도보 16분입니다. 골목이 좁으니 택시로 오시면 5분이면 닿아요.',
+        busRoutes: '동교동삼거리 정류장에서 내리면 도보 6분입니다.',
+        parkingHours:
+          '골목 안은 주차가 어려워요. 연남 공영주차장을 이용하시고 5분 걸어오세요.',
+      },
       {
         component: 'timeline',
         title: '오후의 플레이리스트',
@@ -2031,6 +2195,11 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#FAF5E9', '#8C6845', '#55483A'],
     eyebrow: 'OUR LITTLE ONE TURNS ONE',
     heading: '민준이의 첫해를 펼쳐 봅니다',
+    venue: '루프탑인강남',
+    venueAddress: '서울 강남구 논현로150길 19',
+    venueLat: 37.5195448,
+    venueLng: 127.0299824,
+    venueTel: '010-3385-2042',
     message: [
       '첫 장을 열 때만 해도 품에 쏙 들어왔는데, 벌써 제 손으로 책장을 넘깁니다. 민준이의 첫 생일을 함께 축하해 주세요.',
     ],
@@ -2063,25 +2232,9 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '함께 지켜봐 주신 덕분에 첫해를 잘 보냈습니다. 돌상 앞에서 반갑게 인사드릴게요.',
       },
       {
-        component: 'faq',
-        title: '돌잡이를 함께해 주세요',
-        items: [
-          {
-            question: '돌잡이 때 가족들은 무엇을 하나요?',
-            answer:
-              '민준이가 손을 뻗기 전 어떤 물건을 집을지 골라 보세요. 잡은 뒤에 다 같이 박수를 쳐 주세요.',
-          },
-        ],
-      },
-      {
         component: 'calendar',
         title: '첫돌 잔칫날',
         template: 'calendarType3',
-      },
-      {
-        component: 'place',
-        title: '가족이 모이는 곳',
-        detail: '유아 의자와 잠시 쉬어 갈 가족 휴식 공간이 있습니다.',
       },
       {
         component: 'mealMenu',
@@ -2091,6 +2244,53 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         courses: [
           { name: '어른 식사', dishes: ['떡갈비와 계절 나물'] },
           { name: '아이 식사', dishes: ['간을 약하게 한 채소죽'] },
+        ],
+      },
+      {
+        component: 'place',
+        title: '가족이 모이는 곳',
+        detail:
+          '옥상으로 올라오시면 파티 북이 펼쳐져 있어요. 유아 의자와 잠시 쉬어 갈 자리도 마련했습니다.',
+      },
+      {
+        component: 'transportation',
+        title: '강남 파티룸까지',
+        subwayLine: '7호선',
+        subwayStation: '학동역',
+        subwayExit: '8번 출구',
+        subwayWalk:
+          '학동역 8번 출구에서 논현로를 따라 도보 13분입니다. 골목 안 건물 옥상이에요.',
+        busRoutes: '논현로 정류장에서 내리면 도보 4분입니다.',
+        parkingHours:
+          '건물 주차는 두 대까지예요. 근처 공영주차장을 이용하시면 더 넉넉합니다.',
+      },
+      {
+        component: 'account',
+        title: '마음 전하실 곳',
+        message: '오지 못하시는 분들의 마음도 소중히 받겠습니다.',
+        groups: [
+          {
+            name: '민준이 부모',
+            accounts: [
+              { name: '지수', bank: '카카오뱅크', account: '110-000-000000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '돌잡이를 함께해 주세요',
+        items: [
+          {
+            question: '돌잡이 때 가족들은 무엇을 하나요?',
+            answer:
+              '민준이가 손을 뻗기 전 어떤 물건을 집을지 골라 보세요. 잡은 뒤에 다 같이 박수를 쳐 주세요.',
+          },
+          {
+            question: '옥상이라 더울까요?',
+            answer:
+              '큰 그늘막과 선풍기를 준비해 두었어요. 아이들 물놀이는 없으니 갈아입을 옷은 하나만 챙겨 오세요.',
+          },
         ],
       },
       {
@@ -2109,13 +2309,22 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     palette: ['#F3F7FF', '#47629A', '#3D4B66'],
     eyebrow: 'MINJUN’S FIRST BIRTHDAY',
     heading: '제 생일에 놀러 오세요',
+    venue: 'AC 호텔 서울 강남 · 2층 연회장',
+    venueAddress: '서울 강남구 테헤란로25길 10',
+    venueLat: 37.501237,
+    venueLng: 127.0354203,
+    venueTel: '02-2050-6000',
     message: [
       '엄마 아빠가 제 이름으로 초대장을 써 주셨어요. 첫 촛불을 불 때 제 옆에 있어 주세요.',
     ],
     sectionStyle: 'rounded',
     sections: [
       { component: 'greeting' },
-      { component: 'calendar', title: '첫 번째 생일' },
+      {
+        component: 'calendar',
+        title: '첫 번째 생일',
+        template: 'calendarType1',
+      },
       {
         component: 'myChild',
         title: '한 살 민준이의 요즘',
@@ -2136,15 +2345,15 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       { component: 'place', title: '돌상이 있는 곳' },
       {
-        component: 'faq',
-        title: '아이와 함께 오실 때',
-        items: [
-          {
-            question: '유모차는 어디에 두면 될까요?',
-            answer:
-              '8층 패밀리룸 입구에 유모차를 둘 공간이 있어요. 잠든 아이는 그대로 데리고 들어오셔도 괜찮아요.',
-          },
-        ],
+        component: 'transportation',
+        title: '호텔로 오시는 길',
+        subwayLine: '2호선',
+        subwayStation: '역삼역',
+        subwayWalk:
+          '역삼역에서 논현로를 따라 도보 10분입니다. 호텔 2층 연회장으로 바로 올라오세요.',
+        busRoutes: '역삼역 정류장에서 내리면 호텔이 한 블록 안에 있어요.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 접수대에서 두 시간 무료 주차를 받아 가세요.',
       },
       {
         component: 'mealMenu',
@@ -2169,6 +2378,43 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         message:
           '민준이가 무엇을 고를지 천천히 지켜봐 주세요. 돌잡이가 끝나면 함께 사진 찍을 시간도 있어요.',
         preset: 'shooting',
+      },
+      {
+        component: 'dressCode',
+        title: '사진은 밝은 색으로',
+        colors: ['#F3F7FF', '#47629A', '#3D4B66'],
+        guidelines: [
+          '파란 배경에 밝은 옷을 입으시면 사진이 잘 나와요. 아이들은 편한 옷이면 충분해요.',
+        ],
+      },
+      {
+        component: 'account',
+        title: '마음 전하실 곳',
+        message: '멀리서도 축하해 주시는 마음을 잘 받겠습니다.',
+        groups: [
+          {
+            name: '민준이 부모',
+            accounts: [
+              { name: '김수연', bank: '우리은행', account: '110-000-000000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'faq',
+        title: '아이와 함께 오실 때',
+        items: [
+          {
+            question: '유모차는 어디에 두면 될까요?',
+            answer:
+              '2층 연회장 입구에 유모차를 둘 공간이 있어요. 잠든 아이는 그대로 데리고 들어오셔도 괜찮아요.',
+          },
+          {
+            question: '수유실이 있나요?',
+            answer:
+              '연회장 옆에 조용한 방을 하나 비워 두었습니다. 안내 직원에게 말씀해 주세요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
