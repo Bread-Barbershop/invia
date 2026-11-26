@@ -77,12 +77,23 @@ describe('SortableItems 컴포넌트', () => {
     ).toBeInTheDocument();
   });
 
+  it.each(['Enter', ' '])('%p 키로 포커스된 블록을 선택한다', key => {
+    render(<SortableItems {...defaultProps} onDeleteRequest={undefined} />);
+
+    fireEvent.keyDown(screen.getByRole('button', { name: '인사말 1' }), { key });
+
+    expect(defaultProps.onSelect).toHaveBeenCalledWith('block-1');
+  });
+
   it('삭제(X) 버튼 클릭 시 onDeleteRequest가 호출되고 onSelect는 호출되지 않는다', () => {
     render(<SortableItems {...defaultProps} />);
 
     const deleteBtn = screen.getByRole('button', { name: /삭제하기/ });
 
     fireEvent.pointerDown(deleteBtn);
+    expect(defaultProps.onSelect).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(deleteBtn, { key: 'Enter' });
     expect(defaultProps.onSelect).not.toHaveBeenCalled();
 
     fireEvent.click(deleteBtn);

@@ -68,6 +68,19 @@ const SortableItems = React.memo(
       listeners?.onPointerDown?.(e);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        event.target === event.currentTarget &&
+        (event.key === 'Enter' || event.key === ' ')
+      ) {
+        event.preventDefault();
+        onSelect(id);
+        return;
+      }
+
+      listeners?.onKeyDown?.(event);
+    };
+
     return (
       <div className="relative group">
         <div
@@ -78,6 +91,7 @@ const SortableItems = React.memo(
           role="button"
           data-order-block-id={id}
           onContextMenu={e => onContextMenu(e, id)}
+          onKeyDown={handleKeyDown}
           onPointerDown={handlePointerDown}
           className={cn(
             'flex-center py-2 cursor-pointer rounded-sm w-24 transition-colors duration-200 select-none relative',

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
@@ -98,19 +98,22 @@ describe('순서 패널 블록 관리', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  it('메뉴의 위로/아래로 이동으로 순서를 바꾼다', () => {
+  it('메뉴에서 이동하면 순서를 바꾸고 옮긴 항목으로 포커스를 돌린다', async () => {
     render(<OrderPanel />);
+    const item = screen.getByTestId('item-transportation-1');
 
     fireEvent.click(screen.getByRole('button', { name: 'transportation-1 우클릭' }));
     fireEvent.click(screen.getByRole('menuitem', { name: '위로 이동' }));
 
     expect(getBlockIds()).toEqual(['transportation-1', 'greeting-1']);
     expect(useEditorStore.getState().selectedId).toBe('transportation-1');
+    await waitFor(() => expect(item).toHaveFocus());
 
     fireEvent.click(screen.getByRole('button', { name: 'transportation-1 우클릭' }));
     fireEvent.click(screen.getByRole('menuitem', { name: '아래로 이동' }));
 
     expect(getBlockIds()).toEqual(['greeting-1', 'transportation-1']);
+    await waitFor(() => expect(item).toHaveFocus());
   });
 
   it('첫 블록은 위로, 마지막 블록은 아래로 이동할 수 없다', () => {

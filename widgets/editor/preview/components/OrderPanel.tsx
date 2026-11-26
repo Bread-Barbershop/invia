@@ -170,10 +170,9 @@ function OrderPanel() {
           handleDuplicate(targetId);
           return;
         case 'moveUp':
-          handleMove(targetId, 'up');
-          return;
         case 'moveDown':
-          handleMove(targetId, 'down');
+          handleMove(targetId, action === 'moveUp' ? 'up' : 'down');
+          focusSelectedBlock(targetId);
           return;
         case 'delete':
           setDeleteTargetId(targetId);
@@ -181,7 +180,8 @@ function OrderPanel() {
         default:
       }
     },
-    [closeContextMenu, contextMenu, handleDuplicate, handleMove, setDeleteTargetId]  );
+    [closeContextMenu, contextMenu, focusSelectedBlock, handleDuplicate, handleMove]
+  );
 
   useEffect(() => {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
