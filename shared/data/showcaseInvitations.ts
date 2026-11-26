@@ -430,7 +430,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'calendar', title: '가든 세리머니', template: 'calendarType8' },
-      { component: 'place', title: '정원 입구', detail: '가빛섬 1층 안내 데스크 앞' },
+      { component: 'place', title: '정원 입구', detail: '1층 안내 데스크 앞' },
       {
         component: 'transportation',
         title: '섬으로 오시는 길',
