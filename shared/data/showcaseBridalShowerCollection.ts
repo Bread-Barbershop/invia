@@ -391,6 +391,12 @@ export const bridalShowerCollection: ShowcaseInvitation[] = [
         afterMessage: '함께해 줘서 고마웠어요.',
       },
       {
+        component: 'calendar',
+        title: '오시는 날',
+        subTitle: 'WHEN',
+        template: 'calendarType1',
+      },
+      {
         component: 'timeline',
         title: '그날의 흐름',
         items: [
