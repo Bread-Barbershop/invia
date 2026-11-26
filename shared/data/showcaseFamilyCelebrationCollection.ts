@@ -235,9 +235,18 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
     ],
     date: '2027-06-12',
     time: '14:00',
-    venue: '서원 예식당',
+    venue: '남산골한옥마을 · 전통혼례관',
+    venueAddress: '서울 중구 퇴계로34길 28',
+    venueLat: 37.5595424,
+    venueLng: 126.9947383,
     sections: [
-      { component: 'calendar', title: '예식 일시' },
+      { component: 'calendar', title: '예식 일시', template: 'calendarType9' },
+      {
+        component: 'countdown',
+        title: '예식까지 남은 날',
+        onDayMessage: '오늘, 민서와 지훈이 부부가 됩니다.',
+        afterMessage: '함께해 주셔서 감사합니다.',
+      },
       { component: 'greeting' },
       {
         component: 'picture',
@@ -247,6 +256,17 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
           '저녁이면 마주 앉아 그날 있었던 일을 묻는 부부가 되겠습니다. 민서와 지훈 드림',
       },
       { component: 'place', title: '오시는 곳', detail: '2층 예식홀' },
+      {
+        component: 'transportation',
+        title: '한옥마을로 오시는 길',
+        subwayStation: '충무로역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '충무로역 3번 출구에서 퇴계로34길로 들어와 도보 약 10분입니다. 한옥마을 정문에서 예식홀까지 안내해 드립니다.',
+        busRoutes: '한옥마을 정문 앞에 버스 정류장이 있습니다.',
+        parkingHours:
+          '한옥마을 공영 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
+      },
       {
         component: 'timeline',
         title: '예식 순서',
@@ -260,6 +280,26 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         component: 'wreath',
         title: '화환 대신 마음으로',
         declineMessage: '작은 예식이라 축하 화환은 정중히 사양합니다. 오시는 길에 편한 마음으로 와 주세요.',
+      },
+      {
+        component: 'myFamilyWedding',
+        title: '두 사람을 키운 가족',
+        groomFamily: [
+          { relation: '아버지', name: '정우석' },
+          { relation: '어머니', name: '한미경' },
+        ],
+        brideFamily: [
+          { relation: '아버지', name: '이재훈' },
+          { relation: '어머니', name: '박선희' },
+        ],
+      },
+      {
+        component: 'notice',
+        title: '한복으로 오시는 길',
+        heading: '편한 신발을 함께 준비해 주세요',
+        message:
+          '예식홀까지 마당을 지나 걸어요. 한복을 입으셨다면 가벼운 신발을 하나 더 가져오시면 편합니다.',
+        preset: 'clothes',
       },
       {
         component: 'faq',
