@@ -1,5 +1,15 @@
 import type { JSONContent } from '@tiptap/react';
 
+export type AccountEntry = {
+  name: string;
+  bank: string;
+  account: string;
+  // 기존 초대장에 저장된 송금 설정입니다.
+  kakao?: boolean;
+  kakaoPayUrl?: string;
+  tossUrl?: string;
+};
+
 export const accountSchema = {
   type: null,
   fields: {
@@ -30,14 +40,7 @@ export const accountSchema = {
       required: true,
     },
     accountList: {
-      default: [[{ name: '', bank: '', account: '', kakao: false }]] as {
-        name: string;
-        bank: string;
-        account: string;
-        kakao: boolean;
-        kakaoPayUrl?: string;
-        tossUrl?: string;
-      }[][],
+      default: [[{ name: '', bank: '', account: '' }]] as AccountEntry[][],
       required: true,
     },
   },

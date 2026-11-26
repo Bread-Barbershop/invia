@@ -48,11 +48,13 @@ export const AccountPreview = ({
       <div className="w-70 flex flex-col items-center gap-6">
         {groupList.map((group, i) => (
           <GroupPreview key={i} group={group}>
-            {isOpenAccount => (
+            {({ isOpenAccount, panelId, headerId }) => (
               <AccountsPerGroupPreview
                 isOpenAccount={isOpenAccount}
                 accountList={accountList[i] ?? []}
                 hideActions={hideActions}
+                panelId={panelId}
+                headerId={headerId}
               />
             )}
           </GroupPreview>
