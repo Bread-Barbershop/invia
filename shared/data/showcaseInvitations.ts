@@ -125,7 +125,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '후식', dishes: ['복숭아 셔벗'] },
         ],
       },
-      { component: 'place', title: '예식장 안내', detail: '호텔 본관 그랜드볼룸' },
+      { component: 'place', title: '예식장 안내', detail: '호텔 본관 2층' },
       {
         component: 'transportation',
         title: '호텔로 오시는 길',
@@ -430,7 +430,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'calendar', title: '가든 세리머니', template: 'calendarType8' },
-      { component: 'place', title: '정원 입구', detail: '가빛섬 1층 야외 정원' },
+      { component: 'place', title: '정원 입구', detail: '가빛섬 1층 안내 데스크 앞' },
       {
         component: 'transportation',
         title: '섬으로 오시는 길',
@@ -555,7 +555,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '준비한 엽서에 이름과 축하 한 줄을 적어 넣어 주세요. 신혼집에 돌아가 천천히 읽겠습니다.',
         preset: 'time',
       },
-      { component: 'place', title: '기다리고 있을 곳', detail: '호텔 2층 그랜드볼룸' },
+      { component: 'place', title: '기다리고 있을 곳', detail: '호텔 2층' },
       {
         component: 'transportation',
         title: '파르나스로 오시는 길',
@@ -901,7 +901,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '초록과 크림, 두 가지 색을 맞춰 입으면 사진이 한 편의 영화처럼 남습니다. 린넨 소재를 추천해요.',
         ],
       },
-      { component: 'place', title: '예식이 열리는 곳', detail: '호텔 2층 그랜드 볼룸' },
+      { component: 'place', title: '예식이 열리는 곳', detail: '호텔 2층' },
       {
         component: 'transportation',
         title: '초록 언덕으로 오시는 길',
@@ -1091,7 +1091,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '후식', dishes: ['레몬 케이크'] },
         ],
       },
-      { component: 'place', title: '산책의 출발점', detail: '호텔 3층 그랜드볼룸' },
+      { component: 'place', title: '산책의 출발점', detail: '호텔 3층' },
       {
         component: 'transportation',
         title: '신사역에서 걸어오시면',
@@ -1207,7 +1207,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:40', title: '친구들과 단체 사진' },
         ],
       },
-      { component: 'place', title: '함께 모일 홀', detail: '호텔 2층 그랜드볼룸' },
+      { component: 'place', title: '함께 모일 홀', detail: '호텔 2층' },
       {
         component: 'transportation',
         title: '신논현역에서 걸어오시면',
@@ -1321,7 +1321,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'calendar', title: '서약의 오후', template: 'calendarType4' },
-      { component: 'place', title: '가든홀 입구', detail: '하경정원 안쪽' },
+      { component: 'place', title: '가든홀 입구', detail: '수목원 매표소에서 안내 표지를 따라오세요' },
       {
         component: 'transportation',
         title: '숲으로 오시는 길',
@@ -2207,7 +2207,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           SHOWCASE_PHOTOS.alpineCabin,
         ],
       },
-      { component: 'place', title: '컨벤션홀에서 만나요', detail: '리조트 빌리지센터 2층' },
+      { component: 'place', title: '컨벤션홀에서 만나요' },
       {
         component: 'myFamilyWedding',
         title: '함께 걸어온 가족',
@@ -2311,7 +2311,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '벽돌 골목의 갤러리홀',
-        detail: '붉은 벽돌 건물 2층 갤러리홀 입구에서 맞이할게요.',
+        detail: '붉은 벽돌 건물 2층, 입구에서 맞이할게요.',
       },
       { component: 'greeting' },
       {

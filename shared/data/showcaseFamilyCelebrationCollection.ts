@@ -255,7 +255,7 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
         caption:
           '저녁이면 마주 앉아 그날 있었던 일을 묻는 부부가 되겠습니다. 민서와 지훈 드림',
       },
-      { component: 'place', title: '오시는 곳', detail: '2층 예식홀' },
+      { component: 'place', title: '오시는 곳' },
       {
         component: 'transportation',
         title: '한옥마을로 오시는 길',
