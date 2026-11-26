@@ -753,6 +753,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'myFamilyWedding',
         title: '두 사람을 키운 가족',
+        groomFamilySuffix: '의 아들 민성',
+        brideFamilySuffix: '의 딸 아현',
         groomFamily: [
           { relation: '아버지', name: '박정호' },
           { relation: '어머니', name: '이선영' },
@@ -2211,6 +2213,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'myFamilyWedding',
         title: '함께 걸어온 가족',
+        groomFamilySuffix: '의 아들 민성',
+        brideFamilySuffix: '의 딸 아현',
         groomFamily: [
           { relation: '아버지', name: '박정호' },
           { relation: '어머니', name: '이선영' },

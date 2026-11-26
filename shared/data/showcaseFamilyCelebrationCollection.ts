@@ -284,6 +284,8 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       {
         component: 'myFamilyWedding',
         title: '두 사람을 키운 가족',
+        groomFamilySuffix: '의 아들 민서',
+        brideFamilySuffix: '의 딸 지훈',
         groomFamily: [
           { relation: '아버지', name: '정우석' },
           { relation: '어머니', name: '한미경' },

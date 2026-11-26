@@ -114,6 +114,12 @@ export function buildShowcaseSection(
     case 'myFamilyWedding':
       return block('myFamilyWedding', {
         title: section.title ?? '',
+        ...(section.groomFamilySuffix && {
+          groomFamilySuffix: section.groomFamilySuffix,
+        }),
+        ...(section.brideFamilySuffix && {
+          brideFamilySuffix: section.brideFamilySuffix,
+        }),
         groomFamily: section.groomFamily.map((member, i) => ({
           id: `${id}-groom-${i}`,
           relation: member.relation,

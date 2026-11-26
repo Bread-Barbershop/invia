@@ -41,6 +41,8 @@ export type ShowcaseSection =
   | {
       component: 'myFamilyWedding';
       title?: string;
+      groomFamilySuffix?: string;
+      brideFamilySuffix?: string;
       groomFamily: { relation: string; name: string }[];
       brideFamily: { relation: string; name: string }[];
     }
