@@ -240,12 +240,13 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '두 분을 위해 차린 정원 식탁',
-        template: 'galleryType1',
+        template: 'galleryType6',
         ratio: '4:3',
         images: [
           SHOWCASE_PHOTOS.gardenLongTable,
           SHOWCASE_PHOTOS.gardenSetting,
           SHOWCASE_PHOTOS.gardenWateringCan,
+          SHOWCASE_PHOTOS.summerField,
         ],
       },
       {

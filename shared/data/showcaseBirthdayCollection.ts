@@ -59,7 +59,7 @@ export const birthdayCollection: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '바늘을 내려놓는 자리',
-        template: 'galleryType6',
+        template: 'galleryType2',
         ratio: '4:3',
         images: ['/images/showcase/vinyl.webp', SHOWCASE_PHOTOS.clubTurntable],
       },
@@ -591,7 +591,7 @@ export const birthdayCollection: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '솔숲의 두 장면',
-        template: 'galleryType6',
+        template: 'galleryType1',
         ratio: '4:3',
         images: [
           SHOWCASE_PHOTOS.birthdayCamp,

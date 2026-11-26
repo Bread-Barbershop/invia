@@ -78,7 +78,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '비단보에 싼 첫돌 사진',
-        template: 'galleryType6',
+        template: 'galleryType7',
         ratio: '4:3',
         images: [SHOWCASE_PHOTOS.dolHanbokChild, SHOWCASE_PHOTOS.hanbokBojagi],
       },
@@ -219,7 +219,7 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '과수원의 오후 두 장',
-        template: 'galleryType6',
+        template: 'galleryType5',
         ratio: '4:3',
         images: [
           SHOWCASE_PHOTOS.dolOrchardChild,
