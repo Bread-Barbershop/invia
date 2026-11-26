@@ -9,16 +9,3 @@
   --calendar-outside-month-opacity: 1;
   --calendar-divider: rgb(255 255 255 / 28%);
 }
-
-/* Add-to-calendar actions sit on the invitation itself, so they follow its ink. */
-:global([data-invitation-dark]) .addToCalendar a,
-:global([data-invitation-dark]) .addToCalendar button {
-  border-color: rgb(255 255 255 / 32%);
-  color: #ffffff;
-}
-
-:global([data-invitation-dark]) .addToCalendar a:hover,
-:global([data-invitation-dark]) .addToCalendar button:hover {
-  border-color: rgb(255 255 255 / 60%);
-  background-color: rgb(255 255 255 / 10%);
-}

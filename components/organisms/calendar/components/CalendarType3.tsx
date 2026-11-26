@@ -1,19 +1,15 @@
-import {
-  formatClock12Digits,
-  formatClockPeriod,
-  parseCalendarClock,
-} from '@/shared/utils/calendarTime';
 import { cn } from '@/shared/utils/cn';
 import { getContrastingTextColor } from '@/shared/utils/invitationBackgroundColor';
 
 import { CalendarTemplateProps } from '../types/calendar';
+import { parseCalendarClock } from '../utils/utils';
 
 export function CalendarType3({
   currentYear,
   calendarDays,
   headerDays,
   time,
-  language,
+  language = 'ko',
   monthText,
   accentColor,
 }: CalendarTemplateProps) {
@@ -21,13 +17,10 @@ export function CalendarType3({
     backgroundColor: accentColor,
     color: getContrastingTextColor(accentColor),
   };
-  // Saved times are 12-hour with a period ("오후 06:00") or 24-hour ("18:00").
-  // Parse them so the highlighted day never prints "06:00 / 오후" for 6 PM.
   const clock = parseCalendarClock(time);
   const savedKoreanPeriod = /^\s*오[전후]/.test(time ?? '');
-  const periodLabel = clock
-    ? formatClockPeriod(clock, savedKoreanPeriod ? 'ko' : language)
-    : '';
+  const [amLabel, pmLabel] =
+    savedKoreanPeriod || language === 'ko' ? ['오전', '오후'] : ['AM', 'PM'];
 
   return (
     <div className="w-full px-4 flex flex-col shadow-edit font-lineseed">
@@ -66,10 +59,10 @@ export function CalendarType3({
               {dayObj.isTargetDate && clock && (
                 <div className="bottom-1 w-full text-center flex flex-col items-center">
                   <span className="text-[11px] font-sans leading-[1.1] block">
-                    {formatClock12Digits(clock)}
+                    {clock.hour % 12 || 12}:{String(clock.minute).padStart(2, '0')}
                   </span>
                   <span className="text-[11px] font-sans leading-[1.1] block">
-                    {periodLabel}
+                    {clock.hour < 12 ? amLabel : pmLabel}
                   </span>
                 </div>
               )}

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
 import GuestRenderer from '@/app/guest/[id]/components/GuestRenderer';
@@ -218,60 +218,6 @@ describe('GuestRenderer 달력 공개 미리보기', () => {
     renderCalendarAt('/editor', '');
 
     expect(screen.getByText('날짜와 시간을 입력해 주세요')).toBeInTheDocument();
-  });
-
-  it('게스트 화면에서 장소 블록의 주소를 일정 장소로 붙여 저장한다', async () => {
-    mockPathname = '/guest/test';
-    const blobs: Blob[] = [];
-    URL.createObjectURL = jest.fn((blob: Blob) => {
-      blobs.push(blob);
-      return 'blob:invia-calendar';
-    });
-    const click = jest
-      .spyOn(HTMLAnchorElement.prototype, 'click')
-      .mockImplementation(() => {});
-
-    render(
-      <GuestRenderer
-        blocks={[
-          calendarBlock('2026-03-09'),
-          {
-            id: 'place-block',
-            type: 'wedding',
-            component: 'place',
-            props: {
-              placeName: '인비아 하우스',
-              placeDetail: '3층 그랜드홀',
-              placeAddress: '서울 강남구 테헤란로 1',
-            },
-          } as unknown as NormalizedGuestPayload['blocks'][number],
-        ]}
-        bulkData={bulkData}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('add-to-calendar-ics'));
-
-    const content = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsText(blobs[0]);
-    });
-    expect(content.replace(/\r\n /g, '')).toContain(
-      'LOCATION:인비아 하우스\\, 3층 그랜드홀\\, 서울 강남구 테헤란로 1'
-    );
-    expect(
-      (click.mock.instances[0] as unknown as HTMLAnchorElement).download
-    ).toBe('invia-invitation-20260309.ics');
-    expect(
-      new URL(
-        screen.getByTestId('add-to-calendar-google').getAttribute('href') ?? ''
-      ).searchParams.get('dates')
-    ).toBe('20260309T053000Z/20260309T073000Z');
-
-    click.mockRestore();
-    URL.createObjectURL = undefined as unknown as typeof URL.createObjectURL;
   });
 
   it('어두운 카드의 카운트다운에 맞는 색을 적용하고 작성자가 지정한 본문색을 유지한다', () => {
