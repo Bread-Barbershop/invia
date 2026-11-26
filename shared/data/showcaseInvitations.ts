@@ -231,7 +231,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           SHOWCASE_PHOTOS.monoWindow,
         ],
       },
-      { component: 'place', title: '만나는 곳', detail: '구 서울역사 대합실' },
+      { component: 'place', title: '만나는 곳', detail: '구 서울역사 1층' },
       {
         component: 'transportation',
         title: '서울역에서 걸어오시면',
@@ -1323,7 +1323,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'calendar', title: '서약의 오후', template: 'calendarType4' },
-      { component: 'place', title: '가든홀 입구', detail: '수목원 매표소에서 안내 표지를 따라오세요' },
+      { component: 'place', title: '가든홀 입구', detail: '매표소에서 안내 표지를 따라오세요' },
       {
         component: 'transportation',
         title: '숲으로 오시는 길',
