@@ -89,8 +89,8 @@ export function GuestbookBlock({
               role="status"
               className="text-xs text-emerald-700"
             >
-              응답자용 링크가 연결되었습니다. 하객 화면에 방명록 버튼이
-              표시됩니다.
+              링크 형식이 맞아요. 하객이 열 수 있는지 로그아웃 상태에서 확인해
+              주세요.
             </p>
             <a
               href={validFormUrl}

@@ -71,7 +71,7 @@ describe('RsvpBlock 입력 접근성', () => {
       'rsvp-rsvp-block-form-url-ok'
     );
     expect(status).toHaveTextContent(
-      '응답자용 링크가 연결되었습니다. 하객 화면에 응답 버튼이 표시됩니다.'
+      '링크 형식이 맞아요. 하객이 열 수 있는지 로그아웃 상태에서 확인해 주세요.'
     );
     expect(
       screen.getByRole('link', { name: '응답자 화면 미리 열어보기 (새 창)' })
