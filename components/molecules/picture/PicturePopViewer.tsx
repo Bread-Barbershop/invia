@@ -8,19 +8,12 @@ import GalleryNavButtons from '@/components/organisms/gallery/components/Gallery
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { cn } from '@/shared/utils/cn';
 
-import { PhotoViewerActions } from './PhotoViewerActions';
-
 interface Props {
   isOpen: boolean;
   images: string[];
   ratio: '1:1' | '4:3' | '3:4' | '16:9' | '9:16';
   startIndex: number;
   onClose: () => void;
-  /** 하객/쇼케이스처럼 실제로 사진을 보는 화면에서만 저장·공유 버튼을 노출합니다. */
-  showPhotoActions?: boolean;
-  /** 공유할 초대장 링크 (없으면 현재 페이지 주소) */
-  shareUrl?: string;
-  shareTitle?: string;
 }
 
 const emptySubscribe = () => () => {};
@@ -31,9 +24,6 @@ export const PicturePopViewer = ({
   startIndex = 0,
   onClose,
   ratio = '1:1',
-  showPhotoActions = false,
-  shareUrl,
-  shareTitle,
 }: Props) => {
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(onClose);
   const isClient = useSyncExternalStore(
@@ -155,16 +145,6 @@ export const PicturePopViewer = ({
 
   if (!isOpen || !isClient) return null;
 
-  const currentImageSrc =
-    images[Math.min(selectedIndex, Math.max(0, images.length - 1))] ?? '';
-
-  // 하단에 저장·공유 버튼이 붙는 하객 화면에서는 사진 높이를 화면에 맞춰 줄여
-  // 작은 휴대폰에서도 컨트롤이 화면 밖으로 밀리지 않게 합니다.
-  // (넉넉한 화면에서는 기존과 같은 85vh를 유지)
-  const viewerMaxHeight = showPhotoActions
-    ? 'min(85vh, calc(100vh - 150px))'
-    : '85vh';
-
   const portalElement =
     document.getElementById('preview-container') ||
     (typeof document !== 'undefined' ? document.body : null);
@@ -176,7 +156,7 @@ export const PicturePopViewer = ({
       aria-modal="true"
       aria-label="사진 확대 보기"
       className={cn(
-        'inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex justify-center items-center flex-col px-4 py-4 overflow-y-auto select-none',
+        'inset-0 z-50 bg-black/75 backdrop-blur-[2px] flex justify-center items-center flex-col px-4 select-none',
         pathname?.startsWith('/editor') ? 'absolute' : 'fixed'
       )}
       {...backdropDismiss}
@@ -214,7 +194,7 @@ export const PicturePopViewer = ({
         )}
         style={{
           ...ratioData.style,
-          maxWidth: `calc(${viewerMaxHeight} * ${ratioData.value})`,
+          maxWidth: `calc(85vh * ${ratioData.value})`,
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -259,22 +239,12 @@ export const PicturePopViewer = ({
         )}
       </div>
 
-      {/* 페이지 인디케이터 (1 / 5) + 사진 저장·공유 */}
-      <div className="mt-3 flex flex-col items-center gap-2">
-        {images.length > 1 && (
-          <div className="px-3 py-1 bg-black/50 backdrop-blur-sm text-white/90 text-xs font-medium rounded-full pointer-events-none">
-            {selectedIndex + 1} / {images.length}
-          </div>
-        )}
-        {showPhotoActions && currentImageSrc && (
-          <PhotoViewerActions
-            imageSrc={currentImageSrc}
-            index={selectedIndex}
-            shareUrl={shareUrl}
-            shareTitle={shareTitle}
-          />
-        )}
-      </div>
+      {/* 페이지 인디케이터 (1 / 5) */}
+      {images.length > 1 && (
+        <div className="mt-3 px-3 py-1 bg-black/50 backdrop-blur-sm text-white/90 text-xs font-medium rounded-full pointer-events-none">
+          {selectedIndex + 1} / {images.length}
+        </div>
+      )}
     </div>,
     portalElement
   );

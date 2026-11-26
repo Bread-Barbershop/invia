@@ -72,7 +72,6 @@ function GalleryPreview({
           images={preview}
           startIndex={activeIndex}
           ratio={ratio}
-          showPhotoActions={isGuestPage}
           onClose={() => {
             setIsOpen(false);
           }}
