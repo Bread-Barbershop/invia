@@ -3,8 +3,8 @@ import { createChecklistItem, type ChecklistItem } from './checklistItems';
 export const checklistSchema = {
   type: null,
   fields: {
-    title: { default: '준비물 체크리스트', required: true },
-    description: { default: '잊지 말고 챙겨 주세요.', required: false },
+    title: { default: '체크리스트', required: true },
+    description: { default: '아래 항목을 하나씩 확인해 주세요.', required: false },
     items: {
       default: () =>
         [

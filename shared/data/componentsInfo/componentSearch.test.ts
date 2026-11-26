@@ -239,7 +239,7 @@ describe('블록 검색 별칭과 복합 검색', () => {
     ).toBe(true);
   });
 
-  it('새 이벤트·준비물 블록도 이름과 별칭으로 검색한다', () => {
+  it('새 이벤트·체크리스트 블록도 이름과 별칭으로 검색한다', () => {
     expect(findComponents('이벤트').some(item => item.type === 'eventGuide')).toBe(
       true
     );
@@ -250,7 +250,12 @@ describe('블록 검색 별칭과 복합 검색', () => {
       true
     );
     expect(
-      findComponents('체크리스트').some(item => item.type === 'checklist')
+      filterComponentCategories(componentCls, '체크리스트').some(category =>
+        category.list.some(
+          item =>
+            item.component === 'checklist' && item.contents === '체크리스트'
+        )
+      )
     ).toBe(true);
   });
 

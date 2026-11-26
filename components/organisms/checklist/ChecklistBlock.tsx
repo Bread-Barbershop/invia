@@ -58,8 +58,8 @@ export function ChecklistBlock({
   };
 
   return (
-    <LeftEditorWrapper ariaLabel="준비물 체크리스트" className="gap-3">
-      <NavigationBar>준비물 체크리스트 편집</NavigationBar>
+    <LeftEditorWrapper ariaLabel="체크리스트" className="gap-3">
+      <NavigationBar>체크리스트 편집</NavigationBar>
       <div className="flex w-full flex-col gap-3 py-2">
         <label className="flex flex-col gap-1 text-sm text-text-primary">
           제목
@@ -79,7 +79,7 @@ export function ChecklistBlock({
             onChange={event =>
               updateBlock(id, { description: event.target.value })
             }
-            placeholder="준비물에 대한 짧은 안내를 적어 주세요."
+            placeholder="체크리스트에 대한 짧은 안내를 적어 주세요."
             className="resize-y rounded-md border border-border-divider p-3 text-sm outline-none focus:border-primary"
           />
         </label>
@@ -94,7 +94,7 @@ export function ChecklistBlock({
         {showPresetConfirm && (
           <Confirm
             ref={confirmRef}
-            message="현재 준비물 목록을 예시로 교체할까요?"
+            message="현재 항목을 준비물 예시로 교체할까요?"
             confirmText="적용하기"
             cancelText="취소"
             variant="white"
@@ -115,11 +115,11 @@ export function ChecklistBlock({
                 id={`${id}-checklist-${item.id}`}
                 className="text-sm font-semibold text-text-primary"
               >
-                {index + 1}번째 준비물
+                {index + 1}번째 항목
               </h4>
               <button
                 type="button"
-                aria-label={`${index + 1}번째 준비물 삭제`}
+                aria-label={`${index + 1}번째 항목 삭제`}
                 onClick={() =>
                   updateBlock(id, {
                     items: items.filter(row => row.id !== item.id),
@@ -131,7 +131,7 @@ export function ChecklistBlock({
               </button>
             </div>
             <label className="flex flex-col gap-1 text-xs text-text-secondary">
-              준비물
+              항목
               <input
                 value={item.label}
                 maxLength={CHECKLIST_LIMITS.label}
@@ -164,7 +164,7 @@ export function ChecklistBlock({
           }
           className="rounded-md border border-border-divider px-3 py-2 text-sm text-text-primary hover:bg-[#FAFAFB] disabled:opacity-40"
         >
-          + 준비물 추가
+          + 항목 추가
         </button>
         <p className="text-xs text-text-secondary">
           하객이 초대장에서 직접 체크할 수 있어요. 체크 상태는 하객의 기기에만

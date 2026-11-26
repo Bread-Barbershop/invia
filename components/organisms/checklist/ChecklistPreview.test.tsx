@@ -11,8 +11,8 @@ const block: EditorBlock<'checklist'> = {
   component: 'checklist',
   type: 'seminar',
   props: {
-    title: '준비물 체크리스트',
-    description: '잊지 말고 챙겨 주세요.',
+    title: '체크리스트',
+    description: '아래 항목을 하나씩 확인해 주세요.',
     items: [
       { id: 'a', label: '명함', note: '네트워킹 시간에 나눠 주세요.' },
       { id: 'b', label: '필기 도구', note: '' },
@@ -20,14 +20,14 @@ const block: EditorBlock<'checklist'> = {
   },
 };
 
-describe('준비물 체크리스트 블록', () => {
+describe('체크리스트 블록', () => {
   beforeEach(() => localStorage.clear());
 
-  it('준비물과 진행률을 보여 준다', () => {
+  it('항목과 진행률을 보여 준다', () => {
     render(<ChecklistPreview blockInfo={block} />);
 
-    expect(screen.getByText('준비물 체크리스트')).toBeInTheDocument();
-    expect(screen.getByText('잊지 말고 챙겨 주세요.')).toBeInTheDocument();
+    expect(screen.getByText('체크리스트')).toBeInTheDocument();
+    expect(screen.getByText('아래 항목을 하나씩 확인해 주세요.')).toBeInTheDocument();
     expect(screen.getByText('명함')).toBeInTheDocument();
     expect(
       screen.getByText('네트워킹 시간에 나눠 주세요.')
@@ -74,11 +74,11 @@ describe('준비물 체크리스트 블록', () => {
       'aria-valuenow',
       '2'
     );
-    expect(screen.getByText('모두 준비했어요!')).toBeInTheDocument();
+    expect(screen.getByText('모두 완료했어요!')).toBeInTheDocument();
 
     await user.click(first);
     expect(first).not.toBeChecked();
-    expect(screen.queryByText('모두 준비했어요!')).not.toBeInTheDocument();
+    expect(screen.queryByText('모두 완료했어요!')).not.toBeInTheDocument();
   });
 
   it('저장된 체크 상태를 다시 열 때 복원한다', async () => {
@@ -95,18 +95,18 @@ describe('준비물 체크리스트 블록', () => {
     );
   });
 
-  it('준비물이 없으면 편집 화면에서만 안내 문구를 보여 준다', () => {
+  it('항목이 없으면 편집 화면에서만 안내 문구를 보여 준다', () => {
     const empty = { ...block, props: { ...block.props, items: [] } };
     const editor = render(<ChecklistPreview blockInfo={empty} />);
     expect(
-      screen.getByText('챙겨야 할 준비물을 추가해 주세요.')
+      screen.getByText('체크할 항목을 추가해 주세요.')
     ).toBeInTheDocument();
     editor.unmount();
 
     render(<ChecklistPreview blockInfo={empty} isGuestPage />);
     expect(
-      screen.queryByText('챙겨야 할 준비물을 추가해 주세요.')
+      screen.queryByText('체크할 항목을 추가해 주세요.')
     ).not.toBeInTheDocument();
-    expect(screen.queryByText('준비물 체크리스트')).not.toBeInTheDocument();
+    expect(screen.queryByText('체크리스트')).not.toBeInTheDocument();
   });
 });

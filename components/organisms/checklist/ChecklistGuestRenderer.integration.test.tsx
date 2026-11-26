@@ -88,7 +88,7 @@ const checklistBlock = {
   type: 'seminar' as const,
   component: 'checklist' as const,
   props: {
-    title: '준비물 체크리스트',
+    title: '체크리스트',
     description: '',
     items: [
       { id: 'a', label: '명함', note: '' },
@@ -116,7 +116,7 @@ async function renderChecklistAt(pathname: string) {
   return result;
 }
 
-describe('GuestRenderer 준비물 체크리스트', () => {
+describe('GuestRenderer 체크리스트', () => {
   beforeEach(() => localStorage.clear());
 
   it.each(['/guest/yaKg', '/i/yaKg'])(
@@ -145,7 +145,7 @@ describe('GuestRenderer 준비물 체크리스트', () => {
     expect(screen.getAllByRole('checkbox')[0]).toBeDisabled();
   });
 
-  it('준비물이 비어 있으면 공개 초대장에서 블록을 숨긴다', async () => {
+  it('항목이 비어 있으면 공개 초대장에서 블록을 숨긴다', async () => {
     mockPathname = '/guest/yaKg';
     await act(async () => {
       render(
@@ -160,7 +160,7 @@ describe('GuestRenderer 준비물 체크리스트', () => {
     });
 
     await waitFor(() =>
-      expect(screen.queryByText('준비물 체크리스트')).not.toBeInTheDocument()
+      expect(screen.queryByText('체크리스트')).not.toBeInTheDocument()
     );
   });
 });

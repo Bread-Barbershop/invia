@@ -45,16 +45,16 @@ function savedBlock(): EditorBlock<'checklist'> {
   return JSON.parse(JSON.stringify(upload.block[0]));
 }
 
-describe('준비물 체크리스트 편집', () => {
-  it('기본값은 제목·안내 문구·준비물 2개를 가진다', () => {
-    expect(checklistSchema.fields.title.default).toBe('준비물 체크리스트');
+describe('체크리스트 편집', () => {
+  it('기본값은 제목·안내 문구·항목 2개를 가진다', () => {
+    expect(checklistSchema.fields.title.default).toBe('체크리스트');
     expect(checklistSchema.fields.description.default).toBe(
-      '잊지 말고 챙겨 주세요.'
+      '아래 항목을 하나씩 확인해 주세요.'
     );
     expect(checklistSchema.fields.items.default()).toHaveLength(2);
   });
 
-  it('제목과 준비물을 고치면 저장 데이터에 그대로 담긴다', async () => {
+  it('제목과 항목을 고치면 저장 데이터에 그대로 담긴다', async () => {
     const user = userEvent.setup();
     openEditor();
 
@@ -62,7 +62,7 @@ describe('준비물 체크리스트 편집', () => {
     await user.clear(title);
     await user.type(title, '세미나 준비물');
 
-    const label = screen.getAllByLabelText('준비물')[0];
+    const label = screen.getAllByLabelText('항목')[0];
     await user.clear(label);
     await user.type(label, '명함');
     const note = screen.getAllByLabelText('설명 (선택)')[0];
@@ -77,15 +77,15 @@ describe('준비물 체크리스트 편집', () => {
     });
   });
 
-  it('준비물을 추가하고 삭제할 수 있다', async () => {
+  it('항목을 추가하고 삭제할 수 있다', async () => {
     const user = userEvent.setup();
     openEditor();
 
-    await user.click(screen.getByRole('button', { name: '+ 준비물 추가' }));
+    await user.click(screen.getByRole('button', { name: '+ 항목 추가' }));
     expect(savedBlock().props.items).toHaveLength(3);
 
     await user.click(
-      screen.getByRole('button', { name: '3번째 준비물 삭제' })
+      screen.getByRole('button', { name: '3번째 항목 삭제' })
     );
     expect(savedBlock().props.items).toHaveLength(2);
   });

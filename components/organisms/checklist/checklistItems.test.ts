@@ -5,7 +5,7 @@ import {
   normalizeChecklistItems,
 } from './checklistItems';
 
-describe('준비물 체크리스트 항목', () => {
+describe('체크리스트 항목', () => {
   it('새 항목은 빈 값과 고유 id로 만든다', () => {
     const first = createChecklistItem();
     const second = createChecklistItem({ label: '명함' });

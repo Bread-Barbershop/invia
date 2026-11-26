@@ -76,7 +76,7 @@ export function ChecklistPreview({
       className={className}
       titleClassName={titleClassName}
       mainTitle={blockInfo.props.title}
-      mainTitleDefault="준비물 체크리스트"
+      mainTitleDefault="체크리스트"
       {...rest}
     >
       {description && (
@@ -87,7 +87,7 @@ export function ChecklistPreview({
       {items.length === 0 ? (
         !isGuestPage && (
           <p className="text-xs text-text-tertiary">
-            챙겨야 할 준비물을 추가해 주세요.
+            체크할 항목을 추가해 주세요.
           </p>
         )
       ) : (
@@ -99,7 +99,7 @@ export function ChecklistPreview({
             </p>
             <div
               role="progressbar"
-              aria-label="준비물 체크 진행률"
+              aria-label="체크리스트 진행률"
               aria-valuemin={0}
               aria-valuemax={items.length}
               aria-valuenow={doneCount}
@@ -184,7 +184,7 @@ export function ChecklistPreview({
               className="text-center text-xs font-semibold"
               style={{ color: accentColor }}
             >
-              모두 준비했어요!
+              모두 완료했어요!
             </p>
           )}
         </div>

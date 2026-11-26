@@ -56,7 +56,7 @@ export const weddingComponents: ListType[] = withSearchAliases([
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
   { contents: '세로 구분선', component: 'divider', isType: false },
   { contents: '드레스 코드', component: 'dressCode', isType: false },
-  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
+  { contents: '체크리스트', component: 'checklist', isType: false },
   { contents: '여백', component: 'spacer', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
   // { contents: '세례명', component: null, isType: false },
@@ -86,7 +86,7 @@ export const firstBirthdayComponents: ListType[] = withSearchAliases([
   { contents: '식순 / 타임라인', component: 'timeline', isType: false },
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
   { contents: '드레스 코드', component: 'dressCode', isType: false },
-  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
+  { contents: '체크리스트', component: 'checklist', isType: false },
   { contents: '여백', component: 'spacer', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
 ]);
@@ -110,7 +110,7 @@ export const birthdayComponents: ListType[] = withSearchAliases([
   { contents: '이벤트 안내', component: 'eventGuide', isType: false },
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
   { contents: '드레스 코드', component: 'dressCode', isType: false },
-  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
+  { contents: '체크리스트', component: 'checklist', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
 ]);
 export const seminarComponents: ListType[] = withSearchAliases([
@@ -133,7 +133,7 @@ export const seminarComponents: ListType[] = withSearchAliases([
   { contents: '식순 / 타임라인', component: 'timeline', isType: false },
   { contents: '이벤트 안내', component: 'eventGuide', isType: false },
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
-  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
+  { contents: '체크리스트', component: 'checklist', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
 ]);
 export const etcComponents: ListType[] = withSearchAliases([
@@ -152,7 +152,7 @@ export const etcComponents: ListType[] = withSearchAliases([
   { contents: '이벤트 안내', component: 'eventGuide', isType: false },
   { contents: '식사 메뉴', component: 'mealMenu', isType: false },
   { contents: '세로 구분선', component: 'divider', isType: false },
-  { contents: '준비물 체크리스트', component: 'checklist', isType: false },
+  { contents: '체크리스트', component: 'checklist', isType: false },
   { contents: '여백', component: 'spacer', isType: false },
   { contents: '마무리문구', component: 'closingComment', isType: false },
 ]);
