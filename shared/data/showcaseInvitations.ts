@@ -223,7 +223,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '도시의 아침, 두 장',
-        template: 'galleryType5',
+        template: 'galleryType4',
         ratio: '4:3',
         images: [
           SHOWCASE_PHOTOS.monoCouple,
@@ -320,7 +320,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '같은 하늘 아래, 두 장',
-        template: 'galleryType4',
+        template: 'galleryType2',
         ratio: '1:1',
         images: [SHOWCASE_PHOTOS.skyHydrangea, SHOWCASE_PHOTOS.skyLinen],
       },
