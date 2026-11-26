@@ -180,7 +180,14 @@ function OrderPanel() {
         default:
       }
     },
-    [closeContextMenu, contextMenu, focusSelectedBlock, handleDuplicate, handleMove]
+    [
+      closeContextMenu,
+      contextMenu,
+      focusSelectedBlock,
+      handleDuplicate,
+      handleMove,
+      setDeleteTargetId,
+    ]
   );
 
   useEffect(() => {
