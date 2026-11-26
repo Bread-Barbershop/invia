@@ -45,17 +45,25 @@ export function buildShowcaseSection(
   switch (section.component) {
     case 'greeting':
       return block('greeting', {
-        title: design.heading,
-        subTitle: design.eyebrow,
+        title: section.title ?? design.heading,
+        subTitle: section.subTitle ?? design.eyebrow,
         ...(design.largePrint && { checkedSubTitle: false }),
         ...richText(...design.message),
+      });
+    case 'countdown':
+      return block('countdown', {
+        title: section.title,
+        eventDateTime: section.eventDateTime,
+        onDayMessage: section.onDayMessage ?? '오늘은 특별한 날입니다!',
+        afterMessage: section.afterMessage ?? '함께해 주셔서 감사합니다.',
       });
     case 'calendar': {
       const [hour, minute] = design.time.split(':');
       const time = `${Number(hour) < 12 ? '오전' : '오후'} ${String(Number(hour) % 12 || 12).padStart(2, '0')}:${minute}`;
       return block('calendar', {
         title: section.title,
-        isSubTitle: false,
+        subTitle: section.subTitle ?? '',
+        isSubTitle: !!section.subTitle,
         date: design.date,
         time,
         template: section.template ?? 'calendarType1',
@@ -67,10 +75,16 @@ export function buildShowcaseSection(
     case 'place':
       return block('place', {
         title: section.title,
-        checkedSubTitle: false,
+        subTitle: section.subTitle ?? 'LOCATION',
+        checkedSubTitle: !!section.subTitle,
         placeName: design.venue,
-        placeAddress: '서울 강남구 테헤란로1길 19',
+        placeAddress: section.address ?? '서울 강남구 테헤란로1길 19',
         placeDetail: section.detail ?? '',
+        placeTel: section.tel ?? '',
+        openMap: !!(section.lat && section.lng),
+        openNavi: section.openNavi ?? false,
+        lat: section.lat ?? 0,
+        lng: section.lng ?? 0,
       });
     case 'closingComment':
       return block('closingComment', richText(section.message));
@@ -99,7 +113,8 @@ export function buildShowcaseSection(
     case 'gallery':
       return block('gallery', {
         title: section.title,
-        isSubTitle: false,
+        subTitle: section.subTitle ?? 'GALLERY',
+        isSubTitle: !!section.subTitle,
         template: section.template,
         ratio: section.ratio,
         images: [...section.images],
@@ -134,13 +149,15 @@ export function buildShowcaseSection(
         title: section.title,
         subtitle: section.subtitle,
         menuStyle: section.style,
+        note: section.note ?? '',
         courses: section.courses.map((course, i) => ({
           id: `${id}-course-${i}`,
           name: course.name,
-          dishes: course.dishes.map((name, j) => ({
+          dishes: course.dishes.map((dish, j) => ({
             id: `${id}-dish-${i}-${j}`,
-            name,
-            description: '',
+            ...(typeof dish === 'string'
+              ? { name: dish, description: '' }
+              : { name: dish.name, description: dish.description ?? '' }),
           })),
         })),
       });
@@ -210,7 +227,8 @@ export function buildShowcaseSection(
     case 'myChild':
       return block('myChild', {
         title: section.title,
-        checkedSubTitle: false,
+        checkedSubTitle: !!section.subTitle,
+        subTitle: section.subTitle ?? 'MY CHILD',
         name: section.name,
         birthday: section.birthday,
         image: [section.image],

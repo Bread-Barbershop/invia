@@ -18,6 +18,7 @@ export type ShowcaseInvitation = {
   largePrint?: boolean;
   palette: [background: string, accent: string, text: string];
   font: string;
+  bodyFont?: string;
   eyebrow: string;
   heading: string;
   message: string[];

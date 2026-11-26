@@ -6,9 +6,11 @@ import campCover from '@/public/templates/thumbnails/birthday_09.webp';
 import birthdayLetterCover from '@/public/templates/thumbnails/birthday_10.webp';
 import seventiethCover from '@/public/templates/thumbnails/birthday_11.webp';
 import eightiethCover from '@/public/templates/thumbnails/birthday_12.webp';
+import yearEndTableCover from '@/public/templates/thumbnails/birthday_13.webp';
 import gardenBrunchCover from '@/public/templates/thumbnails/bridalShower_01.webp';
 import hotelPajamaCover from '@/public/templates/thumbnails/bridalShower_02.webp';
 import whiteRibbonCover from '@/public/templates/thumbnails/bridalShower_03.webp';
+import brunchShowerCover from '@/public/templates/thumbnails/bridalShower_04.webp';
 import hanbokCover from '@/public/templates/thumbnails/firstBirthday_03.webp';
 import orchardCover from '@/public/templates/thumbnails/firstBirthday_04.webp';
 import seaCover from '@/public/templates/thumbnails/firstBirthday_05.webp';
@@ -16,6 +18,7 @@ import moonCover from '@/public/templates/thumbnails/firstBirthday_06.webp';
 import portraitCover from '@/public/templates/thumbnails/firstBirthday_07.webp';
 import dinoCover from '@/public/templates/thumbnails/firstBirthday_08.webp';
 import postCover from '@/public/templates/thumbnails/firstBirthday_09.webp';
+import winterFirstBirthdayCover from '@/public/templates/thumbnails/firstBirthday_10.webp';
 import clayCover from '@/public/templates/thumbnails/seminar_06.webp';
 import prismCover from '@/public/templates/thumbnails/seminar_07.webp';
 import cityCover from '@/public/templates/thumbnails/seminar_08.webp';
@@ -97,9 +100,12 @@ export const showcaseItems = [
   { id: 'showcase-42', image: seventiethCover },
   { id: 'showcase-43', image: eightiethCover },
   { id: 'showcase-44', image: weddingLetterCover },
+  { id: 'showcase-48', image: winterFirstBirthdayCover },
+  { id: 'showcase-49', image: yearEndTableCover },
   { id: 'showcase-45', image: gardenBrunchCover },
   { id: 'showcase-46', image: hotelPajamaCover },
   { id: 'showcase-47', image: whiteRibbonCover },
+  { id: 'showcase-50', image: brunchShowerCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

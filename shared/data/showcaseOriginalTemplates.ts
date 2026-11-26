@@ -244,6 +244,9 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'Cormorant Garamond',
     'Prata',
   ]),
+  'showcase-48': original('firstBirthday_10', ['고운 바탕', 'SUIT']),
+  'showcase-49': original('birthday_13', ['고운 바탕']),
+  'showcase-50': original('bridalShower_04', ['Pretendard', '고운 바탕']),
 };
 
 export function getShowcaseOriginalTemplate(id: string) {

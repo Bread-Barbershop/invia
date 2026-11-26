@@ -361,4 +361,139 @@ export const bridalShowerCollection: ShowcaseInvitation[] = [
       },
     ],
   },
+  {
+    name: '포레 온실 브런치 샤워',
+    description: '유리 지붕 아래 긴 테이블에서, 커피와 빵으로 여는 소규모 브라이덜 샤워.',
+    palette: ['#F8F3EA', '#FA7564', '#000000'],
+    eyebrow: 'A BRIDAL SHOWER FOR SUA',
+    heading: '수아의 브라이덜 샤워',
+    date: '2027-01-16',
+    time: '11:00',
+    venue: '포레 온실',
+    font: '고운 바탕',
+    bodyFont: 'LINESeedKR',
+    sectionStyle: 'plain',
+    id: 'showcase-50',
+    type: 'bridalShower',
+    message: [
+      '수아가 결혼을 앞두고 있어요.',
+      '우리는 그 앞에 놓인 아침 하나를 같이 먹어 보려 합니다.',
+      '포레 온실의 유리 지붕 아래, 커피와 빵이 놓인 긴 테이블에 앉아 수아가 하고 싶은 이야기를 천천히 들어 주는 시간이에요.',
+      '화려한 것보다 조용한 쪽이 잘 어울리는 사람이라, 크게 부르지 않고 아는 얼굴들만 모셨습니다.',
+    ],
+    sections: [
+      { component: 'greeting', title: '초대의 글', subTitle: 'INVITATION' },
+      {
+        component: 'countdown',
+        title: '수아의 아침까지',
+        eventDateTime: '2027-01-16T11:00',
+        onDayMessage: '오늘이 그날이에요. 천천히 오세요.',
+        afterMessage: '함께해 줘서 고마웠어요.',
+      },
+      {
+        component: 'timeline',
+        title: '그날의 흐름',
+        items: [
+          {
+            time: '11:00',
+            title: '도착, 그리고 커피',
+            description: '익숙한 얼굴들 사이에 앉아요. 커피는 미리 준비해 둘게요.',
+          },
+          {
+            time: '11:40',
+            title: '긴 테이블에 둘러앉아',
+            description: '빵과 커피를 나눠요. 리코타 팬케이크는 따뜻할 때가 좋아요.',
+          },
+          {
+            time: '12:30',
+            title: '수아에게 한마디',
+            description: '꽃 한 송이와 함께 편지를 읽어요. 미리 적어 두면 좋아요.',
+          },
+          {
+            time: '13:20',
+            title: '사진, 그리고 인사',
+            description: '유리 지붕 아래에서 몇 장 남기고 조용히 헤어져요.',
+          },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '브런치 테이블',
+        subtitle: 'Brunch Table',
+        style: 'ribbon',
+        note: '커피는 계속 따라 드릴게요. 알레르기가 있으면 미리 알려 주세요.',
+        courses: [
+          {
+            name: '첫 접시',
+            dishes: [{ name: '크로크무슈', description: '그린 샐러드와 함께' }],
+          },
+          {
+            name: '따뜻한 접시',
+            dishes: [
+              { name: '리코타 팬케이크', description: '메이플 시럽, 계절 과일' },
+            ],
+          },
+          {
+            name: '마지막',
+            dishes: [
+              { name: '얼그레이 티와 마들렌', description: '레몬 향을 곁들여' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'dressCode',
+        title: '편하게 오세요',
+        colors: ['#F1DED9', '#E5E7EB', '#E1EBDD'],
+        guidelines: [
+          '편한 신발이 좋아요. 온실 바닥이 조금 차가워요.',
+          '사진은 편하게 찍어 주세요. 남겨 두고 싶은 아침이에요.',
+        ],
+      },
+      {
+        component: 'gallery',
+        title: '테이블 위의 것들',
+        subTitle: 'ON THE TABLE',
+        template: 'galleryType1',
+        ratio: '3:4',
+        images: [
+          'https://lh3.googleusercontent.com/d/1uSp4716ghS0jvR8ukLYUMmP_rmkCKpgx',
+          'https://lh3.googleusercontent.com/d/1K7fxnrR6jsKCChXhMWu6m3Giz5mpDSWT',
+          'https://lh3.googleusercontent.com/d/1hai-RloYAIAjMcmEnUNFr5bozXsWPt1P',
+        ],
+      },
+      {
+        component: 'place',
+        title: '오시는 길',
+        subTitle: 'LOCATION',
+        detail: '· 1층, 온실 입구',
+        address: '서울특별시 마포구 와우산로35길 53',
+        lat: 37.5564494,
+        lng: 126.9279047,
+        openNavi: true,
+      },
+      {
+        component: 'faq',
+        title: '자주 묻는 질문',
+        items: [
+          {
+            question: '꽃은 꼭 가져가야 하나요?',
+            answer: '한 송이면 충분해요. 수아가 좋아하는 색이면 더 좋고요.',
+          },
+          {
+            question: '드레스 코드가 있나요?',
+            answer: '따로 없어요. 사진에 남을 테니 편하게 입고 오세요.',
+          },
+          {
+            question: '선물도 준비해야 할까요?',
+            answer: '마음만이면 충분해요. 대신 수아에게 전할 한마디를 생각해 주세요.',
+          },
+        ],
+      },
+      {
+        component: 'closingComment',
+        message: '1월 16일 아침, 온실 문을 열어 둘게요.',
+      },
+    ],
+  },
 ];

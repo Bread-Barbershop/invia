@@ -668,4 +668,138 @@ export const firstBirthdayCollection: ShowcaseInvitation[] = [
       },
     ],
   },
+  {
+    name: '겨울에 온 아이',
+    description: '오방색 조각보와 한복 사진, 해가 드는 한옥 마루에서 차리는 첫돌 잔치.',
+    palette: ['#F8F3EA', '#FA7564', '#000000'],
+    eyebrow: 'FROM SEOJUN & HANEUL',
+    heading: '겨울에 온 아이',
+    date: '2027-02-20',
+    time: '12:00',
+    venue: '인비아 한옥',
+    font: '고운 바탕',
+    bodyFont: 'LINESeedKR',
+    sectionStyle: 'paper',
+    id: 'showcase-48',
+    type: 'firstBirthday',
+    message: [
+      '작년 2월, 눈이 오던 날 도윤이가 태어났습니다. 그날부터 집 안이 조금씩 시끄러워지고, 조금씩 따뜻해졌습니다.',
+      '첫 생일은 크게 하지 않으려 합니다. 가까운 분들만 모시고, 해가 드는 한옥 마루에 앉아 밥 한 끼 나누고 싶습니다.',
+      '2월 20일 낮, 잠깐 들러 도윤이 얼굴 한 번 봐 주세요.',
+    ],
+    sections: [
+      { component: 'greeting' },
+      {
+        component: 'myChild',
+        title: '도윤이의 첫 겨울',
+        subTitle: 'MY CHILD',
+        name: '도윤',
+        birthday: '2026.02.20',
+        message:
+          '잘 먹고 잘 웃고, 요즘은 어른 손가락을 하나씩 잡고 걷는 연습 중입니다. 좋아하는 건 미역국과 할머니 집 마루.',
+        image: 'https://lh3.googleusercontent.com/d/1-JaCYcVKF-5LEHsaTtt6ncDC2PgBVN8y',
+      },
+      {
+        component: 'gallery',
+        title: '겨울의 조각들',
+        subTitle: 'LITTLE MOMENTS',
+        template: 'galleryType1',
+        ratio: '3:4',
+        images: [
+          'https://lh3.googleusercontent.com/d/16NqswjJjwvmZASr9XWfjlF2CkmBwS1NF',
+          'https://lh3.googleusercontent.com/d/1iK16ymcwWYr_DYfj1bMCBEIWOC5vEPJa',
+          'https://lh3.googleusercontent.com/d/1PkJtpMMhYLkO_w6h6svDFxi83j5noiLv',
+        ],
+      },
+      {
+        component: 'calendar',
+        title: '오시는 날',
+        subTitle: 'WHEN',
+        template: 'calendarType9',
+      },
+      {
+        component: 'place',
+        title: '오시는 곳',
+        subTitle: 'WHERE',
+        detail: '· 사랑채',
+        address: '서울특별시 종로구 옥인길 24',
+        lat: 37.5808777,
+        lng: 126.9673542,
+      },
+      {
+        component: 'timeline',
+        title: '그날의 순서',
+        items: [
+          { time: '12:00', title: '도착', description: '마루에 앉아 따뜻한 차 한 잔.' },
+          {
+            time: '12:30',
+            title: '돌잡이',
+            description: '도윤이가 무엇을 집을지 지켜봐 주세요.',
+          },
+          { time: '13:00', title: '식사', description: '한 상 가득 차려 두겠습니다.' },
+          { time: '14:00', title: '사진', description: '마루에서 같이 한 장씩 남겨요.' },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '그날의 밥상',
+        subtitle: 'ON THE TABLE',
+        style: 'garden',
+        note: '아이 먹을 것은 따로 챙겨 두겠습니다.',
+        courses: [
+          {
+            name: '먼저',
+            dishes: [
+              { name: '겨울 나물', description: '도라지와 시래기를 무쳐 놓았습니다.' },
+            ],
+          },
+          {
+            name: '함께',
+            dishes: [
+              { name: '소갈비찜과 미역국', description: '갓 지은 밥과 같이 나갑니다.' },
+            ],
+          },
+          {
+            name: '마지막',
+            dishes: [
+              { name: '수정과와 약과', description: '직접 담근 유자청을 곁들여.' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'transportation',
+        title: '오시는 길',
+        subwayLine: '3호선',
+        subwayStation: '경복궁역',
+        subwayExit: '2번 출구',
+        subwayWalk: '걸어서 8분, 은행나무가 있는 골목으로 들어오세요.',
+        busRoutes: '종로 11번 마을버스 · 옥인동 정류장 하차',
+        parkingHours:
+          '골목 안에는 차가 들어갈 수 없습니다. 옥인동 공영주차장을 이용해 주세요.',
+        alternativeParking: '옥인동 공영주차장 · 도보 3분',
+      },
+      {
+        component: 'dressCode',
+        title: '옷차림',
+        colors: ['#F1DED9', '#E5E7EB', '#E1EBDD'],
+        guidelines: [
+          '마루에 앉아 식사하니 편한 옷과 따뜻한 양말을 챙겨 주세요.',
+        ],
+      },
+      {
+        component: 'notice',
+        title: '알려드릴 것',
+        heading: '조용한 골목, 느린 오후',
+        message:
+          '이웃이 사는 주택가라 목소리는 조금만 낮춰 주세요. 아이들이 뛰어도 괜찮습니다. 마루에 방석을 넉넉히 두겠습니다.',
+        preset: 'party',
+        image: 'https://lh3.googleusercontent.com/d/1e73wpZdQTKOzNdY2KmwOq3r08aMoaO0k',
+      },
+      {
+        component: 'closingComment',
+        message: '2월 20일, 마루에 해가 들 때 뵙겠습니다.',
+      },
+    ],
+  },
 ];

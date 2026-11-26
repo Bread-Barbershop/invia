@@ -8,19 +8,38 @@ import type { NoticePresetId } from '@/components/organisms/notice/noticeList';
 import type { CalendarCardType } from '@/shared/data/template/componentTemplate';
 
 export type ShowcaseSection =
-  | { component: 'greeting' }
+  | { component: 'greeting'; title?: string; subTitle?: string }
   | {
       component: 'calendar';
       title: string;
+      subTitle?: string;
       template?: `calendarType${1 | 2 | 3 | 4 | 5}` | CalendarCardType;
     }
-  | { component: 'place'; title: string; detail?: string }
+  | {
+      component: 'countdown';
+      title: string;
+      eventDateTime: string;
+      onDayMessage?: string;
+      afterMessage?: string;
+    }
+  | {
+      component: 'place';
+      title: string;
+      subTitle?: string;
+      detail?: string;
+      address?: string;
+      tel?: string;
+      lat?: number;
+      lng?: number;
+      openNavi?: boolean;
+    }
   | { component: 'closingComment'; message: string }
   | { component: 'coupleIntroduction'; title: string; story: string }
   | { component: 'picture'; title: string; image: string; caption?: string }
   | {
       component: 'gallery';
       title: string;
+      subTitle?: string;
       images: string[];
       template: GalleryVariant;
       ratio: RatioType;
@@ -42,7 +61,11 @@ export type ShowcaseSection =
       title: string;
       subtitle: string;
       style: MealMenuStyle;
-      courses: { name: string; dishes: string[] }[];
+      courses: {
+        name: string;
+        dishes: (string | { name: string; description?: string })[];
+      }[];
+      note?: string;
     }
   | {
       component: 'dressCode';
@@ -63,13 +86,16 @@ export type ShowcaseSection =
   | {
       component: 'transportation';
       title: string;
+      subwayLine?: string;
       subwayStation?: string;
       subwayExit?: string;
       subwayWalk?: string;
+      busRoutes?: string;
       shuttleStop?: string;
       shuttleInterval?: string;
       parkingHours?: string;
       alternativeParking?: string;
+      navigationUrl?: string;
     }
   | {
       component: 'afterParty';
@@ -96,6 +122,7 @@ export type ShowcaseSection =
   | {
       component: 'myChild';
       title: string;
+      subTitle?: string;
       name: string;
       birthday: string;
       message: string;
