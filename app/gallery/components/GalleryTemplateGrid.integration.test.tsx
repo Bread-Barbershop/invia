@@ -2,7 +2,11 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
 
-import { INVITATION_TEMPLATES } from '@/shared/data/invitationTemplates/catalog';
+import {
+  getInvitationTemplates,
+  INVITATION_TEMPLATES,
+} from '@/shared/data/invitationTemplates/catalog';
+import { filterInvitationTemplates } from '@/shared/data/invitationTemplates/search';
 
 import GalleryCategoryTabs from './GalleryCategoryTabs';
 import GalleryTemplateGrid from './GalleryTemplateGrid';
@@ -157,5 +161,66 @@ describe('초대장 갤러리', () => {
     expect(
       screen.getByRole('link', { name: '이 디자인으로 만들기' })
     ).toHaveAttribute('href', '/editor?template=showcase-40');
+  });
+
+  it('검색어가 없으면 전체 템플릿 수를 보여준다', () => {
+    renderGallery();
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      `총 ${INVITATION_TEMPLATES.length}개 템플릿`
+    );
+  });
+
+  it('검색어에 맞는 템플릿만 남기고 결과 수를 보여준다', () => {
+    const expected = filterInvitationTemplates(INVITATION_TEMPLATES, '꽃');
+    renderGallery(undefined, 'q=꽃');
+
+    const grid = screen.getByRole('region', { name: '초대장 디자인' });
+    expect(expected.length).toBeGreaterThan(0);
+    expect(within(grid).getAllByRole('button')).toHaveLength(expected.length);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      `‘꽃’ 검색 결과 ${expected.length}개 템플릿`
+    );
+  });
+
+  it('검색어와 분류를 함께 적용한다', () => {
+    const expected = filterInvitationTemplates(
+      getInvitationTemplates('birthday'),
+      '꽃'
+    );
+    renderGallery('birthday', 'q=꽃');
+
+    const grid = screen.getByRole('region', { name: '초대장 디자인' });
+    expect(expected.length).toBeGreaterThan(0);
+    expect(within(grid).getAllByRole('button')).toHaveLength(expected.length);
+    for (const template of expected) {
+      expect(
+        within(grid).getByRole('button', { name: template.name })
+      ).toBeInTheDocument();
+    }
+  });
+
+  it('검색 결과가 없으면 빈 상태와 분류를 지키는 검색 초기화를 보여준다', () => {
+    renderGallery('birthday', 'q=없는검색어xyz');
+
+    expect(
+      screen.getByText('‘없는검색어xyz’와 맞는 템플릿이 없어요.')
+    ).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '‘없는검색어xyz’ 검색 결과 0개 템플릿'
+    );
+    expect(screen.getByRole('link', { name: '검색 초기화' })).toHaveAttribute(
+      'href',
+      '/gallery?category=birthday'
+    );
+  });
+
+  it('분류를 바꿔도 검색어를 유지한다', () => {
+    renderGallery(undefined, 'q=꽃');
+
+    expect(screen.getByRole('link', { name: '결혼식' })).toHaveAttribute(
+      'href',
+      '/gallery?q=%EA%BD%83&category=wedding'
+    );
   });
 });

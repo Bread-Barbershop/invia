@@ -51,4 +51,53 @@ describe('카테고리별 실제 편집 가능한 표지 목록', () => {
       posterOnly: true,
     });
   });
+
+  it('표지 이름·분위기로 검색하고 결과 수와 빈 상태를 보여준다', () => {
+    render(<PosterPanel />);
+
+    expect(
+      screen.getByText(`총 ${getInvitationTemplates('all').length}개`)
+    ).toBeInTheDocument();
+
+    const searchInput = screen.getByLabelText('표지 검색');
+    fireEvent.change(searchInput, { target: { value: '클래식' } });
+
+    expect(screen.getAllByRole('button', { name: /표지 적용$/ })).toHaveLength(
+      1
+    );
+    expect(screen.getByText('검색 결과 1개')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '클래식 모먼트 표지 적용' })
+    ).toBeInTheDocument();
+
+    fireEvent.change(searchInput, { target: { value: '없는검색어xyz' } });
+
+    expect(screen.getByText('검색 결과가 없어요')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /표지 적용$/ })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '검색 초기화' }));
+
+    expect(screen.getAllByRole('button', { name: /표지 적용$/ })).toHaveLength(
+      getInvitationTemplates('all').length
+    );
+    expect(screen.getByLabelText('표지 검색')).toHaveValue('');
+  });
+
+  it('검색어는 고른 분류 안에서만 적용된다', () => {
+    render(<PosterPanel />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '세미나' })
+    );
+    fireEvent.change(screen.getByLabelText('표지 검색'), {
+      target: { value: '웨딩' },
+    });
+
+    expect(
+      screen.queryByRole('button', { name: /표지 적용$/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('검색 결과가 없어요')).toBeInTheDocument();
+  });
 });

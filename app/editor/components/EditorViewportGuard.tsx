@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, Home, Maximize2 } from 'lucide-react';
+import { ArrowUpRight, Home, LayoutGrid, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import FooterPolicyLink from '@/features/session/components/FooterPolicyLink';
 import HeaderPrivacyNoticeButton from '@/features/session/components/HeaderPrivacyNoticeButton';
 import HomeButton from '@/features/session/components/HomeButton';
+import { DASHBOARD_SHELL_NAV_MENU } from '@/features/session/config/dashboardShell.config';
 import homeBackgroundImage from '@/shared/assets/images/home/home-background.png';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 import { useEditorCalloutStore } from '@/shared/store/useEditorCalloutStore';
@@ -38,10 +39,18 @@ function EditorDesktopNotice({
         <div className="flex h-full items-center gap-8">
           <HomeButton />
 
-          <nav className="flex h-full items-center gap-6">
-            <Link href="/faq" className={HEADER_NAV_LINK_CLASS}>
-              FAQ
-            </Link>
+          <nav className="hidden h-full items-center gap-6 sm:flex">
+            {DASHBOARD_SHELL_NAV_MENU.filter(menu => menu.href !== '/editor').map(
+              menu => (
+                <Link
+                  key={`${menu.title}-${menu.href}`}
+                  href={menu.href}
+                  className={HEADER_NAV_LINK_CLASS}
+                >
+                  {menu.title}
+                </Link>
+              )
+            )}
           </nav>
         </div>
 
@@ -60,10 +69,13 @@ function EditorDesktopNotice({
           </h1>
           <p className="mt-8 max-w-xl text-base leading-7 text-black/60 sm:text-lg sm:leading-8">
             초대장은 {DESKTOP_CONTENT_MIN_WIDTH}px 이상의 브라우저에서
-            만들어주세요.
+            만들어주세요.{' '}
             <br />
             섬세한 편집을 위해 {DESKTOP_CONTENT_MIN_WIDTH}px 이상의 브라우저
             너비가 필요합니다.
+          </p>
+          <p className="mt-4 max-w-xl text-sm leading-6 text-black/45">
+            지금 이 화면에서도 갤러리와 디자인 미리보기는 둘러볼 수 있어요.
           </p>
         </section>
 
@@ -101,6 +113,13 @@ function EditorDesktopNotice({
             >
               홈으로 돌아가기
               <Home className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/gallery"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/20 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-black"
+            >
+              갤러리 둘러보기
+              <LayoutGrid className="h-4 w-4" />
             </Link>
             <Link
               href="/faq"

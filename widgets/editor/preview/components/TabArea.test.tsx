@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 
 import TabArea from './TabArea';
@@ -36,7 +36,7 @@ describe('TabArea 컴포넌트', () => {
     expect(defaultProps.onSearchChange).toHaveBeenCalledWith('인사말');
   });
 
-  it('검색어가 있을 때 검색어 지우기(X) 버튼을 누르면 빈 문자열로 초기화된다', () => {
+  it('검색어가 있을 때 검색어 지우기(X) 버튼을 눌러도 빈 문자열로 초기화된다', () => {
     render(<TabArea {...defaultProps} searchQuery="갤러리" />);
 
     const clearBtn = screen.getByRole('button', { name: '검색어 지우기' });
@@ -44,5 +44,14 @@ describe('TabArea 컴포넌트', () => {
 
     fireEvent.click(clearBtn);
     expect(defaultProps.onSearchChange).toHaveBeenCalledWith('');
+  });
+
+  it('지금 만드는 초대장 분류의 탭을 맨 앞에 두고 표시한다', () => {
+    render(<TabArea {...defaultProps} currentType="seminar" />);
+
+    const tabs = screen.getAllByRole('listitem');
+    expect(tabs[0]).toHaveTextContent('세미나');
+    expect(within(tabs[0]).getByText('현재 초대장')).toBeInTheDocument();
+    expect(within(tabs[1]).queryByText('현재 초대장')).not.toBeInTheDocument();
   });
 });
