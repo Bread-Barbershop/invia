@@ -174,6 +174,8 @@ function useDashboardInvitations(
       if (version < listVersionsRef.current.applied) return;
 
       if (shouldRedirectToHome(res.status, payloadMessage)) {
+        listVersionsRef.current.applied = version;
+        listVersionsRef.current.folderIds = new Set();
         setInvites([]);
         setError(null);
         setDeleteBusy({});
@@ -206,6 +208,8 @@ function useDashboardInvitations(
       setInvitationResults(createInitialInvitationResults(nextInvites));
     } catch (err) {
       if (version < listVersionsRef.current.applied) return;
+      listVersionsRef.current.applied = version;
+      listVersionsRef.current.folderIds = new Set();
       console.error(err);
       setInvites([]);
       setDeleteBusy({});
@@ -272,6 +276,8 @@ function useDashboardInvitations(
           }
 
           if (shouldRedirectToHome(res.status, payloadMessage)) {
+            listVersionsRef.current.applied = version;
+            listVersionsRef.current.folderIds = new Set();
             pendingInvitationRef.current = null;
             setInvites([]);
             setError(null);
@@ -712,6 +718,7 @@ function useDashboardInvitations(
 
   const refreshInvitation = useCallback(
     async (folderId: string) => {
+      const listVersion = listVersionsRef.current.applied;
       const version = bumpInvitationRefreshVersion(folderId);
       try {
         const response = await fetch('/api/drive/loadInvitation', {
@@ -720,7 +727,10 @@ function useDashboardInvitations(
         });
         if (!response.ok) return false;
         const payload = (await response.json()) as LoadInvitationResponse;
-        if (invitationRefreshVersionsRef.current.get(folderId) !== version)
+        if (
+          invitationRefreshVersionsRef.current.get(folderId) !== version ||
+          listVersionsRef.current.applied !== listVersion
+        )
           return false;
         const fresh = payload.invites
           .map(normalizeInvite)

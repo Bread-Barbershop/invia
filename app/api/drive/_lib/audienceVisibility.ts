@@ -166,6 +166,11 @@ async function loadScope(folderId: string) {
         ? { ...stored, pending: true }
         : stored;
   }
+  const activeSlugs = new Set(groups.map(group => group.slug));
+  visibility = {
+    ...visibility,
+    publicSlugs: visibility.publicSlugs.filter(slug => activeSlugs.has(slug)),
+  };
   return {
     root,
     groups,
@@ -315,27 +320,33 @@ export async function applyAudienceVisibility(
   selection?: { publicSlugs: string[]; revision: string },
   preserveScope = false
 ) {
-  const { root, groups, audiences, dataFile, meta, visibility } =
+  const { root, groups, audiences, allAudiences, dataFile, meta, visibility } =
     await loadScope(folderId);
   const dataId = dataFile.id;
   const guestUrl = meta?.guestUrl || guestPath(dataId);
   if (
     preserveScope ||
-    (!selection && published === visibility.published && !visibility.pending)
+    (!selection &&
+      published === visibility.published &&
+      !visibility.pending &&
+      allAudiences.length === audiences.length)
   ) {
     return { groups, visibility, guestUrl, dataJsonFileId: dataId };
   }
-  const allowed = new Set(selection?.publicSlugs ?? visibility.publicSlugs);
+  const selectedSlugs = selection?.publicSlugs ?? visibility.publicSlugs;
   if (
     selection &&
     (selection.revision !== visibility.revision ||
-      [...allowed].some(slug => !groups.some(group => group.slug === slug)))
+      selectedSlugs.some(slug => !groups.some(group => group.slug === slug)))
   ) {
     throw new InvitationCloneError(
       '공개 범위가 변경됐어요. 최신 설정을 다시 열어 주세요.',
       409
     );
   }
+  // Redis may still contain a retired slug from an older scope snapshot.
+  // It must not count as selected or remain in the saved public scope.
+  const allowed = new Set(selectedSlugs);
   if (published && !groups.some(group => allowed.has(group.slug)))
     throw new InvitationCloneError(
       '공개할 초대장을 하나 이상 선택해 주세요.',
@@ -355,6 +366,9 @@ export async function applyAudienceVisibility(
   await setPublicAccess(folderId, false);
   const files = await listCloneFiles(folderId);
   const basePublic = published && allowed.has('');
+  const activeAudienceFolders = new Set(
+    audiences.map(group => group.folderId)
+  );
   const targets: { id: string; enabled: boolean; mark?: boolean }[] = [
     ...(await legacyMediaTargets(files, dataId, basePublic)),
     ...files
@@ -362,9 +376,12 @@ export async function applyAudienceVisibility(
         file => file.ownedByMe && (file.id === dataId || isBaseAsset(file))
       )
       .map(file => ({ id: file.id, enabled: basePublic })),
-    ...audiences.map(group => ({
+    ...allAudiences.map(group => ({
       id: group.folderId,
-      enabled: published && allowed.has(group.slug),
+      enabled:
+        activeAudienceFolders.has(group.folderId) &&
+        published &&
+        allowed.has(group.slug),
     })),
   ];
   await inCloneBatches(

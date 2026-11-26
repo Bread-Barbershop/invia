@@ -174,11 +174,14 @@ function leaseArguments() {
   return [Math.floor(Date.now() / 1000), CLAIM_SECONDS];
 }
 
-async function withAudienceRedis<T>(run: (redis: Redis) => Promise<T>) {
+async function withAudienceRedis<T>(
+  run: (redis: Redis) => Promise<T>,
+  options?: { automaticDeserialization?: boolean }
+) {
   if (!isShortUrlStoreConfigured())
     throw new AudienceLinkStoreUnavailableError();
   try {
-    return await run(Redis.fromEnv());
+    return await run(Redis.fromEnv(options));
   } catch (error) {
     throw new AudienceLinkStoreUnavailableError(error);
   }
@@ -321,7 +324,8 @@ export async function getRetiredAudienceSlug(
 ) {
   const [key] = audienceKeys(rootDataFileId);
   return withAudienceRedis(redis =>
-    redis.hget<string>(key, `retired-folder:${folderId}`)
+    redis.hget<string>(key, `retired-folder:${folderId}`),
+    { automaticDeserialization: false }
   );
 }
 
