@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 
 import { componentCls } from '@/shared/data/componentsInfo/componentInfo';
 import { BlockSlice, EditorState } from '@/shared/types/block';
+import { cloneBlockProps, createBlockId } from '@/shared/utils/blockManagement';
 import { createDefaultProps } from '@/shared/utils/createDefaultProps';
 
 export const createBlockSlice: StateCreator<EditorState, [], [], BlockSlice> = (
@@ -47,6 +48,28 @@ export const createBlockSlice: StateCreator<EditorState, [], [], BlockSlice> = (
     set(state => ({
       block: state.block.filter(items => items.id !== id),
     })),
+  duplicateBlock: (id: string) => {
+    const source = get().block.find(block => block.id === id);
+    if (!source) return null;
+
+    const newId = createBlockId();
+    const duplicated = {
+      ...source,
+      id: newId,
+      props: cloneBlockProps(source.props),
+    };
+
+    set(state => {
+      const sourceIndex = state.block.findIndex(block => block.id === id);
+      if (sourceIndex < 0) return state;
+
+      const next = [...state.block];
+      next.splice(sourceIndex + 1, 0, duplicated);
+      return { block: next };
+    });
+
+    return newId;
+  },
   moveBlock: (from, to) =>
     set(state => {
       const next = [...state.block];

@@ -71,6 +71,11 @@ export interface BlockSlice {
     appearance: Pick<EditorBlock['props'], 'sectionStyle' | 'entranceEffect'>
   ) => void;
   deleteBlock: (id: string) => void;
+  /**
+   * 블록을 같은 자리 뒤에 복제하고 새 블록 id를 돌려준다.
+   * 복제할 블록이 없으면 null.
+   */
+  duplicateBlock: (id: string) => string | null;
   moveBlock: (from: number, to: number) => void;
   addAllBlock: (type: InvitationType) => void;
   setBlock: (block: EditorBlock[]) => void;
