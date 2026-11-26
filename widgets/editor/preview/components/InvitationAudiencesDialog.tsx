@@ -24,7 +24,7 @@ import type { useInvitationUpload } from '../hooks/useInvitationUpload';
 
 type Upload = Pick<
   ReturnType<typeof useInvitationUpload>,
-  'handleUpload'
+  | 'handleUpload'
   | 'isLoading'
   | 'isCleaningUp'
   | 'loadingMessage'
@@ -49,6 +49,7 @@ type ListResult =
 const AUDIENCES_API = '/api/drive/invitationAudiences';
 const LOAD_ERROR = '하객 그룹을 불러오지 못했어요.';
 const CREATE_ERROR = '하객 그룹을 추가하지 못했어요. 다시 시도해 주세요.';
+const DELETE_ERROR = '하객 그룹을 삭제하지 못했어요. 다시 시도해 주세요.';
 const SAVE_ERROR = '현재 초대장을 저장하지 못했어요. 다시 시도해 주세요.';
 
 const FIELD_CLASS =
@@ -100,8 +101,9 @@ export default function InvitationAudiencesDialog({
   const [slug, setSlug] = useState('');
   const [sourceFolderId, setSourceFolderId] = useState('');
   const [pendingAction, setPendingAction] = useState<Action | null>(null);
+  const [deleteGroup, setDeleteGroup] = useState<AudienceGroup | null>(null);
   const [operation, setOperation] = useState<
-    'saving' | 'creating' | 'opening' | null
+    'saving' | 'creating' | 'deleting' | 'opening' | null
   >(null);
   const [error, setError] = useState<{
     message: string;
@@ -127,9 +129,11 @@ export default function InvitationAudiencesDialog({
         : upload.loadingMessage
       : operation === 'creating'
         ? '초대장을 복제하고 있어요.'
-        : operation === 'opening'
-          ? '초대장 편집기를 열고 있어요.'
-          : null;
+        : operation === 'deleting'
+          ? '하객 그룹을 삭제하고 있어요.'
+          : operation === 'opening'
+            ? '초대장 편집기를 열고 있어요.'
+            : null;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -181,13 +185,13 @@ export default function InvitationAudiencesDialog({
   }, [folderId, listKey]);
 
   useEffect(() => {
-    if (pendingAction) {
+    if (pendingAction || deleteGroup) {
       confirmationCancelRef.current?.focus();
     } else {
       actionTriggerRef.current?.focus();
       actionTriggerRef.current = null;
     }
-  }, [pendingAction]);
+  }, [deleteGroup, pendingAction]);
 
   function closeDialog() {
     if (!busyRef.current && !busy) onClose();
@@ -262,7 +266,7 @@ export default function InvitationAudiencesDialog({
   }
 
   function requestAction(action: Action) {
-    if (busyRef.current || busy) return;
+    if (busyRef.current || busy || deleteGroup) return;
     setError(null);
     if (useEditorStore.getState().isDirty) {
       actionTriggerRef.current =
@@ -272,6 +276,81 @@ export default function InvitationAudiencesDialog({
       setPendingAction(action);
     } else {
       void continueAction(action);
+    }
+  }
+
+  function requestGroupDelete(group: AudienceGroup) {
+    if (busyRef.current || busy || pendingAction || !group.slug) return;
+    setError(null);
+    actionTriggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setDeleteGroup(group);
+  }
+
+  async function confirmGroupDelete() {
+    if (!deleteGroup || !list || busyRef.current || busy) return;
+    const root = groupOptions.find(group => group.slug === '');
+    if (!root) {
+      setError({ message: DELETE_ERROR });
+      return;
+    }
+
+    const target = deleteGroup;
+    busyRef.current = true;
+    setError(null);
+    setOperation('deleting');
+    let opening = false;
+    try {
+      const result = await readAudienceResponse<{ success?: boolean }>(
+        AUDIENCES_API,
+        DELETE_ERROR,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rootFolderId: root.folderId,
+            groupFolderId: target.folderId,
+          }),
+        }
+      );
+      if (result.success !== true) throw new Error(DELETE_ERROR);
+
+      const remaining = list.groups.filter(
+        group => group.folderId !== target.folderId
+      );
+      setListResult({
+        key: listKey,
+        groups: {
+          ...list,
+          groups: remaining,
+          activeSlug: list.activeSlug === target.slug ? '' : list.activeSlug,
+        },
+      });
+      setSourceFolderId(current =>
+        current === target.folderId ? root.folderId : current
+      );
+      setCopiedFolderId(current =>
+        current === target.folderId ? '' : current
+      );
+      actionTriggerRef.current = titleRef.current;
+      setDeleteGroup(null);
+      setError(null);
+
+      if (list.activeSlug === target.slug) {
+        setOperation('opening');
+        useEditorStore.setState({ isDirty: false });
+        onOpenEditor(root);
+        opening = true;
+      }
+    } catch (err) {
+      setError({ message: err instanceof Error ? err.message : DELETE_ERROR });
+    } finally {
+      if (!opening) {
+        setOperation(null);
+        busyRef.current = false;
+      }
     }
   }
 
@@ -335,7 +414,15 @@ export default function InvitationAudiencesDialog({
       aria-labelledby={titleId}
       onCancel={event => {
         event.preventDefault();
-        closeDialog();
+        if (deleteGroup) {
+          setDeleteGroup(null);
+          setError(null);
+        } else if (pendingAction) {
+          setPendingAction(null);
+          setError(null);
+        } else {
+          closeDialog();
+        }
       }}
       {...backdropDismiss}
       className="fixed inset-0 m-auto max-h-[calc(100dvh-32px)] w-[min(560px,calc(100vw-32px))] overflow-y-auto rounded-2xl border border-[#deddd6] bg-white p-0 font-pretendard text-text-primary shadow-edit backdrop:bg-black/50"
@@ -419,7 +506,9 @@ export default function InvitationAudiencesDialog({
                       <button
                         type="button"
                         aria-pressed={active}
-                        disabled={busy || Boolean(pendingAction)}
+                        disabled={
+                          busy || Boolean(pendingAction) || Boolean(deleteGroup)
+                        }
                         onClick={() => {
                           if (!active) requestAction({ type: 'switch', group });
                         }}
@@ -439,16 +528,41 @@ export default function InvitationAudiencesDialog({
                         type="button"
                         aria-label={`${group.name} 링크 복사`}
                         className={cn(SECONDARY_BUTTON, 'shrink-0 gap-1.5')}
-                        disabled={busy}
+                        disabled={
+                          busy ||
+                          Boolean(pendingAction) ||
+                          Boolean(deleteGroup) ||
+                          Boolean(group.linkRetired)
+                        }
                         onClick={() => void copyGroupLink(group)}
                       >
-                        {copiedFolderId === group.folderId ? (
+                        {group.linkRetired ? (
+                          <X size={16} aria-hidden="true" />
+                        ) : copiedFolderId === group.folderId ? (
                           <Check size={16} aria-hidden="true" />
                         ) : (
                           <Copy size={16} aria-hidden="true" />
                         )}
-                        링크 복사
+                        {group.linkRetired ? '링크 비활성' : '링크 복사'}
                       </button>
+                      {group.slug && (
+                        <button
+                          type="button"
+                          aria-label={`${group.name} 삭제`}
+                          className={cn(
+                            SECONDARY_BUTTON,
+                            'shrink-0 border-[#e1b7b8] text-[#a3212d]'
+                          )}
+                          disabled={
+                            busy ||
+                            Boolean(pendingAction) ||
+                            Boolean(deleteGroup)
+                          }
+                          onClick={() => requestGroupDelete(group)}
+                        >
+                          삭제
+                        </button>
+                      )}
                     </li>
                   );
                 })}
@@ -479,7 +593,9 @@ export default function InvitationAudiencesDialog({
                 </p>
               </div>
               <fieldset
-                disabled={busy || Boolean(pendingAction)}
+                disabled={
+                  busy || Boolean(pendingAction) || Boolean(deleteGroup)
+                }
                 className="grid min-w-0 gap-3"
               >
                 {groupOptions.length > 1 && (
@@ -492,7 +608,9 @@ export default function InvitationAudiencesDialog({
                     }))}
                     value={source?.folderId ?? ''}
                     onChange={setSourceFolderId}
-                    disabled={busy || Boolean(pendingAction)}
+                    disabled={
+                      busy || Boolean(pendingAction) || Boolean(deleteGroup)
+                    }
                   />
                 )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -555,6 +673,50 @@ export default function InvitationAudiencesDialog({
           </>
         )}
 
+        {deleteGroup && (
+          <section
+            aria-label={`${deleteGroup.name} 그룹 삭제 확인`}
+            className="grid gap-3 rounded-xl border border-[#e1b7b8] bg-white p-4"
+          >
+            <div className="grid gap-1">
+              <h3 className="text-sm font-semibold">
+                ‘{deleteGroup.name}’ 그룹을 삭제할까요?
+              </h3>
+              <p className="text-sm leading-6 text-neutral-700">
+                이미 보낸 ‘{deleteGroup.name}’ 링크로는 초대장을 열 수 없어요.
+              </p>
+              {list?.activeSlug === deleteGroup.slug &&
+                useEditorStore.getState().isDirty && (
+                  <p className="text-sm leading-6 text-[#a3212d]">
+                    저장하지 않은 변경 사항도 함께 삭제돼요.
+                  </p>
+                )}
+            </div>
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                ref={confirmationCancelRef}
+                type="button"
+                className={SECONDARY_BUTTON}
+                disabled={busy}
+                onClick={() => {
+                  setDeleteGroup(null);
+                  setError(null);
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={PRIMARY_BUTTON}
+                disabled={busy}
+                onClick={() => void confirmGroupDelete()}
+              >
+                삭제
+              </button>
+            </div>
+          </section>
+        )}
+
         {pendingAction && (
           <section
             aria-label="변경 사항 저장"
@@ -589,7 +751,10 @@ export default function InvitationAudiencesDialog({
           </section>
         )}
         {operationMessage && (
-          <p role="status" className="flex items-center gap-2 text-sm text-neutral-600">
+          <p
+            role="status"
+            className="flex items-center gap-2 text-sm text-neutral-600"
+          >
             <LoadingSpinner
               aria-hidden="true"
               className="size-4 shrink-0 motion-safe:animate-spin"

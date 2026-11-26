@@ -10,6 +10,8 @@ jest.mock('@/app/api/drive/_lib/captureDriveError', () => ({
 }));
 jest.mock('@/app/api/short-url/_lib/shortUrlStore', () => ({
   resolveShortCode: jest.fn(),
+  deleteShortCodeMapping: jest.fn(),
+  isShortUrlStoreConfigured: jest.fn(() => false),
 }));
 jest.mock('@/app/api/drive/_lib/cloneInvitation', () => ({
   ...jest.requireActual('@/app/api/drive/_lib/cloneInvitation'),
@@ -18,24 +20,34 @@ jest.mock('@/app/api/drive/_lib/cloneInvitation', () => ({
 jest.mock('@/app/api/drive/_lib/audienceLinkStore', () => ({
   ...jest.requireActual('@/app/api/drive/_lib/audienceLinkStore'),
   readAudienceVisibility: jest.fn(),
+  writeAudienceVisibility: jest.fn(),
   claimAudienceLink: jest.fn(),
   commitAudienceLink: jest.fn(),
   releaseAudienceLink: jest.fn(),
   resolveAudienceLink: jest.fn(),
+  inspectAudienceLink: jest.fn(),
+  isAudienceLinkRetired: jest.fn(),
+  getRetiredAudienceSlug: jest.fn(),
+  retireAudienceLink: jest.fn(),
 }));
 
 import {
   AudienceLinkStoreUnavailableError,
   readAudienceVisibility,
+  writeAudienceVisibility,
   claimAudienceLink,
   commitAudienceLink,
   resolveAudienceLink,
+  inspectAudienceLink,
+  isAudienceLinkRetired,
+  getRetiredAudienceSlug,
+  retireAudienceLink,
 } from '@/app/api/drive/_lib/audienceLinkStore';
 import { cloneOwnedInvitation } from '@/app/api/drive/_lib/cloneInvitation';
 import { googleFetch } from '@/app/api/drive/_lib/googleFetch';
 import { resolveShortCode } from '@/app/api/short-url/_lib/shortUrlStore';
 
-import { GET, POST } from './route';
+import { DELETE, GET, POST } from './route';
 
 const APP = 'Bread-Barbershop';
 const FOLDER = 'application/vnd.google-apps.folder';
@@ -81,6 +93,7 @@ function driveFixture() {
     id: ROOT_DATA,
     name: 'data.json',
     mimeType: 'application/json',
+    ownedByMe: true,
   };
   const rootMeta = {
     id: 'root-meta-file',
@@ -174,6 +187,14 @@ describe('하객 그룹 API', () => {
       .mocked(claimAudienceLink)
       .mockResolvedValue({ status: 'claimed', dataJsonFileId: null });
     jest.mocked(resolveAudienceLink).mockResolvedValue(null);
+    jest.mocked(inspectAudienceLink).mockResolvedValue({
+      retired: false,
+      retiredFolderId: null,
+      dataJsonFileId: GROUP_DATA,
+    });
+    jest.mocked(isAudienceLinkRetired).mockResolvedValue(false);
+    jest.mocked(getRetiredAudienceSlug).mockResolvedValue(null);
+    jest.mocked(retireAudienceLink).mockResolvedValue(undefined);
     jest.mocked(cloneOwnedInvitation).mockResolvedValue({
       folderId: GROUP,
       invitationUuid: EXAMPLE.invitationUuid,
@@ -259,14 +280,12 @@ describe('하객 그룹 API', () => {
         audience_visibility: marker,
       });
       jest.mocked(resolveAudienceLink).mockResolvedValue(GROUP_DATA);
-      jest
-        .mocked(readAudienceVisibility)
-        .mockResolvedValue({
-          publicSlugs: ['family'],
-          pending,
-          published,
-          revision: 'r1',
-        });
+      jest.mocked(readAudienceVisibility).mockResolvedValue({
+        publicSlugs: ['family'],
+        pending,
+        published,
+        revision: 'r1',
+      });
       const result = await load(ROOT, 'share-options');
       expect(await result.json()).toMatchObject({
         groups: [
@@ -402,6 +421,11 @@ describe('하객 그룹 API', () => {
     expect((await create()).status).toBe(503);
 
     fixture.hasGroup = true;
+    jest.mocked(inspectAudienceLink).mockResolvedValue({
+      retired: false,
+      retiredFolderId: null,
+      dataJsonFileId: null,
+    });
     const response = await load(GROUP);
 
     expect(await response.json()).toMatchObject({
@@ -415,4 +439,75 @@ describe('하객 그룹 API', () => {
     });
     expect(cloneOwnedInvitation).toHaveBeenCalledTimes(1);
   });
+
+  it('삭제 표시된 그룹은 링크를 복구하지 않고 편집 목록에 남긴다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    jest.mocked(inspectAudienceLink).mockResolvedValue({
+      retired: true,
+      retiredFolderId: GROUP,
+      dataJsonFileId: null,
+    });
+
+    const response = await load(ROOT);
+    expect(await response.json()).toMatchObject({
+      groups: [expect.anything(), { ...EXAMPLE, linkRetired: true }],
+    });
+    expect(claimAudienceLink).not.toHaveBeenCalled();
+    expect(commitAudienceLink).not.toHaveBeenCalled();
+  });
+
+  it('DELETE는 소유한 자식 그룹의 서버 기록 slug만 폐기하고 그룹 폴더만 지운다', async () => {
+    const fixture = driveFixture();
+    fixture.hasGroup = true;
+    const response = await DELETE(
+      new Request(`${BASE_URL}/api/drive/invitationAudiences`, {
+        method: 'DELETE',
+        body: JSON.stringify({
+          rootFolderId: ROOT,
+          groupFolderId: GROUP,
+          slug: 'caller-controlled-slug',
+        }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ success: true });
+    expect(retireAudienceLink).toHaveBeenCalledWith(
+      ROOT_DATA,
+      EXAMPLE.slug,
+      GROUP
+    );
+    expect(googleFetch).toHaveBeenCalledWith(
+      `https://www.googleapis.com/drive/v3/files/${GROUP}`,
+      expect.objectContaining({ method: 'DELETE' })
+    );
+    expect(fixture.hasGroup).toBe(false);
+    expect(writeAudienceVisibility).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['기본 초대장 폴더', ROOT, ROOT],
+    ['다른 행사의 그룹', 'other-root', GROUP],
+  ])(
+    '%s는 하객 그룹으로 삭제할 수 없다',
+    async (_, rootFolderId, groupFolderId) => {
+      const fixture = driveFixture();
+      fixture.hasGroup = true;
+      fixture.foreignSource = 'other-root';
+      const response = await DELETE(
+        new Request(`${BASE_URL}/api/drive/invitationAudiences`, {
+          method: 'DELETE',
+          body: JSON.stringify({ rootFolderId, groupFolderId }),
+        })
+      );
+
+      expect(response.status).toBe(404);
+      expect(retireAudienceLink).not.toHaveBeenCalled();
+      expect(googleFetch).not.toHaveBeenCalledWith(
+        expect.stringContaining(`/files/${groupFolderId}`),
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    }
+  );
 });

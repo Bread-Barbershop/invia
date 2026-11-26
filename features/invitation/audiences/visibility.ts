@@ -19,6 +19,24 @@ export type AudienceVisibilityStatus =
 
 export type GroupShareVisibility = Exclude<AudienceVisibilityStatus, 'partial'>;
 
+export function removeDeletedAudienceFromVisibility(
+  visibility: AudienceVisibility,
+  deletedSlug: string,
+  remainingGroupSlugs: string[],
+  revision: string
+): AudienceVisibility {
+  const remaining = new Set(remainingGroupSlugs);
+  const publicSlugs = visibility.publicSlugs.filter(
+    slug => slug !== deletedSlug && remaining.has(slug)
+  );
+  return {
+    ...visibility,
+    published: visibility.published && publicSlugs.length > 0,
+    publicSlugs,
+    revision,
+  };
+}
+
 export function visibilityStatus({
   groups,
   visibility,

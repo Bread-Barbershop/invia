@@ -53,15 +53,17 @@ async function loadShareOptions(
   ) {
     throw new Error(LOAD_ERROR);
   }
-  return groups.map(group => ({
-    folderId: group.folderId,
-    visibility: statusLabels[group.visibility] ? group.visibility : 'pending',
-    name: group.slug ? group.name : '기본 초대장',
-    url: new URL(
-      buildAudienceGuestUrl(rootGuestUrl, group.slug),
-      window.location.origin
-    ).href,
-  }));
+  return groups
+    .filter(group => !group.linkRetired)
+    .map(group => ({
+      folderId: group.folderId,
+      visibility: statusLabels[group.visibility] ? group.visibility : 'pending',
+      name: group.slug ? group.name : '기본 초대장',
+      url: new URL(
+        buildAudienceGuestUrl(rootGuestUrl, group.slug),
+        window.location.origin
+      ).href,
+    }));
 }
 
 export function useAudienceShare({
@@ -83,9 +85,18 @@ export function useAudienceShare({
   const folderId = invite?.folderId;
   const published = invite?.published;
   const scope = invite?.audienceVisibility;
+  const optionsRevision = invite?.audienceOptionsRevision;
   const request = useMemo(
-    () => ({ folderId, guestUrl, active, attempt, published, scope }),
-    [folderId, guestUrl, active, attempt, published, scope]
+    () => ({
+      folderId,
+      guestUrl,
+      active,
+      attempt,
+      published,
+      scope,
+      optionsRevision,
+    }),
+    [folderId, guestUrl, active, attempt, published, scope, optionsRevision]
   );
   const [result, setResult] = useState<{
     request: typeof request;
