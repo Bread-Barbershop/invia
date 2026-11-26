@@ -3,11 +3,9 @@ import userEvent from '@testing-library/user-event';
 
 import { AccountsPerGroupPreview } from './AccountsPerGroupPreview';
 
+import type { AccountEntry } from '../Account.schema';
+
 jest.mock('@/shared/assets/icons/copy.svg', () => () => null);
-jest.mock('@/shared/assets/icons/kakao.svg', () => () => null);
-jest.mock('@/app/api/account/openAccountApp', () => ({
-  openAccountApp: jest.fn(),
-}));
 
 const writeText = jest.fn().mockResolvedValue(undefined);
 
@@ -23,7 +21,7 @@ const mockClipboard = () => {
   });
 };
 
-const accounts = [
+const accounts: AccountEntry[] = [
   {
     name: '김하객',
     bank: '국민은행',
@@ -32,11 +30,14 @@ const accounts = [
   },
 ];
 
-const renderAccounts = (options?: { hideActions?: boolean }) =>
+const renderAccounts = (options?: {
+  hideActions?: boolean;
+  accountList?: AccountEntry[];
+}) =>
   render(
     <AccountsPerGroupPreview
       isOpenAccount
-      accountList={accounts}
+      accountList={options?.accountList ?? accounts}
       hideActions={options?.hideActions}
     />
   );
@@ -53,10 +54,25 @@ describe('계좌 목록 미리보기', () => {
       screen.getByRole('button', { name: '김하객 국민은행 계좌번호 복사' })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', {
+      screen.queryByRole('button', {
         name: '김하객 국민은행 계좌번호 복사 후 카카오톡 열기',
       })
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
+  });
+
+  it('기존에 저장된 송금 링크가 있어도 계좌번호 복사만 제공한다', () => {
+    renderAccounts({
+      accountList: [
+        {
+          ...accounts[0],
+          kakaoPayUrl: 'https://qr.kakaopay.com/sample',
+          tossUrl: 'https://toss.me/sample',
+        },
+      ],
+    });
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /계좌번호 복사$/ })).toBeVisible();
   });
 
   it('복사하면 클립보드에 은행과 계좌번호를 넣고 상태를 알린다', async () => {

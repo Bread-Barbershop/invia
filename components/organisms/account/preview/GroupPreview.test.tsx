@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { GroupPreview } from './GroupPreview';
 
 jest.mock('@/shared/assets/icons/copy.svg', () => () => null);
-jest.mock('@/shared/assets/icons/kakao.svg', () => () => null);
 
 const renderGroup = () =>
   render(
