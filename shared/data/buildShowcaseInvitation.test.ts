@@ -82,7 +82,9 @@ describe('첫 화면 초대장 샘플', () => {
         buildShowcaseInvitation(design).blocks.length - previousCount;
       expect(added).toBeGreaterThanOrEqual(3);
       // 본문이 길어져도 스크롤 부담이 커지지 않도록 상한을 둔다.
-      expect(buildShowcaseInvitation(design).blocks.length).toBeLessThanOrEqual(14);
+      expect(buildShowcaseInvitation(design).blocks.length).toBeLessThanOrEqual(
+        14
+      );
     }
   );
 
@@ -124,25 +126,40 @@ describe('첫 화면 초대장 샘플', () => {
     }
   );
 
-  it.each(SHOWCASE_INVITATIONS.filter(design => design.type === 'wedding'))(
-    '$name은 실제 예식장 주소·좌표로 지도와 길안내를 연다',
-    design => {
-      expect(design.venueAddress).toBeTruthy();
-      expect(typeof design.venueLat).toBe('number');
-      expect(typeof design.venueLng).toBe('number');
-      const place = buildShowcaseInvitation(design).blocks.find(
-        block => block.component === 'place'
-      );
-      expect(place?.props).toMatchObject({
-        placeName: design.venue,
-        placeAddress: design.venueAddress,
-        lat: design.venueLat,
-        lng: design.venueLng,
-        openMap: true,
-        openNavi: true,
-      });
-    }
-  );
+  it.each(
+    SHOWCASE_INVITATIONS.filter(design =>
+      ['wedding', 'firstBirthday', 'birthday'].includes(design.type)
+    )
+  )('$name은 실제 장소 주소·좌표로 지도와 길안내를 연다', design => {
+    expect(design.venueAddress).toBeTruthy();
+    expect(typeof design.venueLat).toBe('number');
+    expect(typeof design.venueLng).toBe('number');
+    const place = buildShowcaseInvitation(design).blocks.find(
+      block => block.component === 'place'
+    );
+    expect(place?.props).toMatchObject({
+      placeName: design.venue,
+      placeAddress: design.venueAddress,
+      lat: design.venueLat,
+      lng: design.venueLng,
+      openMap: true,
+      openNavi: true,
+    });
+  });
+
+  it.each(
+    SHOWCASE_INVITATIONS.filter(design =>
+      ['firstBirthday', 'birthday'].includes(design.type)
+    )
+  )('$name은 오시는 길 블록으로 대중교통 안내를 제공한다', design => {
+    const transport = design.sections.find(
+      section => section.component === 'transportation'
+    );
+    expect(transport).toBeDefined();
+    expect(
+      transport && 'subwayStation' in transport ? transport.subwayStation : ''
+    ).toBeTruthy();
+  });
 
   it.each(SHOWCASE_INVITATIONS)(
     '$name의 카운트다운은 예식 날짜·시간과 같다',
