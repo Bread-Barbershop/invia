@@ -227,6 +227,8 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
   'showcase-42': original('birthday_11', ['고운 바탕', 'SUIT']),
   'showcase-43': original('birthday_12', ['SUIT']),
   'showcase-44': original('wedding_15', ['고운 바탕', 'SUIT']),
+  'showcase-48': original('firstBirthday_10', ['고운 바탕', 'SUIT']),
+  'showcase-49': original('birthday_13', ['고운 바탕']),
   'showcase-45': original('bridalShower_01', [
     'Cormorant Garamond',
     '고운 바탕',
@@ -244,8 +246,6 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'Cormorant Garamond',
     'Prata',
   ]),
-  'showcase-48': original('firstBirthday_10', ['고운 바탕', 'SUIT']),
-  'showcase-49': original('birthday_13', ['고운 바탕']),
   'showcase-50': original('bridalShower_04', ['Pretendard', '고운 바탕']),
 };
 

@@ -382,7 +382,7 @@ export const bridalShowerCollection: ShowcaseInvitation[] = [
       '화려한 것보다 조용한 쪽이 잘 어울리는 사람이라, 크게 부르지 않고 아는 얼굴들만 모셨습니다.',
     ],
     sections: [
-      { component: 'greeting', title: '초대의 글', subTitle: 'INVITATION' },
+      { component: 'greeting', subTitle: 'INVITATION' },
       {
         component: 'countdown',
         title: '수아의 아침까지',
