@@ -268,11 +268,11 @@ export async function retireAudienceLink(
 ) {
   if (!slug || !folderId) throw new Error('Invalid audience retirement');
   const result = await withAudienceRedis(redis =>
-    redis.eval<string[], number>(RETIRE_SCRIPT, audienceKeys(rootDataFileId), [
-      ...leaseArguments(),
-      slug,
-      folderId,
-    ])
+    redis.eval<(string | number)[], number>(
+      RETIRE_SCRIPT,
+      audienceKeys(rootDataFileId),
+      [...leaseArguments(), slug, folderId]
+    )
   );
   if (result !== 1)
     throw new Error('Audience slug is retired by another group');
