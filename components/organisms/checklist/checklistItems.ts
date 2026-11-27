@@ -50,6 +50,11 @@ const PRESETS: Partial<
     { label: '드레스코드 확인', note: '파티 분위기에 맞는 옷차림을 준비해 주세요.' },
     { label: '카메라', note: '주인공과의 특별한 순간을 남겨 주세요.' },
   ],
+  exhibition: [
+    { label: '초대장 링크 저장', note: '오프닝 날 입장 확인에 필요해요.' },
+    { label: '편한 신발', note: '서서 둘러보는 시간이 길어요.' },
+    { label: '빈손으로 오세요', note: '음료와 다과는 저희가 준비합니다.' },
+  ],
 };
 
 export function createChecklistItem(

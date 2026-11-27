@@ -16,7 +16,7 @@ describe('체크리스트 항목', () => {
   });
 
   it('초대장 종류별 예시는 모두 이름을 가진다', () => {
-    (['wedding', 'firstBirthday', 'birthday', 'seminar', 'etc', 'bridalShower'] as const).forEach(
+    (['wedding', 'firstBirthday', 'birthday', 'seminar', 'etc', 'bridalShower', 'exhibition'] as const).forEach(
       type => {
         const preset = getChecklistPreset(type);
         expect(preset.length).toBeGreaterThanOrEqual(2);

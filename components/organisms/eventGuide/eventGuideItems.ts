@@ -129,6 +129,26 @@ const PRESETS: Record<InvitationType, Omit<EventGuideItem, 'id'>[]> = {
       place: '',
     },
   ],
+  exhibition: [
+    {
+      title: '작가의 도슨트',
+      description: '작업 순서대로 직접 설명하는 시간입니다.',
+      time: '오프닝 중',
+      place: '전시장 안쪽',
+    },
+    {
+      title: '차와 음악',
+      description: '따뜻한 차를 한 잔 들고 천천히 둘러보세요.',
+      time: '상시',
+      place: '입구 옆 테이블',
+    },
+    {
+      title: '엽서 쓰기',
+      description: '작가에게 한 줄 남겨 주시면 전해 드려요.',
+      time: '상시',
+      place: '창가 자리',
+    },
+  ],
 };
 
 export function createEventGuideItem(

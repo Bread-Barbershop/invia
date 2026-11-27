@@ -11,6 +11,9 @@ import gardenBrunchCover from '@/public/templates/thumbnails/bridalShower_01.web
 import hotelPajamaCover from '@/public/templates/thumbnails/bridalShower_02.webp';
 import whiteRibbonCover from '@/public/templates/thumbnails/bridalShower_03.webp';
 import brunchShowerCover from '@/public/templates/thumbnails/bridalShower_04.webp';
+import popupOpeningCover from '@/public/templates/thumbnails/exhibition_01.webp';
+import bukchonCeramicCover from '@/public/templates/thumbnails/exhibition_02.webp';
+import hannamSalonCover from '@/public/templates/thumbnails/exhibition_03.webp';
 import hanbokCover from '@/public/templates/thumbnails/firstBirthday_03.webp';
 import orchardCover from '@/public/templates/thumbnails/firstBirthday_04.webp';
 import seaCover from '@/public/templates/thumbnails/firstBirthday_05.webp';
@@ -108,6 +111,9 @@ export const showcaseItems = [
   { id: 'showcase-47', image: whiteRibbonCover },
   { id: 'showcase-50', image: brunchShowerCover },
   { id: 'showcase-51', image: exhibitionCover },
+  { id: 'showcase-55', image: popupOpeningCover },
+  { id: 'showcase-56', image: bukchonCeramicCover },
+  { id: 'showcase-57', image: hannamSalonCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

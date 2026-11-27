@@ -28,6 +28,7 @@ const TEMPLATE_TYPES: InvitationTemplateType[] = [
   'firstBirthday',
   'birthday',
   'bridalShower',
+  'exhibition',
   'seminar',
 ];
 

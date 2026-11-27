@@ -27,6 +27,7 @@ describe('블록 추가 패널 분류 정렬', () => {
       'wedding',
       'firstBirthday',
       'seminar',
+      'exhibition',
       'bridalShower',
       'etc',
       'layout',
@@ -36,6 +37,7 @@ describe('블록 추가 패널 분류 정렬', () => {
       'firstBirthday',
       'birthday',
       'seminar',
+      'exhibition',
       'bridalShower',
       'etc',
       'layout',
@@ -51,6 +53,7 @@ describe('블록 추가 패널 분류 정렬', () => {
       'firstBirthday',
       'birthday',
       'seminar',
+      'exhibition',
       'etc',
       'layout',
     ]);
