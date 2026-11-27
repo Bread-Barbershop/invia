@@ -8,6 +8,8 @@ import { getChecklistStorageKey } from '@/components/organisms/checklist/checkli
 
 import type { NormalizedGuestPayload } from '@/app/guest/[id]/validation/parseGuestPayload';
 
+const originalScope = 'original-invitation';
+const copiedScope = 'copied-invitation';
 let mockPathname = '/guest/yaKg';
 
 jest.mock('next/navigation', () => ({
@@ -103,13 +105,20 @@ function asGuestBlocks(...blocks: (typeof checklistBlock)[]): GuestBlock[] {
   return blocks as unknown as GuestBlock[];
 }
 
-async function renderChecklistAt(pathname: string) {
+async function renderChecklistAt(
+  pathname: string,
+  checklistStorageScope = originalScope
+) {
   mockPathname = pathname;
 
   let result!: ReturnType<typeof render>;
   await act(async () => {
     result = render(
-      <GuestRenderer blocks={asGuestBlocks(checklistBlock)} bulkData={bulkData} />
+      <GuestRenderer
+        blocks={asGuestBlocks(checklistBlock)}
+        bulkData={bulkData}
+        checklistStorageScope={checklistStorageScope}
+      />
     );
   });
 
@@ -132,12 +141,38 @@ describe('GuestRenderer 체크리스트', () => {
       expect(checkbox).toBeChecked();
       expect(
         JSON.parse(
-          localStorage.getItem(getChecklistStorageKey(checklistBlock.id)) ??
+          localStorage.getItem(getChecklistStorageKey(originalScope, checklistBlock.id)) ??
             '[]'
         )
       ).toEqual(['a']);
     }
   );
+
+  it('복제한 초대장은 같은 체크리스트 항목도 독립적으로 체크한다', async () => {
+    const user = userEvent.setup();
+    const original = await renderChecklistAt('/guest/original');
+    await user.click(screen.getByRole('checkbox', { name: '명함' }));
+    original.unmount();
+
+    const copy = await renderChecklistAt('/guest/copy', copiedScope);
+    expect(screen.getByRole('checkbox', { name: '명함' })).not.toBeChecked();
+    await user.click(screen.getByRole('checkbox', { name: '필기 도구' }));
+    copy.unmount();
+
+    await renderChecklistAt('/guest/original');
+    expect(screen.getByRole('checkbox', { name: '명함' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '필기 도구' })).not.toBeChecked();
+  });
+
+  it('같은 초대장을 짧은 링크로 다시 열어도 체크 상태를 유지한다', async () => {
+    const user = userEvent.setup();
+    const direct = await renderChecklistAt('/guest/original');
+    await user.click(screen.getByRole('checkbox', { name: '명함' }));
+    direct.unmount();
+
+    await renderChecklistAt('/i/yaKg');
+    expect(screen.getByRole('checkbox', { name: '명함' })).toBeChecked();
+  });
 
   it('편집 화면 경로에서는 체크할 수 없다', async () => {
     await renderChecklistAt('/editor');

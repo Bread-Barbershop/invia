@@ -11,6 +11,7 @@ import { cn } from '@/shared/utils/cn';
 
 import {
   getCheckedItemIdsSnapshot,
+  getChecklistStorageKey,
   getEmptyCheckedItemIdsSnapshot,
   setCheckedItemIds,
   subscribeCheckedItemIds,
@@ -22,6 +23,7 @@ import type { HTMLAttributes } from 'react';
 interface Props extends HTMLAttributes<HTMLDivElement> {
   blockInfo: EditorBlock<'checklist'>;
   isGuestPage?: boolean;
+  checklistStorageScope?: string;
   titleClassName?: string;
 }
 
@@ -30,6 +32,7 @@ export function ChecklistPreview({
   className = '',
   titleClassName,
   isGuestPage = false,
+  checklistStorageScope,
   ...rest
 }: Props) {
   const accentColor = useEditorStore(
@@ -38,27 +41,25 @@ export function ChecklistPreview({
   const items = normalizeChecklistItems(blockInfo.props.items).filter(item =>
     item.label.trim()
   );
-  const storedCheckedIds = useSyncExternalStore(
+  const storageKey =
+    isGuestPage && checklistStorageScope
+      ? getChecklistStorageKey(checklistStorageScope, blockInfo.id)
+      : null;
+  const checkedIds = useSyncExternalStore(
     useCallback(
-      (onChange: () => void) =>
-        subscribeCheckedItemIds(blockInfo.id, onChange),
-      [blockInfo.id]
+      (onChange: () => void) => subscribeCheckedItemIds(storageKey, onChange),
+      [storageKey]
     ),
-    useCallback(
-      () => getCheckedItemIdsSnapshot(blockInfo.id),
-      [blockInfo.id]
-    ),
+    useCallback(() => getCheckedItemIdsSnapshot(storageKey), [storageKey]),
     getEmptyCheckedItemIdsSnapshot
   );
-  // 편집 화면에서는 저장된 체크 상태를 숨기고 하객만 직접 체크한다.
-  const checkedIds = isGuestPage ? storedCheckedIds : [];
 
   const toggle = (itemId: string) => {
-    if (!isGuestPage) return;
+    if (!storageKey) return;
     const next = checkedIds.includes(itemId)
       ? checkedIds.filter(id => id !== itemId)
       : [...checkedIds, itemId];
-    setCheckedItemIds(blockInfo.id, next);
+    setCheckedItemIds(storageKey, next);
   };
 
   const checkedSet = new Set(checkedIds);
@@ -130,7 +131,7 @@ export function ChecklistPreview({
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      disabled={!isGuestPage}
+                      disabled={!storageKey}
                       onChange={() => toggle(item.id)}
                       className="peer sr-only"
                     />

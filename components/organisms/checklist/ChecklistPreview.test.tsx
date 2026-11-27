@@ -6,6 +6,7 @@ import type { EditorBlock } from '@/shared/types/block';
 import { getChecklistStorageKey } from './checklistChecks';
 import { ChecklistPreview } from './ChecklistPreview';
 
+const checklistStorageScope = 'invitation-scope';
 const block: EditorBlock<'checklist'> = {
   id: 'check-1',
   component: 'checklist',
@@ -51,12 +52,20 @@ describe('체크리스트 블록', () => {
 
     await user.click(screen.getByText('명함'));
     expect(checkboxes[0]).not.toBeChecked();
-    expect(localStorage.getItem(getChecklistStorageKey(block.id))).toBeNull();
+    expect(
+      localStorage.getItem(getChecklistStorageKey(checklistStorageScope, block.id))
+    ).toBeNull();
   });
 
   it('하객 화면에서는 체크 상태가 진행률에 반영되고 기기에 저장된다', async () => {
     const user = userEvent.setup();
-    render(<ChecklistPreview blockInfo={block} isGuestPage />);
+    render(
+      <ChecklistPreview
+        blockInfo={block}
+        isGuestPage
+        checklistStorageScope={checklistStorageScope}
+      />
+    );
 
     const [first, second] = screen.getAllByRole('checkbox');
     await user.click(first);
@@ -66,7 +75,9 @@ describe('체크리스트 블록', () => {
       '1'
     );
     expect(
-      JSON.parse(localStorage.getItem(getChecklistStorageKey(block.id)) ?? '[]')
+      JSON.parse(
+        localStorage.getItem(getChecklistStorageKey(checklistStorageScope, block.id)) ?? '[]'
+      )
     ).toEqual(['a']);
 
     await user.click(second);
@@ -82,9 +93,18 @@ describe('체크리스트 블록', () => {
   });
 
   it('저장된 체크 상태를 다시 열 때 복원한다', async () => {
-    localStorage.setItem(getChecklistStorageKey(block.id), JSON.stringify(['b']));
+    localStorage.setItem(
+      getChecklistStorageKey(checklistStorageScope, block.id),
+      JSON.stringify(['b'])
+    );
 
-    render(<ChecklistPreview blockInfo={block} isGuestPage />);
+    render(
+      <ChecklistPreview
+        blockInfo={block}
+        isGuestPage
+        checklistStorageScope={checklistStorageScope}
+      />
+    );
 
     await waitFor(() =>
       expect(screen.getAllByRole('checkbox')[1]).toBeChecked()

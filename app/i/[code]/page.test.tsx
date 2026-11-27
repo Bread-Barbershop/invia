@@ -66,6 +66,7 @@ describe('ShortGuestPage', () => {
     loadGuestPayloadMock.mockResolvedValue({
       status: 'ok',
       payload,
+      checklistStorageScope: 'invitation-scope',
       warnings: [],
     });
   });
@@ -81,6 +82,7 @@ describe('ShortGuestPage', () => {
     expect(guestInvitationViewMock).toHaveBeenCalledWith({
       payload,
       mode: 'guest',
+      checklistStorageScope: 'invitation-scope',
     });
     expect(html).toContain('data-testid="short-guest-view"');
     expect(notFoundMock).not.toHaveBeenCalled();

@@ -61,6 +61,7 @@ function GuestRenderer({
   bulkData,
   renderHints,
   activePrivacyFields,
+  checklistStorageScope,
   isGuestPage: isGuestPageOverride,
   showVisualEffects = true,
   renderBlock,
@@ -69,6 +70,7 @@ function GuestRenderer({
   bulkData: GuestRendererBulkData;
   renderHints?: GuestRendererRenderHints;
   activePrivacyFields?: NormalizedGuestPayload['activePrivacyFields'];
+  checklistStorageScope?: string;
   isGuestPage?: boolean;
   showVisualEffects?: boolean;
   renderBlock?: (
@@ -171,6 +173,7 @@ function GuestRenderer({
           className?: string;
           isGuestPage?: boolean;
           hideActions?: boolean;
+          checklistStorageScope?: string;
         }>;
 
         const hideActions = block.component === 'account'
@@ -185,6 +188,9 @@ function GuestRenderer({
               blockInfo={block}
               className=""
               {...(hideActions ? { hideActions: true } : {})}
+              {...(isGuestPage && block.component === 'checklist' && checklistStorageScope
+                ? { checklistStorageScope }
+                : {})}
               {...(isGuestPage && GUEST_PAGE_PROP_COMPONENTS.has(block.component)
                 ? { isGuestPage: true }
                 : {})}

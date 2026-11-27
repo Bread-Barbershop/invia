@@ -14,15 +14,15 @@ function getStorage(): Storage | null {
   }
 }
 
-export function getChecklistStorageKey(blockId: string) {
-  return `${STORAGE_PREFIX}${blockId}`;
+export function getChecklistStorageKey(scope: string, blockId: string) {
+  return `${STORAGE_PREFIX}${scope}:${blockId}`;
 }
 
-function readRaw(blockId: string): string | null {
+function readRaw(storageKey: string): string | null {
   const storage = getStorage();
   if (!storage) return null;
   try {
-    return storage.getItem(getChecklistStorageKey(blockId));
+    return storage.getItem(storageKey);
   } catch {
     return null;
   }
@@ -41,20 +41,21 @@ function parseIds(raw: string | null): string[] {
   }
 }
 
-function notify(blockId: string) {
-  listeners.get(blockId)?.forEach(listener => listener());
+function notify(storageKey: string) {
+  listeners.get(storageKey)?.forEach(listener => listener());
 }
 
 export function subscribeCheckedItemIds(
-  blockId: string,
+  storageKey: string | null,
   onChange: () => void
 ): () => void {
-  const set = listeners.get(blockId) ?? new Set<() => void>();
+  if (!storageKey) return () => {};
+  const set = listeners.get(storageKey) ?? new Set<() => void>();
   set.add(onChange);
-  listeners.set(blockId, set);
+  listeners.set(storageKey, set);
   return () => {
     set.delete(onChange);
-    if (set.size === 0) listeners.delete(blockId);
+    if (set.size === 0) listeners.delete(storageKey);
   };
 }
 
@@ -62,14 +63,15 @@ export function subscribeCheckedItemIds(
  * useSyncExternalStore용 스냅샷. 같은 저장값이면 같은 배열을 돌려줘
  * 렌더링이 반복되지 않게 한다.
  */
-export function getCheckedItemIdsSnapshot(blockId: string): string[] {
-  const override = sessionOverrides.get(blockId);
+export function getCheckedItemIdsSnapshot(storageKey: string | null): string[] {
+  if (!storageKey) return EMPTY_CHECKED_IDS;
+  const override = sessionOverrides.get(storageKey);
   if (override) return override;
-  const raw = readRaw(blockId);
-  const cached = snapshots.get(blockId);
+  const raw = readRaw(storageKey);
+  const cached = snapshots.get(storageKey);
   if (cached && cached.raw === raw) return cached.value;
   const value = parseIds(raw);
-  snapshots.set(blockId, { raw, value });
+  snapshots.set(storageKey, { raw, value });
   return value;
 }
 
@@ -77,23 +79,23 @@ export function getEmptyCheckedItemIdsSnapshot(): string[] {
   return EMPTY_CHECKED_IDS;
 }
 
-export function setCheckedItemIds(blockId: string, ids: string[]) {
+export function setCheckedItemIds(storageKey: string, ids: string[]) {
   const raw = JSON.stringify(ids);
   const storage = getStorage();
   let stored = false;
   if (storage) {
     try {
-      storage.setItem(getChecklistStorageKey(blockId), raw);
+      storage.setItem(storageKey, raw);
       stored = true;
     } catch {
       // 저장 공간을 쓸 수 없으면 이번 화면에서만 체크 상태를 유지한다.
     }
   }
   if (stored) {
-    sessionOverrides.delete(blockId);
-    snapshots.set(blockId, { raw, value: ids });
+    sessionOverrides.delete(storageKey);
+    snapshots.set(storageKey, { raw, value: ids });
   } else {
-    sessionOverrides.set(blockId, ids);
+    sessionOverrides.set(storageKey, ids);
   }
-  notify(blockId);
+  notify(storageKey);
 }

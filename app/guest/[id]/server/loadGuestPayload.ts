@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { createHash } from 'node:crypto';
+
 import { cache } from 'react';
 
 import { applyInvitationPrivacy } from '@/features/invitation/privacy/applyInvitationPrivacy';
@@ -18,6 +20,7 @@ export type LoadGuestPayloadResult =
   | {
       status: 'ok';
       payload: NormalizedGuestPayload;
+      checklistStorageScope: string;
       warnings: GuestPayloadWarning[];
     }
   | {
@@ -136,6 +139,8 @@ export const loadGuestPayload = cache(
     return {
       status: 'ok',
       payload: applyInvitationPrivacy(parsed.payload),
+      // 같은 공개 파일을 여는 링크끼리 진행 상태를 공유한다. Drive 파일 ID는 서버에 둔다.
+      checklistStorageScope: createHash('sha256').update(id).digest('base64url'),
       warnings: parsed.warnings,
     };
   }
