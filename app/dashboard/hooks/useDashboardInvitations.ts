@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { DASHBOARD_LOAD_ERROR_FALLBACK } from '@/app/dashboard/dashboardErrorMessages';
 import {
   DeleteInvitationResponse,
   InvitationVisibilityResult,
@@ -72,10 +73,24 @@ function useDashboardInvitations(
   const normalizedInitialInvites = normalizeInvites(initialInvites);
 
   const [loading, setLoading] = useState(loadOnMount);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<InviteListItem[]>(
     normalizedInitialInvites
   );
+  // 카드 자리를 스켈레톤으로 바꾸는 건 보여 줄 카드도, 실패 안내도 없을 때뿐이다.
+  // 이미 보이는 초대장이나 오류 카드가 있으면 그 화면을 유지한 채 결과만 반영한다.
+  const visibleStateRef = useRef({
+    hasInvites: normalizedInitialInvites.length > 0,
+    hasError: false,
+  });
+
+  useEffect(() => {
+    visibleStateRef.current = {
+      hasInvites: invites.length > 0,
+      hasError: Boolean(error),
+    };
+  }, [invites, error]);
   const clonedFolderIdsRef = useRef(new Set<string>());
   const listVersionsRef = useRef({
     requested: 0,
@@ -157,8 +172,10 @@ function useDashboardInvitations(
 
   const loadInvitations = useCallback(async () => {
     const version = ++listVersionsRef.current.requested;
-    setLoading(true);
-    setError(null);
+    setRefreshing(true);
+    if (!visibleStateRef.current.hasInvites && !visibleStateRef.current.hasError) {
+      setLoading(true);
+    }
 
     try {
       const res = await fetch('/api/drive/loadInvitation', {
@@ -188,7 +205,7 @@ function useDashboardInvitations(
       }
 
       if (!res.ok) {
-        throw new Error(payloadMessage ?? '초대장 목록을 불러오지 못했습니다.');
+        throw new Error(payloadMessage ?? DASHBOARD_LOAD_ERROR_FALLBACK);
       }
 
       const loadedInvites = normalizeInvites(
@@ -200,6 +217,7 @@ function useDashboardInvitations(
         : loadedInvites;
 
       replaceInvites(nextInvites, version);
+      setError(null);
       setDeleteBusy({});
       setDeleteErrors({});
       setVisibilityBusy({});
@@ -212,17 +230,19 @@ function useDashboardInvitations(
       listVersionsRef.current.applied = version;
       listVersionsRef.current.folderIds = new Set();
       console.error(err);
-      setInvites([]);
-      setDeleteBusy({});
-      setDeleteErrors({});
-      resetInvitationResultState();
-      setVisibilityBusy({});
-      setVisibilityErrors({});
+      // 보이던 초대장은 실패 때문에 지우지 않는다.
+      // 목록이 비어 있던 첫 로딩 실패만 오류 카드로 안내하고,
+      // 이미 카드가 있으면 새로 고침 실패 안내를 띄운 채 목록을 유지한다.
       setError(
-        err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.'
+        err instanceof TypeError
+          ? DASHBOARD_LOAD_ERROR_FALLBACK
+          : err instanceof Error && err.message
+            ? err.message
+            : DASHBOARD_LOAD_ERROR_FALLBACK
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [
     abortAllReadinessPolling,
@@ -910,6 +930,7 @@ function useDashboardInvitations(
   return {
     invites,
     loading,
+    refreshing,
     error,
     loadInvitations,
     refreshInvitation,
