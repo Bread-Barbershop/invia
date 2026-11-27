@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 
-import { Image } from '@/components/atoms/image';
+import { GalleryImage } from '@/components/organisms/gallery/components/GalleryImage';
 import GalleryNavButtons from '@/components/organisms/gallery/components/GalleryNavButtons';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { cn } from '@/shared/utils/cn';
@@ -209,13 +209,15 @@ export const PicturePopViewer = ({
                 key={idx}
                 className="flex-[0_0_100%] min-w-0 relative h-full flex items-center justify-center select-none"
               >
-                <Image
+                {/* 현재 사진과 양옆 사진은 미리 불러와 넘길 때 비지 않게 합니다. */}
+                <GalleryImage
                   src={src}
                   alt={`팝업 이미지 ${idx + 1}`}
-                  fill
-                  className="object-cover select-none pointer-events-none"
-                  draggable={false}
-                  priority={idx === selectedIndex}
+                  loading={
+                    Math.abs(idx - selectedIndex) <= 1 ? 'eager' : 'lazy'
+                  }
+                  fetchPriority={idx === selectedIndex ? 'high' : 'auto'}
+                  className="object-cover select-none"
                 />
               </div>
             ))}

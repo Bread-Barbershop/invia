@@ -39,7 +39,7 @@ function LeftPanel() {
         {isEdit ? (
           <button
             type="button"
-            className="flex-center relative w-full h-full font-semibold"
+            className="flex-center relative w-full h-full rounded-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             onClick={() => setIsEdit(false)}
           >
             상세 편집

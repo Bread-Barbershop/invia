@@ -3,7 +3,6 @@ import AutoScroll from 'embla-carousel-auto-scroll';
 import useEmblaCarousel from 'embla-carousel-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { Image } from '@/components/atoms/image';
 import { cn } from '@/shared/utils/cn';
 
 import { GalleryItemVariants } from '../GalleryCarouselType';
@@ -11,6 +10,8 @@ import { useGallerySwipeClick } from '../hooks/useGallerySwipeClick';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { GalleryTemplateProps } from '../types/galleryType';
 import { createInfiniteSlides } from '../utils/createInfiniteSlides';
+
+import { GalleryImage } from './GalleryImage';
 
 function GalleryType5({
   imageClick,
@@ -106,12 +107,10 @@ function GalleryType5({
                 }}
                 onClick={e => handleCardClick(i % preview.length, e)}
               >
-                <Image
+                <GalleryImage
                   src={src}
                   alt={`slide-${i % preview.length}`}
-                  fill
-                  className="object-cover pointer-events-none select-none"
-                  draggable={false}
+                  className="object-cover"
                 />
               </div>
             </div>

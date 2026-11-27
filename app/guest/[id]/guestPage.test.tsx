@@ -222,6 +222,7 @@ describe('GuestPage 서버 컴포넌트 테스트', () => {
       blocks: validGuestPayload.blocks,
       bulkData: validGuestPayload.bulkData,
       isGuestPage: true,
+      checklistStorageScope: expect.stringMatching(/^[\w-]{43}$/),
       renderHints: undefined,
     });
 
@@ -283,6 +284,7 @@ describe('GuestPage 서버 컴포넌트 테스트', () => {
         isZoom: false,
       },
       isGuestPage: true,
+      checklistStorageScope: expect.stringMatching(/^[\w-]{43}$/),
       renderHints: undefined,
     });
   });
@@ -315,6 +317,7 @@ describe('GuestPage 서버 컴포넌트 테스트', () => {
         isZoom: false,
       },
       isGuestPage: true,
+      checklistStorageScope: expect.stringMatching(/^[\w-]{43}$/),
       renderHints: payloadWithRenderHints.renderHints,
     });
   });

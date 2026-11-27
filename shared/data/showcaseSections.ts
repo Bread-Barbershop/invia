@@ -8,17 +8,10 @@ import type { NoticePresetId } from '@/components/organisms/notice/noticeList';
 import type { CalendarCardType } from '@/shared/data/template/componentTemplate';
 
 export type ShowcaseSection =
-  | { component: 'greeting'; title?: string; subTitle?: string }
-  | {
-      component: 'calendar';
-      title: string;
-      subTitle?: string;
-      template?: `calendarType${1 | 2 | 3 | 4 | 5}` | CalendarCardType;
-    }
   | {
       component: 'countdown';
       title: string;
-      eventDateTime: string;
+      eventDateTime?: string;
       onDayMessage?: string;
       afterMessage?: string;
     }
@@ -28,10 +21,27 @@ export type ShowcaseSection =
       subTitle?: string;
       detail?: string;
       address?: string;
-      tel?: string;
       lat?: number;
       lng?: number;
+      tel?: string;
       openNavi?: boolean;
+    }
+  | {
+      component: 'account';
+      title: string;
+      message?: string;
+      groups: {
+        name: string;
+        accounts: { name: string; bank: string; account: string }[];
+      }[];
+    }
+  | {
+      component: 'myFamilyWedding';
+      title?: string;
+      groomFamilySuffix?: string;
+      brideFamilySuffix?: string;
+      groomFamily: { relation: string; name: string }[];
+      brideFamily: { relation: string; name: string }[];
     }
   | { component: 'closingComment'; message: string }
   | { component: 'coupleIntroduction'; title: string; story: string }

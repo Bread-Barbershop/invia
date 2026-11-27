@@ -29,6 +29,8 @@ import { Popup } from '../popup/Popup';
 import { NaverMapScript } from './NaverMapScript';
 import { hasPlaceCoordinates } from './placeCoordinates';
 import { PlaceMap } from './PlaceMap';
+import { SketchMapModeTabs, SketchMapPanel } from './sketch/SketchMapPanel';
+import { resolvePlaceSketchProps } from './sketch/sketchOptionsModel';
 interface Props {
   blockInfo: EditorBlock<'place'>;
   id: string;
@@ -70,6 +72,8 @@ export function Place({ blockInfo, id }: Props) {
   } = blockInfo.props;
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const fieldCopy = getPlaceFieldCopy(blockInfo.type);
+  const sketchProps = resolvePlaceSketchProps(blockInfo.props);
+  const isSketchMode = sketchProps.mapStyle === 'sketch';
 
   const closeAddressSearch = () => {
     geocodeRequest.current += 1;
@@ -184,6 +188,7 @@ export function Place({ blockInfo, id }: Props) {
               wrapperClassName="max-w-[480px] h-[640px]"
             >
               <DaumPostcode
+                scriptUrl="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
                 defaultQuery={submittedQuery}
                 onComplete={data => {
                   searchAddress(data.address);
@@ -264,15 +269,17 @@ export function Place({ blockInfo, id }: Props) {
             </div>
             {openMap && (
               <div className="flex flex-col gap-1.5 pl-2 border-l-2 border-gray-200">
-                <Checkbox
-                  direction="right"
-                  onChange={() => handleUpdateBlock('mapLocked', !mapLocked)}
-                  checked={Boolean(mapLocked)}
-                >
-                  <span className="text-[13px]">
-                    지도 고정 (지도가 움직이지 않아요.)
-                  </span>
-                </Checkbox>
+                {!isSketchMode && (
+                  <Checkbox
+                    direction="right"
+                    onChange={() => handleUpdateBlock('mapLocked', !mapLocked)}
+                    checked={Boolean(mapLocked)}
+                  >
+                    <span className="text-[13px]">
+                      지도 고정 (지도가 움직이지 않아요.)
+                    </span>
+                  </Checkbox>
+                )}
                 <Checkbox
                   direction="right"
                   onChange={() => handleUpdateBlock('openNavi', !openNavi)}
@@ -287,9 +294,24 @@ export function Place({ blockInfo, id }: Props) {
           </div>
         </section>
         {openMap && (
-          <div className="flex w-full flex-col gap-1">
-            {isScriptLoaded && hasPlaceCoordinates(lng, lat) && (
-              <PlaceMap lng={lng} lat={lat} locked={Boolean(mapLocked)} />
+          <div className="flex w-full flex-col gap-1.5">
+            <SketchMapModeTabs
+              value={sketchProps.mapStyle}
+              onChange={value => handleUpdateBlock('mapStyle', value)}
+            />
+            {isSketchMode ? (
+              <SketchMapPanel
+                lat={lat}
+                lng={lng}
+                venueLabel={placeName || placeAddress}
+                props={sketchProps}
+                onChange={patch => updateBlock(id, patch)}
+              />
+            ) : (
+              isScriptLoaded &&
+              hasPlaceCoordinates(lng, lat) && (
+                <PlaceMap lng={lng} lat={lat} locked={Boolean(mapLocked)} />
+              )
             )}
           </div>
         )}

@@ -13,6 +13,11 @@ import {
   useFabricViewContext,
 } from '@/widgets/mainPoster/context/FabricContext';
 
+import {
+  PREVIEW_SHORTCUT_ARIA_KEYS,
+  usePreviewShortcut,
+} from '../hooks/usePreviewShortcut';
+
 export default function InvitationPreviewButton() {
   const { canvas } = useFabricViewContext();
   const { exportCanvasPreview } = useFabricActionsContext();
@@ -36,7 +41,7 @@ export default function InvitationPreviewButton() {
     setPreview('closed');
   }, [release]);
 
-  const open = () => {
+  const open = useCallback(() => {
     if (frameRef.current !== null || resourceRef.current) return;
     setPreview('preparing');
 
@@ -57,7 +62,12 @@ export default function InvitationPreviewButton() {
         }
       });
     });
-  };
+  }, [bgmPlayer, exportCanvasPreview, release]);
+
+  usePreviewShortcut({
+    onOpen: open,
+    enabled: Boolean(canvas) && preview !== 'preparing',
+  });
 
   return (
     <>
@@ -65,8 +75,10 @@ export default function InvitationPreviewButton() {
         type="button"
         disabled={!canvas}
         aria-haspopup="dialog"
+        aria-keyshortcuts={PREVIEW_SHORTCUT_ARIA_KEYS}
+        title="미리보기 (Ctrl+Enter)"
         onClick={open}
-        className="w-full h-11 bg-white rounded-lg shadow-edit flex-center text-sm font-semibold transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-11 bg-white rounded-lg shadow-edit flex-center text-sm font-semibold transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
         미리보기
       </button>

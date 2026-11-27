@@ -1,5 +1,7 @@
 import { Button } from '@/components/atoms/button';
 
+import type { AccountEntry } from '../Account.schema';
+
 export const GroupEdit = ({
   handleUpdateBlock,
   totalGroupList,
@@ -12,16 +14,11 @@ export const GroupEdit = ({
       | number
       | boolean
       | { name: string }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[][]
+      | AccountEntry[]
+      | AccountEntry[][]
   ) => void;
   totalGroupList: { name: string }[];
-  totalAccountList: {
-    name: string;
-    bank: string;
-    account: string;
-    kakao: boolean;
-  }[][];
+  totalAccountList: AccountEntry[][];
 }) => {
   const handleDeleteGroup = (groupIndex: number) => {
     if (totalGroupList.length <= 1) return;

@@ -45,14 +45,19 @@ function EditorUpdate({ folderId, uuid }: Props) {
   }, [reset, resetBgm]);
 
   useEffect(() => {
-    if (savedData) {
-      (async () => {
-        initBulkData();
-        await initEditStore();
-        initBgmStore();
-        setIsStoreReady(true);
-      })();
-    }
+    if (!savedData) return;
+
+    const controller = new AbortController();
+    void (async () => {
+      initBulkData();
+      await initEditStore(controller.signal);
+      if (controller.signal.aborted) return;
+
+      initBgmStore();
+      setIsStoreReady(true);
+    })();
+
+    return () => controller.abort();
   }, [savedData, initEditStore, initBgmStore, initBulkData]);
 
   useEditorDirtyTracker(isStoreReady);

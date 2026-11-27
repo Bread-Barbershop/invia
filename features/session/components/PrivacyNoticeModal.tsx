@@ -2,12 +2,24 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 import NoticeConfirmButton from '@/components/atoms/button/NoticeConfirmButton';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
-import { disableBodyScroll } from '@/shared/utils/focusTrap';
+import {
+  disableBodyScroll,
+  getHiddenRoot,
+  removeHiddenRoot,
+  trapFocus,
+} from '@/shared/utils/focusTrap';
 
 type PrivacyNoticeModalProps = {
   open: boolean;
@@ -35,25 +47,44 @@ function PrivacyNoticeModal({
     onClose();
   }, [onClose]);
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(handleClose);
+  const onEscape = useEffectEvent(handleClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
 
   useEffect(() => {
-    if (!open) return;
+    const dialog = dialogRef.current;
+    if (!open || !mounted || !dialog) return;
 
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const enableRestore = disableBodyScroll();
+    // 안내가 열린 동안 뒤 화면은 스크린리더와 키보드 탐색에서 제외한다.
+    getHiddenRoot();
+
+    // 열자마자 제목과 설명이 읽히도록 대화상자 자체로 포커스를 옮긴다.
+    dialog.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onEscape();
+        return;
+      }
 
-      event.preventDefault();
-      handleClose();
+      trapFocus(event, dialog);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       enableRestore();
+      removeHiddenRoot();
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
-  }, [handleClose, open]);
+  }, [mounted, open]);
 
   if (!mounted) return null;
 
@@ -69,9 +100,13 @@ function PrivacyNoticeModal({
           {...backdropDismiss}
         >
           <motion.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            className="max-h-[calc(100dvh-40px)] max-w-[calc(100vw-40px)] rounded-xl text-left shadow-[0_24px_60px_-20px_rgb(0_0_0_/_12%),0_8px_24px_-8px_rgb(0_0_0_/_18%)]"
+            aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+            tabIndex={-1}
+            className="max-h-[calc(100dvh-40px)] max-w-[calc(100vw-40px)] rounded-xl text-left outline-none shadow-[0_24px_60px_-20px_rgb(0_0_0_/_12%),0_8px_24px_-8px_rgb(0_0_0_/_18%)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -84,13 +119,17 @@ function PrivacyNoticeModal({
               }`}
             >
               <div
-                className={`min-h-0 w-fit max-w-full flex-1 overflow-y-auto overscroll-contain font-pretendard font-medium text-text-plain ${
+                role="region"
+                aria-label="개인정보 안내 내용"
+                tabIndex={0}
+                className={`min-h-0 w-fit max-w-full flex-1 overflow-y-auto overscroll-contain font-pretendard font-medium text-text-plain focus-visible:outline-2 focus-visible:outline-offset-2 ${
                   isMobileHome
                     ? 'px-0 py-0 text-[13px] leading-[18px]'
                     : 'px-0 py-5 text-[14px] leading-5 sm:px-10'
                 }`}
               >
                 <h2
+                  id={titleId}
                   className={
                     isMobileHome
                       ? 'mb-5 text-center text-[20px] font-bold leading-7'
@@ -99,7 +138,7 @@ function PrivacyNoticeModal({
                 >
                   {isMobileHome ? '안심하고 이용하세요.' : '안심하고 이용하세요'}
                 </h2>
-                <p className="mb-5">
+                <p id={descriptionId} className="mb-5">
                   이 모바일 청첩장 프로젝트는 누구나 쉽게 사용할 수 있도록{' '}
                   <span className="text-[#1F72EF]">무료로 제공</span>되고
                   있어요.

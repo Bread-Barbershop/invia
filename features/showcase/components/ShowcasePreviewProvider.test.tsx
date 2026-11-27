@@ -71,6 +71,8 @@ describe('초대장 카드 미리보기', () => {
     await user.click(screen.getByRole('button', { name: '다음 초대장' }));
     expectCurrentInvitation('포레 온실 브런치 샤워', 'showcase-50');
     await user.click(screen.getByRole('button', { name: '다음 초대장' }));
+    expectCurrentInvitation('빛이 머문 방', 'showcase-51');
+    await user.click(screen.getByRole('button', { name: '다음 초대장' }));
     expectCurrentInvitation('클래식 모먼트', 'showcase-0');
   });
 

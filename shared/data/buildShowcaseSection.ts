@@ -7,6 +7,9 @@ import type { ShowcaseInvitation } from './showcaseInvitations';
 import type { ShowcaseSection } from './showcaseSections';
 import type { JSONContent } from '@tiptap/core';
 
+// 주소를 따로 지정하지 않은 예시 초대장이 쓰는 기본 예식장 주소.
+const FALLBACK_VENUE_ADDRESS = '서울 강남구 테헤란로1길 19';
+
 function richText(...paragraphs: string[]) {
   const messageJson: JSONContent = {
     type: 'doc',
@@ -53,7 +56,7 @@ export function buildShowcaseSection(
     case 'countdown':
       return block('countdown', {
         title: section.title,
-        eventDateTime: section.eventDateTime,
+        eventDateTime: section.eventDateTime ?? `${design.date}T${design.time}`,
         onDayMessage: section.onDayMessage ?? '오늘은 특별한 날입니다!',
         afterMessage: section.afterMessage ?? '함께해 주셔서 감사합니다.',
       });
@@ -72,19 +75,64 @@ export function buildShowcaseSection(
         showDday: false,
       });
     }
-    case 'place':
+    case 'place': {
+      const address =
+        section.address ?? design.venueAddress ?? FALLBACK_VENUE_ADDRESS;
+      const lat = section.lat ?? design.venueLat;
+      const lng = section.lng ?? design.venueLng;
+      const hasCoordinates = typeof lat === 'number' && typeof lng === 'number';
+      const tel = section.tel ?? design.venueTel;
       return block('place', {
         title: section.title,
         subTitle: section.subTitle ?? 'LOCATION',
         checkedSubTitle: !!section.subTitle,
         placeName: design.venue,
-        placeAddress: section.address ?? '서울 강남구 테헤란로1길 19',
+        placeAddress: address,
         placeDetail: section.detail ?? '',
-        placeTel: section.tel ?? '',
-        openMap: !!(section.lat && section.lng),
-        openNavi: section.openNavi ?? false,
-        lat: section.lat ?? 0,
-        lng: section.lng ?? 0,
+        ...(hasCoordinates && {
+          lat,
+          lng,
+          openMap: true,
+          openNavi: section.openNavi ?? true,
+        }),
+        ...(tel && { placeTel: tel, checkedPlaceTel: true }),
+      });
+    }
+    case 'account': {
+      const message = section.message ? richText(section.message) : null;
+      return block('account', {
+        title: section.title,
+        checkedSubTitle: false,
+        ...(message
+          ? message
+          : { messageJson: null, messageHtml: null }),
+        groupList: section.groups.map(group => ({ name: group.name })),
+        accountList: section.groups.map(group =>
+          group.accounts.map(account => ({ ...account }))
+        ),
+      });
+    }
+    case 'myFamilyWedding':
+      return block('myFamilyWedding', {
+        title: section.title ?? '',
+        ...(section.groomFamilySuffix && {
+          groomFamilySuffix: section.groomFamilySuffix,
+        }),
+        ...(section.brideFamilySuffix && {
+          brideFamilySuffix: section.brideFamilySuffix,
+        }),
+        groomFamily: section.groomFamily.map((member, i) => ({
+          id: `${id}-groom-${i}`,
+          relation: member.relation,
+          name: member.name,
+          flower: false,
+        })),
+        brideFamily: section.brideFamily.map((member, i) => ({
+          id: `${id}-bride-${i}`,
+          relation: member.relation,
+          name: member.name,
+          flower: false,
+        })),
       });
     case 'closingComment':
       return block('closingComment', richText(section.message));

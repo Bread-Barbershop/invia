@@ -1,4 +1,7 @@
-import { shouldIgnoreEditorShortcut } from './editorShortcutGuard';
+import {
+  isEditorShortcutBlocked,
+  shouldIgnoreEditorShortcut,
+} from './editorShortcutGuard';
 
 describe('편집기 단축키 입력 보호', () => {
   const originalInnerWidth = window.innerWidth;
@@ -115,5 +118,46 @@ describe('편집기 단축키 입력 보호', () => {
 
     dialog.open = false;
     expect(shouldIgnoreEditorShortcut(createKeyEvent())).toBe(false);
+  });
+
+  it('수정키 조합 단축키는 수정키가 있어도 다른 방해 요인이 없으면 허용한다', () => {
+    expect(isEditorShortcutBlocked(createKeyEvent({ ctrlKey: true }))).toBe(
+      false
+    );
+    expect(isEditorShortcutBlocked(createKeyEvent({ altKey: true }))).toBe(
+      false
+    );
+  });
+
+  it('수정키 조합 단축키도 입력 중이거나 팝업이 열려 있으면 막는다', () => {
+    window.innerWidth = 1280;
+    expect(isEditorShortcutBlocked(createKeyEvent({ ctrlKey: true }))).toBe(
+      true
+    );
+
+    window.innerWidth = 1440;
+    const popup = document.createElement('div');
+    popup.setAttribute('role', 'menu');
+    popup.dataset.shortcutGuardTest = 'true';
+    document.body.append(popup);
+
+    expect(isEditorShortcutBlocked(createKeyEvent({ ctrlKey: true }))).toBe(
+      true
+    );
+  });
+
+  it('수정키 조합 단축키도 입력 가능한 요소 안에서는 막는다', () => {
+    const input = document.createElement('input');
+    input.dataset.shortcutGuardTest = 'true';
+    document.body.append(input);
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'd',
+      ctrlKey: true,
+      bubbles: true,
+    });
+    input.dispatchEvent(event);
+
+    expect(isEditorShortcutBlocked(event)).toBe(true);
   });
 });

@@ -4,6 +4,8 @@ import { HTMLAttributes, useState } from 'react';
 
 import { MiddlePreviewWrapper } from '@/components/organisms/wrapper/MiddlePreviewWrapper';
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
+import { resolveSketchPalette } from '@/shared/map/sketch/palettes';
+import { matchesSketchMapSettings } from '@/shared/map/sketch/sketchTypes';
 import type { EditorBlock } from '@/shared/types/block';
 import { formatPhoneNumber } from '@/shared/utils/phoneNumber';
 import {
@@ -15,6 +17,9 @@ import { NaverMapScript } from './NaverMapScript';
 import { Navigation } from './Navigation';
 import { hasPlaceCoordinates } from './placeCoordinates';
 import { PlaceMap } from './PlaceMap';
+import { SketchErrorBoundary } from './sketch/SketchErrorBoundary';
+import { SketchMapSvg } from './sketch/SketchMapSvg';
+import { resolvePlaceSketchProps } from './sketch/sketchOptionsModel';
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   blockInfo: EditorBlock<'place'>;
@@ -42,7 +47,19 @@ export const PlacePreview = ({
     checkedPlaceTel = false,
     mapLocked,
   } = blockInfo.props;
-  const showMap = blockInfo.props.openMap && hasPlaceCoordinates(blockInfo.props.lng, blockInfo.props.lat);
+  const { lat, lng } = blockInfo.props;
+  const showMap = blockInfo.props.openMap && hasPlaceCoordinates(lng, lat);
+  const sketchProps = resolvePlaceSketchProps(blockInfo.props);
+  const currentSketch =
+    sketchProps.mapStyle === 'sketch' &&
+    matchesSketchMapSettings(sketchProps.sketch, {
+      lat,
+      lng,
+      radius: sketchProps.sketchRadius,
+      density: sketchProps.sketchDensity,
+    })
+      ? sketchProps.sketch
+      : null;
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const { fontFamily, fontSize } = useBodyFontInfo();
   const detailStyle = {
@@ -78,7 +95,21 @@ export const PlacePreview = ({
         </p>
       )}
 
-      {showMap && isScriptLoaded && (
+      {showMap && currentSketch && (
+        <SketchErrorBoundary label="preview" fallback={null}>
+          <SketchMapSvg
+            data={currentSketch}
+            palette={resolveSketchPalette(sketchProps.sketchPalette)}
+            showStations={sketchProps.sketchShowStations}
+            showVenueLabel={sketchProps.sketchShowLabel}
+            showScale={sketchProps.sketchShowScale}
+            venueLabel={placeName || placeAddress}
+            className="overflow-hidden rounded-lg"
+          />
+        </SketchErrorBoundary>
+      )}
+
+      {showMap && !currentSketch && isScriptLoaded && (
         <PlaceMap
           lng={blockInfo.props.lng}
           lat={blockInfo.props.lat}

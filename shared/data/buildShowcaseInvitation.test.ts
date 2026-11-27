@@ -13,7 +13,7 @@ import {
 
 describe('첫 화면 초대장 샘플', () => {
   it('모든 카드가 고유한 본문과 일대일로 연결된다', () => {
-    expect(showcaseItems).toHaveLength(51);
+    expect(showcaseItems).toHaveLength(52);
     expect(SHOWCASE_INVITATIONS).toHaveLength(showcaseItems.length);
     expect(new Set(SHOWCASE_INVITATIONS.map(item => item.id)).size).toBe(
       showcaseItems.length
@@ -74,14 +74,15 @@ describe('첫 화면 초대장 샘플', () => {
       ids.map(id => ({ id: `showcase-${id}`, previousCount }))
     )
   )(
-    '$id의 본문은 첫 판의 $previousCount개 블록에서 3~5개 늘어난다',
+    '$id의 본문은 첫 판의 $previousCount개 블록에서 3개 이상 늘어난다',
     ({ id, previousCount }) => {
       const design = getShowcaseInvitation(id);
       if (!design) throw new Error(`초대장 샘플을 찾을 수 없습니다: ${id}`);
       const added =
         buildShowcaseInvitation(design).blocks.length - previousCount;
       expect(added).toBeGreaterThanOrEqual(3);
-      expect(added).toBeLessThanOrEqual(5);
+      // 본문이 길어져도 스크롤 부담이 커지지 않도록 상한을 둔다.
+      expect(buildShowcaseInvitation(design).blocks.length).toBeLessThanOrEqual(14);
     }
   );
 
@@ -120,6 +121,39 @@ describe('첫 화면 초대장 샘플', () => {
         }
       }
       checkImages(blocks);
+    }
+  );
+
+  it.each(SHOWCASE_INVITATIONS.filter(design => design.type === 'wedding'))(
+    '$name은 실제 예식장 주소·좌표로 지도와 길안내를 연다',
+    design => {
+      expect(design.venueAddress).toBeTruthy();
+      expect(typeof design.venueLat).toBe('number');
+      expect(typeof design.venueLng).toBe('number');
+      const place = buildShowcaseInvitation(design).blocks.find(
+        block => block.component === 'place'
+      );
+      expect(place?.props).toMatchObject({
+        placeName: design.venue,
+        placeAddress: design.venueAddress,
+        lat: design.venueLat,
+        lng: design.venueLng,
+        openMap: true,
+        openNavi: true,
+      });
+    }
+  );
+
+  it.each(SHOWCASE_INVITATIONS)(
+    '$name의 카운트다운은 예식 날짜·시간과 같다',
+    design => {
+      const countdown = buildShowcaseInvitation(design).blocks.find(
+        block => block.component === 'countdown'
+      );
+      if (!countdown) return;
+      expect(countdown.props).toMatchObject({
+        eventDateTime: `${design.date}T${design.time}`,
+      });
     }
   );
 });

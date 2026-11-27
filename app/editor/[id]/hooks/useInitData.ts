@@ -91,7 +91,7 @@ export const useInitData = ({
     }))
   );
 
-  const initEditStore = useCallback(async () => {
+  const initEditStore = useCallback(async (signal?: AbortSignal) => {
     const fontsReady = Promise.all(
       Array.from(collectFontFamilies([bulkData, blocks]), family =>
         preloadFontFamilyWeights(family)
@@ -114,6 +114,7 @@ export const useInitData = ({
             if (file instanceof File) {
               // imageId와 파일을 함께 사용하여 같은 파일도 이미지별로 구분
               const fileKey = await getFileKey(file, imageId);
+              if (signal?.aborted) return;
               const driveFileId = (file as any).driveFileId;
               if (driveFileId) {
                 setHashFiles(`${fileKey}::${driveFileId}`);
@@ -130,12 +131,6 @@ export const useInitData = ({
     if (audioFolderId) {
       setAudioFolderId(audioFolderId);
     }
-    if (uuid) {
-      setInvitationUuid(uuid);
-    }
-    if (invitationFolderId) {
-      setInvitationFolderId(invitationFolderId);
-    }
     if (shareUrl) {
       setShareUrl(hydrateShareUrlState(shareUrl));
       const shareFiles = [
@@ -148,7 +143,15 @@ export const useInitData = ({
       }
     }
     await fontsReady;
+    if (signal?.aborted) return;
+
     selectedBlock('mainPoster');
+    if (uuid) {
+      setInvitationUuid(uuid);
+    }
+    if (invitationFolderId) {
+      setInvitationFolderId(invitationFolderId);
+    }
   }, [
     blocks,
     bulkData,

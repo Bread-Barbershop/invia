@@ -3,12 +3,12 @@ import AutoScroll from 'embla-carousel-auto-scroll';
 import useEmblaCarousel from 'embla-carousel-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image } from '@/components/atoms/image';
-
 import { useGallerySwipeClick } from '../hooks/useGallerySwipeClick';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { GalleryTemplateProps } from '../types/galleryType';
 import { createInfiniteSlides } from '../utils/createInfiniteSlides';
+
+import { GalleryImage } from './GalleryImage';
 
 
 const MAX_WIDTH = 200; // 중앙일 때 카드 폭
@@ -202,12 +202,10 @@ function GalleryType3({
                   className="h-full overflow-hidden rounded-lg bg-white shadow-md relative select-none pointer-events-auto transform-gpu will-change-[width]"
                   style={{ width: `${MIN_WIDTH}px` }}
                 >
-                  <Image
+                  <GalleryImage
                     src={src}
                     alt={`slide-${i % preview.length}`}
-                    fill
-                    className="object-cover pointer-events-none select-none transform-gpu"
-                    draggable={false}
+                    className="object-cover transform-gpu"
                   />
                 </div>
               </div>
