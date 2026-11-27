@@ -13,7 +13,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
     heading: '연무장길의 저녁을 엽니다',
     date: '2027-04-17',
     time: '18:00',
-    venue: '스페이스 온도 · 연무장길',
+    venue: '스페이스 온도',
     venueAddress: '서울 성동구 연무장길 43',
     venueLat: 37.5429398,
     venueLng: 127.0540477,
@@ -114,7 +114,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '스페이스 온도',
-        detail: '연무장길 43 · 1층, 골목 안쪽 흰 간판',
+        detail: '1층, 골목 안쪽 흰 간판',
       },
       {
         component: 'transportation',
@@ -302,7 +302,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '갤러리 결',
-        detail: '북촌로5길 10 · 한옥 두 채, 안쪽 마당',
+        detail: '한옥 두 채, 안쪽 마당',
       },
       {
         component: 'transportation',
@@ -502,7 +502,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '살롱 오후',
-        detail: '이태원로54길 12 · 2층, 초록 문',
+        detail: '2층, 초록 문',
       },
       {
         component: 'transportation',
