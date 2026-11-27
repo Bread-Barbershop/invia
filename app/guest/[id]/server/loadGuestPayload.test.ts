@@ -74,6 +74,7 @@ describe('loadGuestPayload', () => {
     expect(result).toEqual({
       status: 'ok',
       payload: validGuestPayload,
+      checklistStorageScope: expect.stringMatching(/^[\w-]{43}$/),
       warnings: [],
     });
     expect(mockFetch).toHaveBeenCalledWith(
@@ -84,6 +85,25 @@ describe('loadGuestPayload', () => {
         signal: expect.any(AbortSignal),
       })
     );
+  });
+
+  it('체크리스트 저장 식별자는 파일별로 다르고 같은 파일에서 유지된다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue(JSON.stringify(validGuestPayload)),
+    });
+
+    const [original, same, copy] = await Promise.all([
+      loadGuestPayload('original-file-id'),
+      loadGuestPayload('original-file-id'),
+      loadGuestPayload('copied-file-id'),
+    ]);
+
+    if (original.status !== 'ok' || same.status !== 'ok' || copy.status !== 'ok') {
+      throw new Error('공개 초대장 데이터를 불러오지 못했습니다.');
+    }
+    expect(same.checklistStorageScope).toBe(original.checklistStorageScope);
+    expect(copy.checklistStorageScope).not.toBe(original.checklistStorageScope);
   });
 
   it('비공개 Drive status면 private 상태를 반환한다', async () => {

@@ -21,6 +21,7 @@ type GuestInvitationViewProps = {
   onMainPosterReady?: () => void;
   payload: NormalizedGuestPayload;
   mode?: GuestInvitationViewMode;
+  checklistStorageScope?: string;
   previewFolderId?: string;
   localAudioSrc?: string | null;
   showScreenEffects?: boolean;
@@ -31,6 +32,7 @@ function GuestInvitationView({
   onMainPosterReady,
   payload,
   mode = 'guest',
+  checklistStorageScope,
   previewFolderId,
   localAudioSrc,
   showScreenEffects,
@@ -88,6 +90,7 @@ function GuestInvitationView({
               bulkData={payload.bulkData}
               renderHints={payload.renderHints}
               activePrivacyFields={payload.activePrivacyFields}
+              checklistStorageScope={checklistStorageScope}
               {...(showScreenEffects === false && { showVisualEffects: false })}
               isGuestPage
             />
