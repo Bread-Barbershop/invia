@@ -1,11 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
 import LoginModal from '@/features/session/components/LoginModal';
 import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
 import { useAuthGate } from '@/features/session/hooks/useAuthGate';
+
+import type { MouseEvent } from 'react';
 
 type CtaProps = {
   initialIsLoggedIn?: boolean;
@@ -28,7 +31,19 @@ function Cta({ initialIsLoggedIn }: CtaProps) {
     runAfterAuth,
   } = useAuthGate({ initialIsLoggedIn });
 
-  const handleStart = () => {
+  const handleStart = (event: MouseEvent<HTMLAnchorElement>) => {
+    // 새 탭·새 창으로 열기(Ctrl/Cmd/Shift/휠 클릭)는 브라우저 기본 동작에 맡긴다.
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      event.button !== 0
+    ) {
+      return;
+    }
+    event.preventDefault();
+    if (isBusy) return;
     runAfterAuth(() => {
       router.push('/editor');
     });
@@ -64,20 +79,21 @@ function Cta({ initialIsLoggedIn }: CtaProps) {
           </p>
         </div>
 
-        <button
-          type="button"
+        <Link
+          href="/editor"
           onClick={handleStart}
-          disabled={isBusy}
+          aria-disabled={isBusy || undefined}
           className="
           flex h-[3.3125em] w-[13.375em] items-center justify-center rounded-full
           bg-bg-plain font-medium text-white
-          transition-[background-color,scale] hover:bg-[#202020] active:scale-95 active:bg-[#0D0D0D] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
+          transition-[background-color,scale] hover:bg-[#202020] active:scale-95 active:bg-[#0D0D0D] cursor-pointer
+          aria-disabled:pointer-events-none aria-disabled:opacity-60
         "
         >
           <span className="text-[1.5em] leading-[1.333333]">
             무료로 제작하기
           </span>
-        </button>
+        </Link>
       </section>
       <LoginModal
         open={isLoginOpen}

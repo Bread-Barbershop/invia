@@ -7,13 +7,18 @@ import {
 } from '@/shared/data/showcaseInvitations';
 
 import ShowcaseDocument from './ShowcaseDocument';
+import { buildShowcaseMetadata } from './showcaseMetadata';
 
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: '초대장 미리보기',
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  return buildShowcaseMetadata(id);
+}
 
 export function generateStaticParams() {
   return SHOWCASE_INVITATIONS.map(({ id }) => ({ id }));
