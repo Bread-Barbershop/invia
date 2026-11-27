@@ -116,7 +116,6 @@ export function buildCalendarEventStamp(
       end: nextDateStamp(parts),
     };
   }
-
   const startMs =
     Date.UTC(parts.year, parts.month - 1, parts.day, clock.hour, clock.minute) -
     KST_OFFSET_MS;
@@ -137,17 +136,27 @@ export function escapeIcsText(value: string) {
     .replace(/\r\n|\r|\n/g, '\\n');
 }
 
+/** UTF-8 기준 바이트 길이. 한글은 글자당 3바이트다. */
+function utf8ByteLength(value: string) {
+  let bytes = 0;
+  for (const char of value) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code < 0x80) bytes += 1;
+    else if (code < 0x800) bytes += 2;
+    else if (code < 0x10000) bytes += 3;
+    else bytes += 4;
+  }
+  return bytes;
+}
+
 /** RFC 5545는 한 줄을 75옥텟으로 제한하며, 넘치면 다음 줄을 공백으로 시작한다. */
 export function foldIcsLine(line: string, limit = 75) {
-  const encoder = new TextEncoder();
-  const byteLength = (value: string) => encoder.encode(value).length;
-
   const folded: string[] = [];
   let current = '';
   let currentLimit = limit;
 
   for (const char of line) {
-    if (byteLength(current + char) > currentLimit) {
+    if (utf8ByteLength(current + char) > currentLimit) {
       folded.push(current);
       current = char;
       currentLimit = limit - 1; // 이어지는 줄은 공백 한 칸으로 시작한다.

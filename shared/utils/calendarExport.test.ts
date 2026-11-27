@@ -77,7 +77,7 @@ describe('escapeIcsText / foldIcsLine', () => {
     expect(lines.length).toBeGreaterThan(1);
     lines.forEach((line, index) => {
       if (index > 0) expect(line.startsWith(' ')).toBe(true);
-      expect(new TextEncoder().encode(line).length).toBeLessThanOrEqual(75);
+      expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(75);
     });
     expect(folded.replace(/\r\n /g, '')).toBe(
       `SUMMARY:${'가나다라마바사'.repeat(6)}`
