@@ -17,6 +17,7 @@ import clayCover from '@/public/templates/thumbnails/seminar_06.webp';
 import prismCover from '@/public/templates/thumbnails/seminar_07.webp';
 import cityCover from '@/public/templates/thumbnails/seminar_08.webp';
 import coffeeCover from '@/public/templates/thumbnails/seminar_09.webp';
+import exhibitionCover from '@/public/templates/thumbnails/seminar_10.webp';
 import weddingLetterCover from '@/public/templates/thumbnails/wedding_15.webp';
 import showcase0 from '@/shared/assets/images/showcase/showcase-0.webp';
 import showcase1 from '@/shared/assets/images/showcase/showcase-1.webp';
@@ -94,6 +95,7 @@ export const showcaseItems = [
   { id: 'showcase-42', image: seventiethCover },
   { id: 'showcase-43', image: eightiethCover },
   { id: 'showcase-44', image: weddingLetterCover },
+  { id: 'showcase-51', image: exhibitionCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

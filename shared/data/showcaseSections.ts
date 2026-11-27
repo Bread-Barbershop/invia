@@ -63,9 +63,11 @@ export type ShowcaseSection =
   | {
       component: 'transportation';
       title: string;
+      subwayLine?: string;
       subwayStation?: string;
       subwayExit?: string;
       subwayWalk?: string;
+      busRoutes?: string;
       shuttleStop?: string;
       shuttleInterval?: string;
       parkingHours?: string;
