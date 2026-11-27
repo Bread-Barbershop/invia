@@ -8,6 +8,13 @@ import type { NoticePresetId } from '@/components/organisms/notice/noticeList';
 import type { CalendarCardType } from '@/shared/data/template/componentTemplate';
 
 export type ShowcaseSection =
+  | { component: 'greeting'; title?: string; subTitle?: string }
+  | {
+      component: 'calendar';
+      title: string;
+      subTitle?: string;
+      template?: `calendarType${1 | 2 | 3 | 4 | 5}` | CalendarCardType;
+    }
   | {
       component: 'countdown';
       title: string;

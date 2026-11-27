@@ -661,6 +661,9 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     date: '2026-12-20',
     time: '19:00',
     venue: '연남동 작은 식탁',
+    venueAddress: '서울특별시 마포구 동교로 233',
+    venueLat: 37.5609199,
+    venueLng: 126.9240616,
     font: '고운 바탕',
     bodyFont: 'LINESeedKR',
     sectionStyle: 'paper',
@@ -695,6 +698,18 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         address: '서울특별시 마포구 동교로 233',
         lat: 37.5609199,
         lng: 126.9240616,
+      },
+      {
+        component: 'transportation',
+        title: '연남동까지 오는 길',
+        subwayLine: '2호선·경의중앙선·공항철도',
+        subwayStation: '홍대입구역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '홍대입구역 3번 출구에서 동교로를 따라 도보 10분입니다. 초록 문이 보이면 2층으로 올라와 주세요.',
+        busRoutes: '동교동삼거리 정류장에서 내리면 골목 입구가 바로 보여요.',
+        parkingHours:
+          '골목 안은 주차가 어려워요. 근처 공영주차장을 이용하시고 3분 걸어오세요.',
       },
       {
         component: 'timeline',
