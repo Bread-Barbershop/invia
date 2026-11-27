@@ -37,9 +37,11 @@ function MainContentsArea({
     state => state.showAllCalloutsFor
   );
   const hideAllCallouts = useEditorCalloutStore(state => state.hideAllCallouts);
-  const { initEditStore, initBgmStore, initBulkData } = useInitData(
-    savedData ?? null
-  );
+  const { initEditStore, initBgmStore, initBulkData } = useInitData({
+    savedData: savedData ?? null,
+    uuid: '',
+    invitationFolderId: '',
+  });
 
   useEditorDirtyTracker(isDirtyTrackerEnabled);
 

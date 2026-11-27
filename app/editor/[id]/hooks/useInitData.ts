@@ -15,7 +15,15 @@ import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 
 import { SavedData } from '../types/savedata';
 
-export const useInitData = (savedData: SavedData | null) => {
+export const useInitData = ({
+  savedData,
+  uuid,
+  invitationFolderId,
+}: {
+  savedData: SavedData | null;
+  uuid: string;
+  invitationFolderId: string;
+}) => {
   const {
     bulkData,
     blocks,
@@ -41,6 +49,8 @@ export const useInitData = (savedData: SavedData | null) => {
     setBlock,
     updateImage,
     selectedBlock,
+    setInvitationFolderId,
+    setInvitationUuid,
     setImageFolderId,
     setAudioFolderId,
     setBodyData,
@@ -61,6 +71,8 @@ export const useInitData = (savedData: SavedData | null) => {
       setBlock: state.setBlock,
       updateImage: state.updateImage,
       selectedBlock: state.selectedBlock,
+      setInvitationFolderId: state.setInvitationFolderId,
+      setInvitationUuid: state.setInvitationUuid,
       setImageFolderId: state.setImageFolderId,
       setAudioFolderId: state.setAudioFolderId,
       setBodyData: state.setBodyData,
@@ -79,7 +91,7 @@ export const useInitData = (savedData: SavedData | null) => {
     }))
   );
 
-  const initEditStore = useCallback(async () => {
+  const initEditStore = useCallback(async (signal?: AbortSignal) => {
     const fontsReady = Promise.all(
       Array.from(collectFontFamilies([bulkData, blocks]), family =>
         preloadFontFamilyWeights(family)
@@ -102,6 +114,7 @@ export const useInitData = (savedData: SavedData | null) => {
             if (file instanceof File) {
               // imageId와 파일을 함께 사용하여 같은 파일도 이미지별로 구분
               const fileKey = await getFileKey(file, imageId);
+              if (signal?.aborted) return;
               const driveFileId = (file as any).driveFileId;
               if (driveFileId) {
                 setHashFiles(`${fileKey}::${driveFileId}`);
@@ -130,18 +143,30 @@ export const useInitData = (savedData: SavedData | null) => {
       }
     }
     await fontsReady;
+    if (signal?.aborted) return;
+
     selectedBlock('mainPoster');
+    if (uuid) {
+      setInvitationUuid(uuid);
+    }
+    if (invitationFolderId) {
+      setInvitationFolderId(invitationFolderId);
+    }
   }, [
     blocks,
     bulkData,
     imageFolderId,
     audioFolderId,
+    uuid,
+    invitationFolderId,
     shareUrl,
     setBlock,
     updateImage,
     setImageFolderId,
     setAudioFolderId,
+    setInvitationUuid,
     selectedBlock,
+    setInvitationFolderId,
     invitationImage,
     setShareUrl,
     setHashFiles,
