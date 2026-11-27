@@ -40,13 +40,3 @@ export function getEditorSaveStatusView({
     description: '마지막 저장 이후 바뀐 내용이 없어요.',
   };
 }
-
-// /editor/[id]는 이미 저장된 초대장을 여는 화면이라, 스토어가 아직 uuid를
-// 채우기 전에도 '아직 저장 전'으로 잘못 보이지 않게 경로로 먼저 판단한다.
-export function isEditorDetailPath(pathname: string | null | undefined): boolean {
-  if (!pathname) {
-    return false;
-  }
-
-  return /^\/editor\/[^/]+\/?$/.test(pathname);
-}

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 
 import { getAuthSession } from '@/app/api/auth/_lib/getAuthSession';
 import EditorSaveStatus from '@/features/editor/save-status/EditorSaveStatus';
@@ -66,7 +66,11 @@ export default async function DashboardShell({
         </div>
 
         <div className="flex items-center gap-4">
-          {isEditor && <EditorSaveStatus />}
+          {isEditor && (
+            <Suspense fallback={null}>
+              <EditorSaveStatus />
+            </Suspense>
+          )}
           <HeaderPrivacyNoticeButton />
         </div>
       </header>

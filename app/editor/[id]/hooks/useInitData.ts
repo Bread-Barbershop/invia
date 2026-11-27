@@ -15,15 +15,7 @@ import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
 
 import { SavedData } from '../types/savedata';
 
-export const useInitData = ({
-  savedData,
-  uuid,
-  invitationFolderId,
-}: {
-  savedData: SavedData | null;
-  uuid: string;
-  invitationFolderId: string;
-}) => {
+export const useInitData = (savedData: SavedData | null) => {
   const {
     bulkData,
     blocks,
@@ -49,8 +41,6 @@ export const useInitData = ({
     setBlock,
     updateImage,
     selectedBlock,
-    setInvitationFolderId,
-    setInvitationUuid,
     setImageFolderId,
     setAudioFolderId,
     setBodyData,
@@ -71,8 +61,6 @@ export const useInitData = ({
       setBlock: state.setBlock,
       updateImage: state.updateImage,
       selectedBlock: state.selectedBlock,
-      setInvitationFolderId: state.setInvitationFolderId,
-      setInvitationUuid: state.setInvitationUuid,
       setImageFolderId: state.setImageFolderId,
       setAudioFolderId: state.setAudioFolderId,
       setBodyData: state.setBodyData,
@@ -130,12 +118,6 @@ export const useInitData = ({
     if (audioFolderId) {
       setAudioFolderId(audioFolderId);
     }
-    if (uuid) {
-      setInvitationUuid(uuid);
-    }
-    if (invitationFolderId) {
-      setInvitationFolderId(invitationFolderId);
-    }
     if (shareUrl) {
       setShareUrl(hydrateShareUrlState(shareUrl));
       const shareFiles = [
@@ -154,16 +136,12 @@ export const useInitData = ({
     bulkData,
     imageFolderId,
     audioFolderId,
-    uuid,
-    invitationFolderId,
     shareUrl,
     setBlock,
     updateImage,
     setImageFolderId,
     setAudioFolderId,
-    setInvitationUuid,
     selectedBlock,
-    setInvitationFolderId,
     invitationImage,
     setShareUrl,
     setHashFiles,

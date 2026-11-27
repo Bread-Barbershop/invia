@@ -1,13 +1,12 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useShallow } from 'zustand/shallow';
 
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { cn } from '@/shared/utils/cn';
 import {
   getEditorSaveStatusView,
-  isEditorDetailPath,
   type EditorSaveStatusTone,
 } from '@/shared/utils/editorUnsavedChanges';
 
@@ -26,17 +25,29 @@ const dotClassName: Record<EditorSaveStatusTone, string> = {
 // 편집기 머리말에서 지금 고친 내용이 저장돼 있는지 한눈에 알려 준다.
 // 저장 자체는 '모두 저장하기'가 하고, 여기서는 상태만 보여 준다.
 export default function EditorSaveStatus() {
-  const pathname = usePathname();
-  const { isDirty, invitationUuid } = useEditorStore(
+  const { id: folderId } = useParams<{ id?: string }>();
+  const requestedUuids = useSearchParams().getAll('uuid');
+  const { isDirty, invitationFolderId, invitationUuid } = useEditorStore(
     useShallow(state => ({
       isDirty: state.isDirty,
+      invitationFolderId: state.invitationFolderId,
       invitationUuid: state.invitationUuid,
     }))
   );
 
+  if (
+    folderId &&
+    (folderId !== invitationFolderId ||
+      !invitationUuid ||
+      requestedUuids.length !== 1 ||
+      requestedUuids[0] !== invitationUuid)
+  ) {
+    return null;
+  }
+
   const view = getEditorSaveStatusView({
     isDirty,
-    hasSavedInvitation: Boolean(invitationUuid) || isEditorDetailPath(pathname),
+    hasSavedInvitation: Boolean(invitationUuid),
   });
 
   return (

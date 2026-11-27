@@ -1,7 +1,4 @@
-import {
-  getEditorSaveStatusView,
-  isEditorDetailPath,
-} from './editorUnsavedChanges';
+import { getEditorSaveStatusView } from './editorUnsavedChanges';
 
 describe('편집기 저장 상태 문구', () => {
   it('저장된 초대장에 바뀐 내용이 없으면 저장됨으로 보여 준다', () => {
@@ -39,20 +36,5 @@ describe('편집기 저장 상태 문구', () => {
     expect(
       getEditorSaveStatusView({ isDirty: true, hasSavedInvitation: false }).tone
     ).toBe('dirty');
-  });
-});
-
-describe('편집기 상세 경로 판별', () => {
-  it.each([
-    ['/editor/3f2a9c', true],
-    ['/editor/3f2a9c/', true],
-    ['/editor', false],
-    ['/editor/', false],
-    ['/editor/3f2a9c/preview', false],
-    ['', false],
-    [null, false],
-    [undefined, false],
-  ])('%s → %s', (pathname, expected) => {
-    expect(isEditorDetailPath(pathname)).toBe(expected);
   });
 });

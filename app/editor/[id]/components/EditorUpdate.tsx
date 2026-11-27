@@ -26,11 +26,7 @@ interface Props {
 function EditorUpdate({ folderId, uuid }: Props) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const { savedData, loading, error } = useSavedData(folderId, uuid);
-  const { initEditStore, initBgmStore, initBulkData } = useInitData({
-    savedData,
-    uuid,
-    invitationFolderId: folderId,
-  });
+  const { initEditStore, initBgmStore, initBulkData } = useInitData(savedData);
 
   const [isStoreReady, setIsStoreReady] = useState(false);
 
@@ -45,15 +41,26 @@ function EditorUpdate({ folderId, uuid }: Props) {
   }, [reset, resetBgm]);
 
   useEffect(() => {
-    if (savedData) {
-      (async () => {
-        initBulkData();
-        await initEditStore();
-        initBgmStore();
-        setIsStoreReady(true);
-      })();
-    }
-  }, [savedData, initEditStore, initBgmStore, initBulkData]);
+    if (!savedData) return;
+
+    let cancelled = false;
+    void (async () => {
+      initBulkData();
+      await initEditStore();
+      if (cancelled) return;
+
+      initBgmStore();
+      useEditorStore.setState({
+        invitationFolderId: folderId,
+        invitationUuid: uuid,
+      });
+      setIsStoreReady(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [savedData, initEditStore, initBgmStore, initBulkData, folderId, uuid]);
 
   useEditorDirtyTracker(isStoreReady);
   usePreventBack();
