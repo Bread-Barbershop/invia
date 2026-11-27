@@ -11,6 +11,7 @@ import ShowcasePreviewProvider, {
 import { getInvitationTemplates } from '@/shared/data/invitationTemplates/catalog';
 import { filterInvitationTemplates } from '@/shared/data/invitationTemplates/search';
 import type { InvitationTemplate } from '@/shared/data/invitationTemplates/types';
+import { withParticle } from '@/shared/utils/koreanParticle';
 import InvitationTemplatePoster from '@/widgets/editor/preview/components/InvitationTemplatePoster';
 
 import { GALLERY_QUERY_PARAM } from './gallerySearchParams';
@@ -160,7 +161,7 @@ function GalleryTemplateCards({
           {query ? (
             <>
               <p className="text-lg font-semibold text-text-primary">
-                ‘{query}’와 맞는 템플릿이 없어요.
+                {withParticle(`‘${query}’`, '과', '와', '와')} 맞는 템플릿이 없어요.
               </p>
               <p className="mt-1 text-sm text-text-secondary">
                 다른 검색어로 찾아보거나 검색어를 지워보세요.
