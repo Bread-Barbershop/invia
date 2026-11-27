@@ -14,7 +14,38 @@ export type ShowcaseSection =
       title: string;
       template?: `calendarType${1 | 2 | 3 | 4 | 5}` | CalendarCardType;
     }
-  | { component: 'place'; title: string; detail?: string }
+  | {
+      component: 'place';
+      title: string;
+      detail?: string;
+      address?: string;
+      lat?: number;
+      lng?: number;
+      tel?: string;
+    }
+  | {
+      component: 'account';
+      title: string;
+      message?: string;
+      groups: {
+        name: string;
+        accounts: { name: string; bank: string; account: string }[];
+      }[];
+    }
+  | {
+      component: 'countdown';
+      title: string;
+      onDayMessage?: string;
+      afterMessage?: string;
+    }
+  | {
+      component: 'myFamilyWedding';
+      title?: string;
+      groomFamilySuffix?: string;
+      brideFamilySuffix?: string;
+      groomFamily: { relation: string; name: string }[];
+      brideFamily: { relation: string; name: string }[];
+    }
   | { component: 'closingComment'; message: string }
   | { component: 'coupleIntroduction'; title: string; story: string }
   | { component: 'picture'; title: string; image: string; caption?: string }
@@ -63,13 +94,16 @@ export type ShowcaseSection =
   | {
       component: 'transportation';
       title: string;
+      subwayLine?: string;
       subwayStation?: string;
       subwayExit?: string;
       subwayWalk?: string;
+      busRoutes?: string;
       shuttleStop?: string;
       shuttleInterval?: string;
       parkingHours?: string;
       alternativeParking?: string;
+      navigationUrl?: string;
     }
   | {
       component: 'afterParty';
