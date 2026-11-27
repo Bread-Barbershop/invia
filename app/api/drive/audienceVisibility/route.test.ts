@@ -2,6 +2,7 @@
 import type { AudienceVisibility } from '@/features/invitation/audiences/visibility';
 import { GET, PUT } from './route';
 import {
+  getRetiredAudienceSlug,
   readAudienceVisibility,
   writeAudienceVisibility,
 } from '../_lib/audienceLinkStore';
@@ -110,17 +111,19 @@ const put = (published: boolean, publicSlugs: string[], revision: string) =>
     })
   );
 let grants: Set<string>;
+let rootProperties: Record<string, string>;
+let storedVisibility: AudienceVisibility | null;
 beforeEach(() => {
   jest.clearAllMocks();
   grants = new Set(['root']);
-  const props: Record<string, string> = {};
-  let stored: AudienceVisibility | null = null;
+  rootProperties = {};
+  storedVisibility = null;
   jest.mocked(assertInvitationFolderAccess).mockResolvedValue({
     workspaceFolderId: 'space',
     rootFolderId: 'root',
     rootInvitationUuid: 'uuid',
     audience: null,
-    appProperties: props,
+    appProperties: rootProperties,
   });
   jest.mocked(readRootInvitationFiles).mockResolvedValue({
     files,
@@ -147,13 +150,19 @@ beforeEach(() => {
       cover: 'https://lh3.googleusercontent.com/d/legacy-cover',
     });
   jest.mocked(commitCloneFile).mockImplementation(async (id, changes) => {
-    Object.assign(id === 'root' ? props : legacy.appProperties!, changes);
+    Object.assign(
+      id === 'root' ? rootProperties : legacy.appProperties!,
+      changes
+    );
   });
-  jest.mocked(readAudienceVisibility).mockImplementation(async () => stored);
+  jest.mocked(getRetiredAudienceSlug).mockResolvedValue(null);
+  jest
+    .mocked(readAudienceVisibility)
+    .mockImplementation(async () => storedVisibility);
   jest
     .mocked(writeAudienceVisibility)
     .mockImplementation(async (_id, settings) => {
-      stored = settings;
+      storedVisibility = settings;
     });
   jest.mocked(publishPermissionWithRetry).mockImplementation(async id => {
     grants.add(id);
@@ -237,4 +246,74 @@ it('소유하지 않은 폴더의 공개 설정은 변경할 수 없다', async 
   );
   expect((await put(true, [''], 'start')).status).toBe(404);
   expect(writeAudienceVisibility).not.toHaveBeenCalled();
+});
+
+it('은퇴한 그룹은 공개 범위 선택 목록에서 제외한다', async () => {
+  rootProperties.audience_visibility = 'published';
+  storedVisibility = {
+    published: true,
+    publicSlugs: ['', 'family', 'work'],
+    revision: 'stored',
+    pending: false,
+  };
+  jest
+    .mocked(getRetiredAudienceSlug)
+    .mockImplementation(async (_dataId, folderId) =>
+      folderId === 'family' ? 'family' : null
+    );
+
+  const options = await get();
+
+  expect(options.groups.map((group: { slug: string }) => group.slug)).toEqual([
+    '',
+    'work',
+  ]);
+  expect(options.visibility.publicSlugs).toEqual(['', 'work']);
+});
+
+it('비공개 재적용도 남아 있는 은퇴 그룹의 공개 권한을 회수한다', async () => {
+  grants.add('family');
+  rootProperties.audience_visibility = 'private';
+  storedVisibility = {
+    published: false,
+    publicSlugs: ['family'],
+    revision: 'stored',
+    pending: false,
+  };
+  jest
+    .mocked(getRetiredAudienceSlug)
+    .mockImplementation(async (_dataId, folderId) =>
+      folderId === 'family' ? 'family' : null
+    );
+
+  const result = await applyAudienceVisibility('root', false);
+
+  expect(result.visibility.publicSlugs).toEqual([]);
+  expect(revokePublicPermissionWithRetry).toHaveBeenCalledWith('family');
+  expect(grants).not.toContain('family');
+});
+
+it('저장된 범위에 은퇴 그룹이 남아 있어도 활성 그룹만 공개하고 개수를 저장한다', async () => {
+  grants.add('family');
+  rootProperties.audience_visibility = 'private';
+  storedVisibility = {
+    published: false,
+    publicSlugs: ['', 'family', 'work'],
+    revision: 'stored',
+    pending: false,
+  };
+  jest
+    .mocked(getRetiredAudienceSlug)
+    .mockImplementation(async (_dataId, folderId) =>
+      folderId === 'family' ? 'family' : null
+    );
+
+  const result = await applyAudienceVisibility('root', true);
+
+  expect(result.visibility.publicSlugs).toEqual(['', 'work']);
+  expect(revokePublicPermissionWithRetry).toHaveBeenCalledWith('family');
+  expect(grants).toEqual(
+    new Set(['data', 'photos', 'audio', 'poster', 'work', 'legacy-cover'])
+  );
+  expect(rootProperties.audience_public_count).toBe('2');
 });

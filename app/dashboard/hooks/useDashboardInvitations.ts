@@ -82,6 +82,7 @@ function useDashboardInvitations(
     applied: 0,
     folderIds: new Set<string>(),
   });
+  const invitationRefreshVersionsRef = useRef(new Map<string, number>());
   const {
     deleteBusy,
     setDeleteBusy,
@@ -122,6 +123,12 @@ function useDashboardInvitations(
     },
     []
   );
+
+  const bumpInvitationRefreshVersion = useCallback((folderId: string) => {
+    const next = (invitationRefreshVersionsRef.current.get(folderId) ?? 0) + 1;
+    invitationRefreshVersionsRef.current.set(folderId, next);
+    return next;
+  }, []);
 
   const replaceInvites = useCallback(
     (loadedInvites: InviteListItem[], version: number) => {
@@ -168,6 +175,8 @@ function useDashboardInvitations(
       if (version < listVersionsRef.current.applied) return;
 
       if (shouldRedirectToHome(res.status, payloadMessage)) {
+        listVersionsRef.current.applied = version;
+        listVersionsRef.current.folderIds = new Set();
         setInvites([]);
         setError(null);
         setDeleteBusy({});
@@ -200,6 +209,8 @@ function useDashboardInvitations(
       setInvitationResults(createInitialInvitationResults(nextInvites));
     } catch (err) {
       if (version < listVersionsRef.current.applied) return;
+      listVersionsRef.current.applied = version;
+      listVersionsRef.current.folderIds = new Set();
       console.error(err);
       setInvites([]);
       setDeleteBusy({});
@@ -266,6 +277,8 @@ function useDashboardInvitations(
           }
 
           if (shouldRedirectToHome(res.status, payloadMessage)) {
+            listVersionsRef.current.applied = version;
+            listVersionsRef.current.folderIds = new Set();
             pendingInvitationRef.current = null;
             setInvites([]);
             setError(null);
@@ -645,7 +658,7 @@ function useDashboardInvitations(
 
   const handleDelete = useCallback(
     async (folderId: string) => {
-      if (!folderId) return;
+      if (!folderId) return false;
 
       let isDeleted = false;
       setDeleteErrors(prev => ({ ...prev, [folderId]: null }));
@@ -671,6 +684,7 @@ function useDashboardInvitations(
         isDeleted = true;
         clearInvitationTransientState(folderId);
         successToast('초대장이 삭제되었습니다.');
+        return true;
       } catch (err) {
         console.error(err);
         setDeleteErrors(prev => ({
@@ -681,6 +695,7 @@ function useDashboardInvitations(
         errorToast(
           err instanceof Error ? err.message : '초대장 삭제에 실패했습니다.'
         );
+        return false;
       } finally {
         setDeleteBusy(prev => {
           if (!isDeleted) {
@@ -698,6 +713,107 @@ function useDashboardInvitations(
       errorToast,
       setDeleteBusy,
       setDeleteErrors,
+      successToast,
+    ]
+  );
+
+  const refreshInvitation = useCallback(
+    async (folderId: string) => {
+      const listVersion = listVersionsRef.current.applied;
+      const version = bumpInvitationRefreshVersion(folderId);
+      try {
+        const response = await fetch('/api/drive/loadInvitation', {
+          method: 'GET',
+          cache: 'no-store',
+        });
+        if (!response.ok) return false;
+        const payload = (await response.json()) as LoadInvitationResponse;
+        if (
+          invitationRefreshVersionsRef.current.get(folderId) !== version ||
+          listVersionsRef.current.applied !== listVersion
+        )
+          return false;
+        const fresh = payload.invites
+          .map(normalizeInvite)
+          .find(invite => invite.folderId === folderId);
+        if (!fresh) return false;
+
+        const invite = {
+          ...fresh,
+          audienceOptionsRevision: Date.now(),
+        };
+        setInvites(previous =>
+          normalizeInvites(
+            previous.map(current =>
+              current.folderId === folderId ? invite : current
+            )
+          )
+        );
+        setInvitationResults(previous => ({
+          ...previous,
+          [folderId]: invite.guestUrl
+            ? {
+                ok: true,
+                published: invite.published,
+                ready: invite.readiness === 'ready',
+                guestUrl: invite.guestUrl,
+                dataJsonFileId: invite.dataJsonFileId,
+              }
+            : null,
+        }));
+        return true;
+      } catch (err) {
+        console.error('Invitation refresh after group deletion failed:', err);
+        return false;
+      }
+    },
+    [bumpInvitationRefreshVersion, setInvitationResults]
+  );
+
+  const handleDeleteAudience = useCallback(
+    async (rootFolderId: string, groupFolderId: string) => {
+      if (!rootFolderId || !groupFolderId) return false;
+      try {
+        const response = await fetch('/api/drive/invitationAudiences', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rootFolderId, groupFolderId }),
+        });
+        const payload = (await response
+          .json()
+          .catch(() => null)) as DeleteInvitationResponse | null;
+        if (!response.ok || payload?.success !== true) {
+          throw new Error(
+            payload?.message ??
+              '하객 그룹 삭제에 실패했습니다. 다시 시도해 주세요.'
+          );
+        }
+        // Invalidate the card's share option request immediately. A slower
+        // card metadata refresh must not keep the retired URL selectable.
+        bumpInvitationRefreshVersion(rootFolderId);
+        patchInvite(rootFolderId, { audienceOptionsRevision: Date.now() });
+        successToast('하객 그룹을 삭제했습니다.');
+        return true;
+      } catch (err) {
+        console.error(err);
+        // A 5xx/network error can happen after the tombstone was written.
+        // Refresh both card metadata and share options on every failed attempt.
+        bumpInvitationRefreshVersion(rootFolderId);
+        patchInvite(rootFolderId, { audienceOptionsRevision: Date.now() });
+        void refreshInvitation(rootFolderId);
+        errorToast(
+          err instanceof Error
+            ? err.message
+            : '하객 그룹 삭제에 실패했습니다. 다시 시도해 주세요.'
+        );
+        return false;
+      }
+    },
+    [
+      bumpInvitationRefreshVersion,
+      errorToast,
+      patchInvite,
+      refreshInvitation,
       successToast,
     ]
   );
@@ -796,8 +912,10 @@ function useDashboardInvitations(
     loading,
     error,
     loadInvitations,
+    refreshInvitation,
     handleClone,
     handleDelete,
+    handleDeleteAudience,
     handleToggleVisibility,
     handleUpdate,
     handleShare,
