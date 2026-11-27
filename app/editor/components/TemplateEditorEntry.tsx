@@ -9,7 +9,9 @@ import { DEFAULT_SCROLL_ANIMATION } from '@/components/molecules/scroll-fade-in/
 import {
   loadEditorDraft,
   type EditorDraftKey,
+  type EditorDraftSnapshot,
 } from '@/features/editor/draft/editorDraft';
+import EditorDraftRecoveryDialog from '@/features/editor/draft/EditorDraftRecoveryDialog';
 import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
 import LoginModal from '@/features/session/components/LoginModal';
 import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
@@ -74,6 +76,9 @@ export default function TemplateEditorEntry({
     attempt: number;
   } | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [pendingDraft, setPendingDraft] = useState<EditorDraftSnapshot | null>(
+    null
+  );
   const startedTemplateIdRef = useRef<string | null>(null);
   const savedData =
     preparedData?.templateId === templateId ? preparedData.data : null;
@@ -90,14 +95,17 @@ export default function TemplateEditorEntry({
 
     async function loadInitialData() {
       const draft = await loadEditorDraft(draftKey);
-      return draft
-        ? toEditorDraftSavedData(draft)
-        : prepareTemplateEditorData(templateId);
+      // 초안이 있으면 사용자가 고를 때까지 기다린다.
+      if (draft) {
+        if (isCurrent) setPendingDraft(draft);
+        return null;
+      }
+      return prepareTemplateEditorData(templateId);
     }
 
     void loadInitialData().then(
       data => {
-        if (isCurrent) setPreparedData({ templateId, data });
+        if (isCurrent && data) setPreparedData({ templateId, data });
       },
       () => {
         if (isCurrent)
@@ -109,6 +117,26 @@ export default function TemplateEditorEntry({
       isCurrent = false;
     };
   }, [draftKey, loadAttempt, template, templateId]);
+
+  const startFreshTemplate = useCallback(async () => {
+    setPendingDraft(null);
+    try {
+      const data = await prepareTemplateEditorData(templateId);
+      setPreparedData({ templateId, data });
+    } catch {
+      setTemplateLoadError({ templateId, attempt: loadAttempt });
+    }
+  }, [loadAttempt, templateId]);
+
+  const handleResumeDraft = useCallback(() => {
+    if (!pendingDraft) return;
+
+    setPreparedData({
+      templateId,
+      data: toEditorDraftSavedData(pendingDraft),
+    });
+    setPendingDraft(null);
+  }, [pendingDraft, templateId]);
 
   useEffect(() => {
     if (!template || !savedData || startedTemplateIdRef.current === templateId)
@@ -148,6 +176,19 @@ export default function TemplateEditorEntry({
           다시 불러오기
         </button>
       </section>
+    );
+
+  if (pendingDraft)
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#E7E9EB]">
+        <EditorDraftRecoveryDialog
+          draft={pendingDraft}
+          draftKey={draftKey}
+          onResume={handleResumeDraft}
+          onDraftChange={setPendingDraft}
+          onDiscard={() => void startFreshTemplate()}
+        />
+      </div>
     );
 
   if (readyTemplateId === templateId && savedData)
