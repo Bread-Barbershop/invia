@@ -56,6 +56,7 @@ describe('GuestLoadErrorRecovery', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.useRealTimers();
   });
 
@@ -128,9 +129,10 @@ describe('GuestLoadErrorRecovery', () => {
     ).toBeInTheDocument();
   });
 
-  it('refreshes once automatically after a stale chunk error', () => {
+  it('Strict Mode에서도 실제로 새로 고침할 때만 기록하고 한 번 실행한다', () => {
     render(
-      <GuestLoadErrorRecovery error={makeChunkError()} reset={jest.fn()} />
+      <GuestLoadErrorRecovery error={makeChunkError()} reset={jest.fn()} />,
+      { reactStrictMode: true }
     );
 
     expect(
@@ -138,8 +140,81 @@ describe('GuestLoadErrorRecovery', () => {
     ).toBeInTheDocument();
     expect(
       window.sessionStorage.getItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY)
-    ).not.toBeNull();
+    ).toBeNull();
 
+    act(() => {
+      jest.advanceTimersByTime(GUEST_ERROR_AUTO_RELOAD_DELAY_MS);
+    });
+
+    expect(reloadMock).toHaveBeenCalledTimes(1);
+    expect(
+      window.sessionStorage.getItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY)
+    ).toBe(String(Date.now()));
+  });
+
+  it.each([
+    {
+      operation: '접근',
+      blockStorage: () =>
+        jest.spyOn(window, 'sessionStorage', 'get').mockImplementation(() => {
+          throw new DOMException('Storage unavailable', 'SecurityError');
+        }),
+    },
+    {
+      operation: '읽기',
+      blockStorage: () =>
+        jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+          throw new DOMException('Storage read blocked', 'SecurityError');
+        }),
+    },
+    {
+      operation: '쓰기',
+      blockStorage: () =>
+        jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+          throw new DOMException('Storage write blocked', 'QuotaExceededError');
+        }),
+    },
+  ])('저장소 $operation 실패 시 수동 새로 고침만 제공한다', ({ blockStorage }) => {
+    blockStorage();
+    render(
+      <GuestLoadErrorRecovery error={makeChunkError()} reset={jest.fn()} />
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(GUEST_ERROR_AUTO_RELOAD_DELAY_MS * 2);
+    });
+
+    expect(
+      screen.getByRole('heading', { name: '초대장을 새로 고치지 못했어요' })
+    ).toBeInTheDocument();
+    expect(reloadMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: '새로 고침' }));
+    expect(reloadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('대기 중 연결이 끊겨 취소된 새로 고침은 기록하지 않는다', () => {
+    render(
+      <GuestLoadErrorRecovery error={makeChunkError()} reset={jest.fn()} />
+    );
+
+    act(() => {
+      setOnline(false);
+      window.dispatchEvent(new Event('offline'));
+    });
+    act(() => {
+      jest.advanceTimersByTime(GUEST_ERROR_AUTO_RELOAD_DELAY_MS);
+    });
+
+    expect(reloadMock).not.toHaveBeenCalled();
+    expect(
+      window.sessionStorage.getItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY)
+    ).toBeNull();
+
+    act(() => {
+      setOnline(true);
+      window.dispatchEvent(new Event('online'));
+    });
     act(() => {
       jest.advanceTimersByTime(GUEST_ERROR_AUTO_RELOAD_DELAY_MS);
     });

@@ -52,7 +52,8 @@ export function GuestLoadErrorRecovery({
   reset,
 }: GuestLoadErrorRecoveryProps) {
   const [online, setOnline] = useState(readIsOnline);
-  const [autoReloadSkipped, setAutoReloadSkipped] = useState(false);
+  const [manualReloadError, setManualReloadError] = useState<Error | null>(null);
+  const autoReloadSkipped = manualReloadError === error;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const onlineRef = useRef(online);
   const didFocusHeading = useRef(false);
@@ -87,33 +88,38 @@ export function GuestLoadErrorRecovery({
 
   // 배포 직후 사라진 청크를 받으려다 난 오류는 새 화면을 받아야 풀린다.
   useEffect(() => {
-    if (!online || !isChunkLoadError(error)) return;
+    if (!online || autoReloadSkipped || !isChunkLoadError(error)) return;
 
     const storage = readSessionStorage();
-    const now = Date.now();
-    const shouldReload = shouldAutoReloadGuestPage({
-      error,
-      online,
-      lastAutoReloadAt: readGuestErrorAutoReloadAt(storage),
-      now,
-    });
+    const canAutoReload = (now: number) =>
+      shouldAutoReloadGuestPage({
+        error,
+        online: onlineRef.current,
+        lastAutoReloadAt: readGuestErrorAutoReloadAt(storage),
+        now,
+      });
 
-    if (!shouldReload) {
-      // sessionStorage(외부 상태)를 읽어 안내 문구를 한 번만 바꾼다.
+    if (!canAutoReload(Date.now())) {
+      // sessionStorage의 현재 상태에 맞춰 수동 복구를 안내한다.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAutoReloadSkipped(true);
+      setManualReloadError(error);
       return;
     }
 
-    markGuestErrorAutoReload(storage, now);
     const timer = window.setTimeout(() => {
+      if (!onlineRef.current) return;
+      const now = Date.now();
+      if (!canAutoReload(now) || !markGuestErrorAutoReload(storage, now)) {
+        setManualReloadError(error);
+        return;
+      }
       reloadGuestPage();
     }, GUEST_ERROR_AUTO_RELOAD_DELAY_MS);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [error, online]);
+  }, [autoReloadSkipped, error, online]);
 
   const copy = resolveGuestLoadErrorCopy({ error, online, autoReloadSkipped });
 

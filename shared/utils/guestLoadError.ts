@@ -78,7 +78,7 @@ const STALE_RETRY_COPY: GuestLoadErrorCopy = {
   mode: 'stale',
   eyebrow: 'GUEST INVITATION',
   title: '초대장을 새로 고치지 못했어요',
-  description: '화면을 다시 열었지만 초대장을 받아 오지 못했어요.',
+  description: '아래 버튼을 눌러 초대장을 새로 고쳐 주세요.',
   hint: '잠시 후 다시 시도해 주세요. 계속되면 초대장을 보내준 분에게 새 링크를 받아 주세요.',
   primaryLabel: '새로 고침',
   primaryAction: 'reload',
@@ -139,7 +139,7 @@ export function resolveGuestLoadErrorCopy({
 type ShouldAutoReloadInput = {
   error: unknown;
   online: boolean;
-  lastAutoReloadAt: number | null;
+  lastAutoReloadAt: number | null | undefined;
   now: number;
 };
 
@@ -149,7 +149,7 @@ export function shouldAutoReloadGuestPage({
   lastAutoReloadAt,
   now,
 }: ShouldAutoReloadInput): boolean {
-  if (!online) return false;
+  if (!online || lastAutoReloadAt === undefined) return false;
   if (!isChunkLoadError(error)) return false;
   if (lastAutoReloadAt === null) return true;
   return now - lastAutoReloadAt >= GUEST_ERROR_AUTO_RELOAD_COOLDOWN_MS;
@@ -157,28 +157,32 @@ export function shouldAutoReloadGuestPage({
 
 type GuestErrorStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** 읽을 수 없는 저장소(undefined)와 기록이 없는 저장소(null)를 구분한다. */
 export function readGuestErrorAutoReloadAt(
   storage: GuestErrorStorage | null | undefined
-): number | null {
-  if (!storage) return null;
+): number | null | undefined {
+  if (!storage) return undefined;
   try {
     const raw = storage.getItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY);
     if (!raw) return null;
     const parsed = Number(raw);
     return Number.isFinite(parsed) ? parsed : null;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
+/** 기록을 다시 읽을 수 있어야 다음 페이지에서 자동 새로 고침을 제한할 수 있다. */
 export function markGuestErrorAutoReload(
   storage: GuestErrorStorage | null | undefined,
   now: number
-): void {
-  if (!storage) return;
+): boolean {
+  if (!storage) return false;
   try {
-    storage.setItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY, String(now));
+    const timestamp = String(now);
+    storage.setItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY, timestamp);
+    return storage.getItem(GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY) === timestamp;
   } catch {
-    // 사파리 프라이빗 모드처럼 저장이 막힌 경우에는 자동 새로 고침 없이 안내만 한다.
+    return false;
   }
 }

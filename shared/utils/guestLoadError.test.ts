@@ -158,6 +158,17 @@ describe('shouldAutoReloadGuestPage', () => {
     ).toBe(false);
   });
 
+  it('저장소의 기록을 읽을 수 없으면 자동 새로 고침을 하지 않는다', () => {
+    expect(
+      shouldAutoReloadGuestPage({
+        error: makeChunkError(),
+        online: true,
+        lastAutoReloadAt: undefined,
+        now,
+      })
+    ).toBe(false);
+  });
+
   it('stays inside the cooldown so the page cannot reload in a loop', () => {
     expect(
       shouldAutoReloadGuestPage({
@@ -182,7 +193,7 @@ describe('auto reload storage helpers', () => {
   it('reads back the timestamp it wrote', () => {
     const storage = makeMemoryStorage();
 
-    markGuestErrorAutoReload(storage, 1_700_000_000_000);
+    expect(markGuestErrorAutoReload(storage, 1_700_000_000_000)).toBe(true);
 
     expect(storage.setItem).toHaveBeenCalledWith(
       GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY,
@@ -191,14 +202,17 @@ describe('auto reload storage helpers', () => {
     expect(readGuestErrorAutoReloadAt(storage)).toBe(1_700_000_000_000);
   });
 
-  it('returns null for missing, broken, or unavailable storage', () => {
+  it('기록이 없거나 잘못된 값이면 null을 반환한다', () => {
     expect(readGuestErrorAutoReloadAt(makeMemoryStorage())).toBeNull();
     expect(
       readGuestErrorAutoReloadAt(
         makeMemoryStorage({ [GUEST_ERROR_AUTO_RELOAD_STORAGE_KEY]: 'not-a-number' })
       )
     ).toBeNull();
-    expect(readGuestErrorAutoReloadAt(null)).toBeNull();
+  });
+
+  it('저장소에 접근할 수 없으면 undefined를 반환한다', () => {
+    expect(readGuestErrorAutoReloadAt(null)).toBeUndefined();
     expect(
       readGuestErrorAutoReloadAt({
         getItem: () => {
@@ -208,10 +222,10 @@ describe('auto reload storage helpers', () => {
           throw new Error('SecurityError');
         },
       })
-    ).toBeNull();
+    ).toBeUndefined();
   });
 
-  it('does not throw when the browser blocks storage writes', () => {
+  it('브라우저에서 저장을 막으면 기록 실패를 반환한다', () => {
     const blocked = {
       getItem: () => null,
       setItem: () => {
@@ -219,6 +233,13 @@ describe('auto reload storage helpers', () => {
       },
     };
 
-    expect(() => markGuestErrorAutoReload(blocked, 1)).not.toThrow();
+    expect(markGuestErrorAutoReload(blocked, 1)).toBe(false);
+  });
+
+  it('기록을 다시 읽을 수 있어야 저장 성공으로 간주한다', () => {
+    const storage = makeMemoryStorage();
+    storage.setItem.mockImplementation(() => {});
+
+    expect(markGuestErrorAutoReload(storage, 1)).toBe(false);
   });
 });
