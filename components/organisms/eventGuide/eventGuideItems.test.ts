@@ -21,7 +21,7 @@ describe('이벤트 안내 항목', () => {
   });
 
   it('초대장 종류별 예시는 2개 이상이고 모두 이름을 가진다', () => {
-    (['wedding', 'firstBirthday', 'birthday', 'seminar', 'etc'] as const).forEach(
+    (['wedding', 'firstBirthday', 'birthday', 'seminar', 'etc', 'bridalShower'] as const).forEach(
       type => {
         const preset = getEventGuidePreset(type);
         expect(preset.length).toBeGreaterThanOrEqual(2);

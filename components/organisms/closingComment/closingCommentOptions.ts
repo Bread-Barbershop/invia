@@ -5,6 +5,7 @@ export const CLOSING_CATEGORIES: { label: string; value: InvitationType }[] = [
   { label: '돌잔치', value: 'firstBirthday' },
   { label: '세미나', value: 'seminar' },
   { label: '생일', value: 'birthday' },
+  { label: '브라이덜샤워', value: 'bridalShower' },
   { label: 'etc.', value: 'etc' },
 ];
 
@@ -106,12 +107,32 @@ function eventOptions(category: 'seminar' | 'etc', names: ClosingExampleNames) {
   ];
 }
 
+function bridalShowerOptions(name = '') {
+  const bride = name.trim().normalize('NFC');
+  const possessive = bride ? `${bride}의 ` : '';
+  const recipient = bride ? `${bride}에게 ` : '';
+  return [
+    `${possessive}새로운 시작을 함께 축하해 주세요.`,
+    `${possessive}행복한 하루에 따뜻한 마음을 더해 주세요.`,
+    `${recipient}오늘의 축하가 가장 큰 선물이 됩니다.`,
+    `${possessive}새 출발을 함께 응원해 주세요.`,
+    `${possessive}마지막 처녀 시절을 함께 웃어 주세요.`,
+    `${possessive}앞날을 환하게 빌어 주세요.`,
+    `오늘 모인 마음이 ${possessive}새 가정에 닿기를 바라요.`,
+    `${possessive}새로운 장을 함께 열어 주세요.`,
+    `${recipient}좋은 사람들이 있다는 걸 알려 주세요.`,
+    `${possessive}웃는 얼굴을 오래 기억해 주세요.`,
+  ];
+}
+
 export function getClosingCommentOptions(
   category: InvitationType,
   names: ClosingExampleNames = {}
 ) {
   if (category === 'wedding') return weddingOptions(names.coupleNames);
   if (category === 'birthday') return birthdayOptions(names.birthdayName);
+  if (category === 'bridalShower')
+    return bridalShowerOptions(names.birthdayName);
   if (category === 'seminar' || category === 'etc')
     return eventOptions(category, names);
 

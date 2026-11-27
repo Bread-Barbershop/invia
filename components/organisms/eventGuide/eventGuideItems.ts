@@ -115,6 +115,20 @@ const PRESETS: Record<InvitationType, Omit<EventGuideItem, 'id'>[]> = {
       place: '',
     },
   ],
+  bridalShower: [
+    {
+      title: '포토 타임',
+      description: '함께 사진을 남기며 소중한 추억을 만들어요.',
+      time: '파티 중',
+      place: '포토존',
+    },
+    {
+      title: '선물 전달 & 축하',
+      description: '주인공을 위한 따뜻한 축하와 선물을 전해요.',
+      time: '파티 중',
+      place: '',
+    },
+  ],
 };
 
 export function createEventGuideItem(

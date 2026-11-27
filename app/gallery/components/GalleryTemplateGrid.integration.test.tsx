@@ -41,7 +41,14 @@ describe('초대장 갤러리', () => {
     };
   });
 
-  it.each(['all', 'wedding', 'birthday', 'seminar', 'firstBirthday'])(
+  it.each([
+    'all',
+    'wedding',
+    'birthday',
+    'seminar',
+    'firstBirthday',
+    'bridalShower',
+  ])(
     '%s 카테고리에 공용 카탈로그의 모든 해당 디자인을 표시한다',
     category => {
       renderGallery(category);

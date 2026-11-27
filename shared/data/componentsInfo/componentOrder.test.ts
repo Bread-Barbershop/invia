@@ -27,10 +27,26 @@ describe('블록 추가 패널 분류 정렬', () => {
       'wedding',
       'firstBirthday',
       'seminar',
+      'bridalShower',
       'etc',
       'layout',
     ]);
     expect(componentCls.map(category => category.english)).toEqual([
+      'wedding',
+      'firstBirthday',
+      'birthday',
+      'seminar',
+      'bridalShower',
+      'etc',
+      'layout',
+    ]);
+
+    const bridalOrdered = prioritizeComponentCategories(
+      componentCls,
+      'bridalShower'
+    );
+    expect(bridalOrdered.map(category => category.english)).toEqual([
+      'bridalShower',
       'wedding',
       'firstBirthday',
       'birthday',

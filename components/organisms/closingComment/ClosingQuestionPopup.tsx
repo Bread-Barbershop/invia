@@ -75,14 +75,14 @@ function ClosingQuestionPopup({
       wrapperClassName="h-[370px] w-[280px] px-0"
       contentClassName="min-h-0 flex-1 px-0 pb-3.5 flex flex-col "
     >
-      <div className="flex px-2.5 gap-2.5 pt-2.5 pb-1.5">
+      <div className="grid grid-cols-3 gap-x-2.5 gap-y-1 px-2.5 pt-2.5 pb-1.5">
         {CLOSING_CATEGORIES.map(category => (
           <button
             key={category.value}
             aria-pressed={activeCategory === category.value}
             onClick={() => setActiveCategory(category.value)}
             className={cn(
-              'flex-1 py-1.5 text-[13px] font-normal transition-colors',
+              'min-w-0 truncate py-1.5 text-[13px] font-normal transition-colors',
               activeCategory === category.value
                 ? 'border-b-[1.5px] border-text-primary text-text-primary font-medium'
                 : 'text-text-secondary hover:text-text-primary'
@@ -93,10 +93,16 @@ function ClosingQuestionPopup({
         ))}
       </div>
 
-      {(isEvent || activeCategory === 'birthday') && (
+      {(isEvent || activeCategory === 'birthday' || activeCategory === 'bridalShower') && (
         <TextField
           className="px-2.5 pb-2"
-          label={isEvent ? '행사명' : '생일 주인공'}
+          label={
+            isEvent
+              ? '행사명'
+              : activeCategory === 'bridalShower'
+                ? '예비 신부'
+                : '생일 주인공'
+          }
           inputProps={{
             placeholder: '선택 입력',
             className: 'min-w-0',

@@ -227,6 +227,23 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
   'showcase-42': original('birthday_11', ['고운 바탕', 'SUIT']),
   'showcase-43': original('birthday_12', ['SUIT']),
   'showcase-44': original('wedding_15', ['고운 바탕', 'SUIT']),
+  'showcase-45': original('bridalShower_01', [
+    'Cormorant Garamond',
+    '고운 바탕',
+    '나눔 스퀘어 네오',
+  ]),
+  'showcase-46': original('bridalShower_02', [
+    '나눔 스퀘어 네오',
+    'Bodoni Moda',
+    'Hahmlet',
+    'Cormorant Garamond',
+  ]),
+  'showcase-47': original('bridalShower_03', [
+    'Italianno',
+    'Hahmlet',
+    'Cormorant Garamond',
+    'Prata',
+  ]),
   'showcase-51': original('seminar_10', ['Pretendard', 'Noto Serif KR']),
 };
 

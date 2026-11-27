@@ -96,7 +96,7 @@ describe('ContentsArea 컴포넌트', () => {
     expect(mockSetIsEdit).toHaveBeenCalledWith(false);
   });
 
-  it('4개 행사 분류에 템플릿 선택을 제공하고 기타 분류는 제외한다', () => {
+  it('행사 분류마다 템플릿 선택을 제공하고 기타 분류는 제외한다', () => {
     render(
       <ContentsArea
         scrollContainerRef={scrollContainerRef}
@@ -110,12 +110,17 @@ describe('ContentsArea 컴포넌트', () => {
     const templateButtons = screen.getAllByRole('button', {
       name: /템플릿 선택 열기/,
     });
-    expect(templateButtons).toHaveLength(4);
+    expect(templateButtons).toHaveLength(5);
 
     fireEvent.click(
       screen.getByRole('button', { name: '돌잔치 템플릿 선택 열기' })
     );
     expect(mockOpenTemplatePicker).toHaveBeenCalledWith('firstBirthday');
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '브라이덜샤워 템플릿 선택 열기' })
+    );
+    expect(mockOpenTemplatePicker).toHaveBeenCalledWith('bridalShower');
   });
 
   it('지금 만드는 초대장 분류를 맨 앞에 두고 표시를 붙인다', () => {

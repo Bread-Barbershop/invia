@@ -45,6 +45,11 @@ const PRESETS: Partial<
     { label: '초대장 링크 저장', note: '당일 입장할 때 필요해요.' },
     { label: '편한 복장', note: '오래 머물러도 편하게요.' },
   ],
+  bridalShower: [
+    { label: '초대장 링크 저장', note: '당일 입장할 때 필요해요.' },
+    { label: '드레스코드 확인', note: '파티 분위기에 맞는 옷차림을 준비해 주세요.' },
+    { label: '카메라', note: '주인공과의 특별한 순간을 남겨 주세요.' },
+  ],
 };
 
 export function createChecklistItem(

@@ -63,6 +63,12 @@ describe('초대장 카드 미리보기', () => {
     );
     expectCurrentInvitation('정갈한 혼례 초대', 'showcase-44');
     await user.click(screen.getByRole('button', { name: '다음 초대장' }));
+    expectCurrentInvitation('샴페인 가든 브런치', 'showcase-45');
+    await user.click(screen.getByRole('button', { name: '다음 초대장' }));
+    expectCurrentInvitation('시티 호텔 파자마 파티', 'showcase-46');
+    await user.click(screen.getByRole('button', { name: '다음 초대장' }));
+    expectCurrentInvitation('화이트 리본 티파티', 'showcase-47');
+    await user.click(screen.getByRole('button', { name: '다음 초대장' }));
     expectCurrentInvitation('빛이 머문 방', 'showcase-51');
     await user.click(screen.getByRole('button', { name: '다음 초대장' }));
     expectCurrentInvitation('클래식 모먼트', 'showcase-0');

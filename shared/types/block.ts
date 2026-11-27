@@ -18,6 +18,7 @@ export type InvitationType =
   | 'wedding'
   | 'firstBirthday'
   | 'birthday'
+  | 'bridalShower'
   | 'seminar'
   | 'etc';
 
