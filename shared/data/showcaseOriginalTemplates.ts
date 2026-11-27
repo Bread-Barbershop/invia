@@ -185,6 +185,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'Barlow Condensed',
   ]),
   'showcase-31': original('firstBirthday_09', ['SUIT', '고운 바탕']),
+  'showcase-48': original('firstBirthday_10', ['고운 바탕', 'SUIT']),
   'showcase-32': original('birthday_05', [
     'SUIT',
     'Anton',
@@ -211,6 +212,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'LINESeedKR',
     '고운 바탕',
   ]),
+  'showcase-49': original('birthday_13', ['고운 바탕']),
   'showcase-37': original('seminar_06', [
     'SUIT',
     'DM Serif Display',
@@ -244,6 +246,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'Cormorant Garamond',
     'Prata',
   ]),
+  'showcase-50': original('bridalShower_04', ['Pretendard', '고운 바탕']),
   'showcase-51': original('seminar_10', ['Pretendard', 'Noto Serif KR']),
 };
 

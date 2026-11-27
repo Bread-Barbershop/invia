@@ -652,4 +652,156 @@ export const birthdayCollection: ShowcaseInvitation[] = [
       },
     ],
   },
+  {
+    name: '한 해의 마지막 식탁',
+    description: '촛불과 와인, 집에서 차리는 작은 송년 저녁 초대장.',
+    palette: ['#F8F3EA', '#FA7564', '#000000'],
+    eyebrow: 'A YEAR-END DINNER',
+    heading: '한 해의 마지막 식탁',
+    date: '2026-12-20',
+    time: '19:00',
+    venue: '연남동 작은 식탁',
+    venueAddress: '서울특별시 마포구 동교로 233',
+    venueLat: 37.5609199,
+    venueLng: 126.9240616,
+    font: '고운 바탕',
+    bodyFont: 'LINESeedKR',
+    sectionStyle: 'paper',
+    id: 'showcase-49',
+    type: 'birthday',
+    message: [
+      '12월 20일 저녁, 집에서 작은 저녁을 차립니다.',
+      '한 해 동안 각자의 자리에서 애쓴 것들, 잠깐 내려놓고 따뜻한 것 먹으면서 이야기 나누면 좋겠어요.',
+      '화려한 자리는 아니고요. 제가 좋아하는 것들로 천천히 준비해 두겠습니다.',
+      '와인은 제가 고른 걸로 몇 병, 나머지는 편하게 오세요. 사람이 많지 않으니 부담 갖지 마시고, 오실 수 있는 분은 12월 10일까지 알려주세요.',
+    ],
+    sections: [
+      { component: 'greeting' },
+      {
+        component: 'countdown',
+        title: '우리의 마지막 식탁',
+        eventDateTime: '2026-12-20T19:00',
+        onDayMessage: '오늘, 식탁에 앉아 주셔서 고맙습니다.',
+        afterMessage: '함께해 주셔서 고맙습니다. 내년에도 또 봬요.',
+      },
+      {
+        component: 'calendar',
+        title: '일시',
+        subTitle: 'DATE & TIME',
+        template: 'calendarType7',
+      },
+      {
+        component: 'place',
+        title: '오시는 곳',
+        subTitle: 'LOCATION',
+        detail: '초록 문, 2층 (자세한 위치는 개별로 알려드릴게요)',
+        address: '서울특별시 마포구 동교로 233',
+        lat: 37.5609199,
+        lng: 126.9240616,
+      },
+      {
+        component: 'transportation',
+        title: '연남동까지 오는 길',
+        subwayLine: '2호선·경의중앙선·공항철도',
+        subwayStation: '홍대입구역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '홍대입구역 3번 출구에서 동교로를 따라 도보 10분입니다. 초록 문이 보이면 2층으로 올라와 주세요.',
+        busRoutes: '동교동삼거리 정류장에서 내리면 골목 입구가 바로 보여요.',
+        parkingHours:
+          '골목 안은 주차가 어려워요. 근처 공영주차장을 이용하시고 3분 걸어오세요.',
+      },
+      {
+        component: 'timeline',
+        title: '저녁의 순서',
+        items: [
+          {
+            time: '18:30',
+            title: '도착',
+            description: '문 열어 둡니다. 와인 한 잔 먼저.',
+          },
+          {
+            time: '19:00',
+            title: '저녁 시작',
+            description: '전채부터 천천히. 따뜻할 때 드세요.',
+          },
+          {
+            time: '20:30',
+            title: '식탁 위 이야기',
+            description: '디저트와 함께, 한 해에 하고 싶었던 말들.',
+          },
+          {
+            time: '22:00',
+            title: '마무리',
+            description: '택시 잡아 드릴게요. 늦게까지 계셔도 괜찮습니다.',
+          },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '저녁 메뉴',
+        subtitle: 'Dinner Menu',
+        style: 'tasting',
+        note: '와인은 집에 있는 걸로 꺼내 놓았어요. 마실 것 하나씩 가져오셔도 좋습니다.',
+        courses: [
+          {
+            name: '앞접시',
+            dishes: [{ name: '밤 크림 수프', description: '군밤과 트러플 오일' }],
+          },
+          {
+            name: '메인',
+            dishes: [
+              { name: '소갈비 스튜', description: '뿌리채소와 함께, 따뜻하게' },
+            ],
+          },
+          {
+            name: '디저트',
+            dishes: [{ name: '귤 크렘 브릴레', description: '제철 귤과 생크림' }],
+          },
+        ],
+      },
+      {
+        component: 'gallery',
+        title: '갤러리',
+        subTitle: 'GALLERY',
+        template: 'galleryType1',
+        ratio: '3:4',
+        images: [
+          'https://lh3.googleusercontent.com/d/1Sl9Kq7q0tTBzQmWPJzBD4-FY2QHPe0M0',
+          'https://lh3.googleusercontent.com/d/1T6pa0rvUk-mCXGPyce2wcOemCQ_HLKDP',
+        ],
+      },
+      {
+        component: 'dressCode',
+        title: '옷차림',
+        colors: ['#F1DED9', '#E5E7EB', '#E1EBDD'],
+        guidelines: [
+          '편한 옷으로 오세요. 바닥에 앉을 수도 있으니 따뜻한 양말 하나 챙겨 주세요.',
+        ],
+      },
+      {
+        component: 'faq',
+        title: '궁금할 만한 것들',
+        items: [
+          {
+            question: '몇 시까지 있으면 되나요?',
+            answer:
+              '편한 시간에 오셔서 편한 시간에 가시면 돼요. 늦게까지 계셔도 괜찮습니다.',
+          },
+          {
+            question: '뭘 가져가면 좋을까요?',
+            answer: '손은 비우고 오셔도 좋아요. 마실 것 하나씩 챙겨 오시면 더 좋고요.',
+          },
+          {
+            question: '주차는 어떻게 하나요?',
+            answer: '골목엔 자리가 잘 없어요. 버스나 택시로 오시는 걸 추천합니다.',
+          },
+        ],
+      },
+      {
+        component: 'closingComment',
+        message: '12월 20일, 식탁에서 기다릴게요.',
+      },
+    ],
+  },
 ];

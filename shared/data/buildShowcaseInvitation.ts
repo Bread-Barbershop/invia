@@ -23,7 +23,7 @@ export function buildShowcaseInvitation(design: ShowcaseInvitation) {
         isDefault: false,
       },
       bodyData: {
-        font: 'SUIT',
+        font: design.bodyFont ?? 'SUIT',
         fontSize: design.largePrint ? '24px' : '14px',
         fontWeight: '400',
         color: text,
