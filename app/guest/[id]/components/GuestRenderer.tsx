@@ -18,6 +18,7 @@ import { isBlockEnabled } from '@/shared/data/registry/blockAvailability';
 import { blockRegistry } from '@/shared/data/registry/registry';
 import { getFontFaces } from '@/shared/fonts/fontRegistry';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
+import type { EditorBlock } from '@/shared/types/block';
 import { usesDarkInvitationCards } from '@/shared/utils/invitationBackgroundColor';
 import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
 
@@ -26,7 +27,6 @@ import { GuestPrivacyNotice } from './GuestPrivacyNotice';
 import { hasGuestBlockContent } from './hasGuestBlockContent';
 
 import type { NormalizedGuestPayload } from '../validation/parseGuestPayload';
-import type { EditorBlock } from '@/shared/types/block';
 
 type GuestRendererBlock = NormalizedGuestPayload['blocks'][number];
 type GuestRendererBulkData = NormalizedGuestPayload['bulkData'];
