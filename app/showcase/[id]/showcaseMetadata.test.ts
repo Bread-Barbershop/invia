@@ -62,6 +62,34 @@ describe('buildShowcaseMetadata', () => {
     expect(metadata.twitter).toBeUndefined();
   });
 
+  it('공유 카드 이미지의 대체 텍스트도 같은 제목을 따른다', () => {
+    const design = findDesign('showcase-21');
+    const metadata = buildShowcaseMetadata(design.id);
+
+    expect(metadata.openGraph?.images).toEqual([
+      expect.objectContaining({
+        alt: `${design.name} 돌잔치 초대장 표지`,
+      }),
+    ]);
+  });
+
+  it('이름에 이미 카테고리나 “초대”가 있으면 같은 말을 두 번 쓰지 않는다', () => {
+    const titleOf = (name: string) => {
+      const design = SHOWCASE_INVITATIONS.find(
+        invitation => invitation.name === name
+      );
+      if (!design) throw new Error(`테스트 기준 템플릿이 없습니다: ${name}`);
+      return buildShowcaseMetadata(design.id).title;
+    };
+
+    expect(titleOf('브릭 시티 웨딩')).toBe('브릭 시티 웨딩 초대장');
+    expect(titleOf('프리즘 광학 세미나')).toBe('프리즘 광학 세미나 초대장');
+    expect(titleOf('별 아래 생일 캠프')).toBe('별 아래 생일 캠프 초대장');
+    expect(titleOf('민준이의 첫 초대')).toBe('민준이의 첫 초대장');
+    expect(titleOf('정갈한 혼례 초대')).toBe('정갈한 혼례 초대장');
+    expect(titleOf('클래식 모먼트')).toBe('클래식 모먼트 웨딩 초대장');
+  });
+
   it('공개된 템플릿 전부 자기 이름이 들어간 메타데이터를 만든다', () => {
     SHOWCASE_INVITATIONS.forEach(design => {
       const metadata = buildShowcaseMetadata(design.id);
