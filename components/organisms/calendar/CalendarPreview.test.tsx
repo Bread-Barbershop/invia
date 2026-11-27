@@ -194,3 +194,32 @@ describe.each([
     }
   );
 });
+
+describe('하객 화면 일정 저장', () => {
+  beforeEach(() => useEditorStore.getState().reset());
+
+  it('하객 화면에서 날짜가 있으면 캘린더 저장·Google 캘린더를 보여준다', () => {
+    renderPreview(
+      { ...block, props: { ...block.props, date: '2026-03-09' } },
+      true
+    );
+
+    expect(
+      screen.getByRole('button', { name: '캘린더에 저장' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Google 캘린더' })
+    ).toBeInTheDocument();
+  });
+
+  it('편집 미리보기에서는 일정 저장 버튼을 그리지 않는다', () => {
+    renderPreview({ ...block, props: { ...block.props, date: '2026-03-09' } });
+
+    expect(
+      screen.queryByRole('button', { name: '캘린더에 저장' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Google 캘린더' })
+    ).not.toBeInTheDocument();
+  });
+});

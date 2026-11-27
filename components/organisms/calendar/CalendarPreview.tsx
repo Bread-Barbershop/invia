@@ -12,6 +12,7 @@ import { getCalendarMessageHtml } from './calendarMessage';
 import styles from './calendarPreview.module.css';
 import { CalendarTemplates, DDayCountdown } from './components';
 import { CalendarCard } from './components/CalendarCard';
+import { CalendarSaveActions } from './components/CalendarSaveActions';
 import { useCalendarData } from './hooks/useCalendarData';
 
 import type { CSSProperties } from 'react';
@@ -22,7 +23,32 @@ interface Props {
   language?: 'ko' | 'en';
   titleClassName?: string;
   isGuestPage?: boolean;
+  /** 하객 화면에서 장소 블록의 장소명·주소를 일정 장소로 넘겨받는다. */
+  calendarLocation?: string;
   onClick: () => void;
+}
+
+// 쇼케이스·템플릿이 쓰는 기본 섹션 제목은 일정 이름으로 쓰지 않는다.
+const GENERIC_SECTION_TITLES = new Set([
+  '예식 일시',
+  '행사일시',
+  '행사 일시',
+  '일시',
+  '날짜',
+]);
+
+function resolveCalendarEventTitle({
+  title,
+  type,
+}: {
+  title?: string;
+  type: EditorBlock<'calendar'>['type'];
+}) {
+  const trimmed = title?.trim() ?? '';
+  if (trimmed.length > 0 && !GENERIC_SECTION_TITLES.has(trimmed)) {
+    return trimmed;
+  }
+  return type === 'wedding' ? '예식 일정' : '행사 일정';
 }
 
 export function CalendarPreview({
@@ -31,6 +57,7 @@ export function CalendarPreview({
   language: requestedLanguage,
   titleClassName,
   isGuestPage = false,
+  calendarLocation,
   ...rest
 }: Props) {
   const {
@@ -154,6 +181,18 @@ export function CalendarPreview({
               seoulTime={Boolean(cardType)}
               isDefaultMessage={!hasSavedMessage}
               messageHtml={getCalendarMessageHtml(blockInfo)}
+            />
+          )}
+
+          {isGuestPage && (
+            <CalendarSaveActions
+              title={resolveCalendarEventTitle({
+                title,
+                type: blockInfo.type,
+              })}
+              date={date}
+              time={time}
+              {...(calendarLocation ? { location: calendarLocation } : {})}
             />
           )}
         </>
