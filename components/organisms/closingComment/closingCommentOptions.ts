@@ -6,6 +6,7 @@ export const CLOSING_CATEGORIES: { label: string; value: InvitationType }[] = [
   { label: '세미나', value: 'seminar' },
   { label: '생일', value: 'birthday' },
   { label: '브라이덜샤워', value: 'bridalShower' },
+  { label: '전시·팝업', value: 'exhibition' },
   { label: 'etc.', value: 'etc' },
 ];
 
@@ -125,10 +126,31 @@ function bridalShowerOptions(name = '') {
   ];
 }
 
+function exhibitionOptions(names: ClosingExampleNames) {
+  const event = names.eventName?.trim().normalize('NFC') || '이번 전시';
+  const subject = withParticle(event, '이', '가', '전시가');
+  const object = withParticle(event, '을', '를', '전시를');
+  const organizer = names.organizerName?.trim().normalize('NFC') || '저희';
+  const host = withParticle(organizer, '이', '가', '측이');
+  return [
+    `${event}의 첫날에 함께해 주세요.`,
+    `${event}에 오시는 걸음이 작품을 완성합니다.`,
+    `${event}에서 천천히 둘러보세요. 서두르지 않으셔도 됩니다.`,
+    `${object} 함께 보고, 한참 이야기 나누고 가세요.`,
+    `${host} 준비한 자리입니다. 편하게 오세요.`,
+    `${event}에 보내주신 관심에 감사드립니다.`,
+    `${event}의 저녁을 함께 열어 주세요.`,
+    `${subject} 더 오래 기억되도록 함께해 주세요.`,
+    `${event}에서 맞이할 수 있어 기쁩니다.`,
+    `오시는 길에 궁금한 점이 있으면 언제든 알려 주세요.`,
+  ];
+}
+
 export function getClosingCommentOptions(
   category: InvitationType,
   names: ClosingExampleNames = {}
 ) {
+  if (category === 'exhibition') return exhibitionOptions(names);
   if (category === 'wedding') return weddingOptions(names.coupleNames);
   if (category === 'birthday') return birthdayOptions(names.birthdayName);
   if (category === 'bridalShower')

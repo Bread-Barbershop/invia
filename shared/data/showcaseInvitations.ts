@@ -2,6 +2,7 @@ import type { InvitationType } from '@/shared/types/block';
 
 import { birthdayCollection } from './showcaseBirthdayCollection';
 import { bridalShowerCollection } from './showcaseBridalShowerCollection';
+import { exhibitionCollection } from './showcaseExhibitionCollection';
 import { familyCelebrationCollection } from './showcaseFamilyCelebrationCollection';
 import { firstBirthdayCollection } from './showcaseFirstBirthdayCollection';
 import { SHOWCASE_PHOTOS } from './showcaseImages';
@@ -70,6 +71,7 @@ export const SHOWCASE_CATEGORY_LABELS = {
   birthday: '생일',
   firstBirthday: '돌잔치',
   bridalShower: '브라이덜샤워',
+  exhibition: '전시·팝업',
 } as const;
 
 // 표지에 담긴 날짜·이름·분위기를 본문에서도 이어가는, 공개용 완성 샘플이다.
@@ -2664,6 +2666,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
   ...familyCelebrationCollection,
   ...bridalShowerCollection,
   ...studioCollection,
+  ...exhibitionCollection,
 ];
 
 export function getShowcaseInvitation(id: string) {

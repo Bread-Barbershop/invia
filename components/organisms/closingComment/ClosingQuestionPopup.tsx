@@ -62,7 +62,10 @@ function ClosingQuestionPopup({
     birthdayName,
     organizerName: organizer || organizerName,
   });
-  const isEvent = activeCategory === 'seminar' || activeCategory === 'etc';
+  const isEvent =
+    activeCategory === 'seminar' ||
+    activeCategory === 'etc' ||
+    activeCategory === 'exhibition';
   const nameField = isEvent ? 'eventName' : 'birthdayName';
 
   return (
@@ -98,7 +101,9 @@ function ClosingQuestionPopup({
           className="px-2.5 pb-2"
           label={
             isEvent
-              ? '행사명'
+              ? activeCategory === 'exhibition'
+                ? '전시·행사명'
+                : '행사명'
               : activeCategory === 'bridalShower'
                 ? '예비 신부'
                 : '생일 주인공'

@@ -28,6 +28,11 @@ const PRESETS: Record<string, Omit<TimelineItem, 'id'>[]> = {
     { time: '14:30', title: '함께하는 시간', description: '질문 카드와 짧은 게임을 나눠요.' },
     { time: '15:30', title: '디저트와 사진', description: '케이크를 자르고 단체 사진을 남겨요.' },
   ],
+  exhibition: [
+    { time: '18:00', title: '문 열기', description: '첫 잔을 들고 천천히 둘러보세요.' },
+    { time: '18:30', title: '작가의 말', description: '오늘의 작품을 직접 소개합니다.' },
+    { time: '19:30', title: '자유 관람', description: '문 닫을 때까지 편하게 머무르세요.' },
+  ],
 };
 
 const EMPTY_ITEM = { time: '', title: '', description: '' };

@@ -12,6 +12,7 @@ describe('InvitationTemplatePicker', () => {
     ['birthday', '별 아래 생일 캠프', 'showcase-36'],
     ['seminar', '커피 감각 연구소', 'showcase-40'],
     ['bridalShower', '시티 호텔 파자마 파티', 'showcase-46'],
+    ['exhibition', '손의 시간, 도자', 'showcase-56'],
   ] as const)(
     '%s 탭에서 아홉 번째 템플릿을 선택할 수 있다',
     (type, name, id) => {

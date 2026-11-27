@@ -110,7 +110,7 @@ describe('ContentsArea 컴포넌트', () => {
     const templateButtons = screen.getAllByRole('button', {
       name: /템플릿 선택 열기/,
     });
-    expect(templateButtons).toHaveLength(5);
+    expect(templateButtons).toHaveLength(6);
 
     fireEvent.click(
       screen.getByRole('button', { name: '돌잔치 템플릿 선택 열기' })
@@ -121,6 +121,11 @@ describe('ContentsArea 컴포넌트', () => {
       screen.getByRole('button', { name: '브라이덜샤워 템플릿 선택 열기' })
     );
     expect(mockOpenTemplatePicker).toHaveBeenCalledWith('bridalShower');
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '전시·팝업 템플릿 선택 열기' })
+    );
+    expect(mockOpenTemplatePicker).toHaveBeenCalledWith('exhibition');
   });
 
   it('지금 만드는 초대장 분류를 맨 앞에 두고 표시를 붙인다', () => {

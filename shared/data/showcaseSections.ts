@@ -137,6 +137,23 @@ export type ShowcaseSection =
     }
   | { component: 'sponsorshipInfomation'; title: string; images: string[] }
   | {
+      component: 'checklist';
+      title: string;
+      description?: string;
+      items: { label: string; note?: string }[];
+    }
+  | {
+      component: 'eventGuide';
+      title: string;
+      intro?: string;
+      items: {
+        title: string;
+        description?: string;
+        time?: string;
+        place?: string;
+      }[];
+    }
+  | {
       component: 'myChild';
       title: string;
       subTitle?: string;

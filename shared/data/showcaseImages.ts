@@ -116,4 +116,39 @@ export const SHOWCASE_PHOTOS = {
     'https://lh3.googleusercontent.com/d/1QRp-EDUNrdgtu5AGHHs_lM3J07MVKkEn',
   exhibitionCup:
     'https://lh3.googleusercontent.com/d/1tk19XEpk6nQ94zceBt2027-eq7ZRz3Rl',
+  // 전시·팝업 · 성수동 팝업 오프닝 (showcase-55)
+  exPopupGuests:
+    'https://lh3.googleusercontent.com/d/18cegbO8BrJnIF-yomPIZRPwCl0B0VSu-',
+  exPopupHost:
+    'https://lh3.googleusercontent.com/d/1qxsufpHNd3bwrUmJitL8xMkjHXDrUo1l',
+  exPopupSpace:
+    'https://lh3.googleusercontent.com/d/1aj5yxh5YSuRYK-Ga-ICUSSO-cyQ3zDfy',
+  exPopupStreet:
+    'https://lh3.googleusercontent.com/d/1u3oZAxGkxa0V1wCurOV6R4y46BCgN6Vr',
+  exPopupTable:
+    'https://lh3.googleusercontent.com/d/1aUrgQigRVG6Kk9b-r1NaX8vjHVnBPztd',
+  exPopupWrap:
+    'https://lh3.googleusercontent.com/d/12ZQx1Vlp08GA4jaSTq1eJPKVEDsQOEgr',
+  // 전시·팝업 · 북촌 도예 개인전 (showcase-56)
+  exPotteryArtist:
+    'https://lh3.googleusercontent.com/d/1QCy5OQup6nQH6xOBiw4toyemc9-3_vz6',
+  exPotteryCourtyard:
+    'https://lh3.googleusercontent.com/d/1y8jWQYNiLB-lKmGezvDhJWxPMgFjIw-P',
+  exPotteryDetail:
+    'https://lh3.googleusercontent.com/d/1j8ou-tEMSnZj-xaYE-sUeT86ubvvGUF6',
+  exPotteryTea:
+    'https://lh3.googleusercontent.com/d/1cuFeS-0CCAn-4p-yQ_o5P77SJbHBQXTM',
+  exPotteryWall:
+    'https://lh3.googleusercontent.com/d/1buQoA601VXpjmYVJQt8BsuGgYJX_T0a2',
+  // 전시·팝업 · 한남동 살롱 북토크 (showcase-57)
+  exSalonAudience:
+    'https://lh3.googleusercontent.com/d/1m8R-sUjTt7Lk_tSsq4YKHbMdDJ1FdN1s',
+  exSalonBooks:
+    'https://lh3.googleusercontent.com/d/1Uu5o-Vf3SO1pz2oIi03qzaX7XBUOD9m0',
+  exSalonHost:
+    'https://lh3.googleusercontent.com/d/1eCqoZEsUf_UYtlP45m4t1vNZMPR0N80j',
+  exSalonRoom:
+    'https://lh3.googleusercontent.com/d/1YWmicOvkM0tSLPF6yAf7GHY5Q9-Y4UOz',
+  exSalonWindow:
+    'https://lh3.googleusercontent.com/d/1XqEaFyeivdxInc6q93VXQgqpOw88yVHl',
 } as const;
