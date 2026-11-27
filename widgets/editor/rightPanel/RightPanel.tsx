@@ -117,11 +117,7 @@ function RightPanel() {
 
   return (
     <div
-      id="editor-block-panel"
-      role="region"
-      aria-label="블록 설정"
-      tabIndex={-1}
-      className={`${selectedId !== 'mainPoster' && (!typeArray || typeArray.length === 0) ? 'invisible' : 'visible'} w-93.75 h-full max-h-[810px] mr-5 min-[1540px]:mr-15 flex flex-col gap-5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`}
+      className={`${selectedId !== 'mainPoster' && (!typeArray || typeArray.length === 0) ? 'invisible' : 'visible'} w-93.75 h-full max-h-[810px] mr-5 min-[1540px]:mr-15 flex flex-col gap-5`}
     >
       <div className="w-93.75 min-h-0 h-full flex-1 bg-white rounded-lg shadow-edit flex-center flex-col gap-2 px-5 ">
         <div role="tablist" aria-label="블록 설정 보기" className="w-full h-11">

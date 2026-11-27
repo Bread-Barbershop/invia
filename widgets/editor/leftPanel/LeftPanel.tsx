@@ -18,11 +18,7 @@ function LeftPanel() {
 
   return (
     <div
-      id="editor-style-panel"
-      role="region"
-      aria-label="편집 도구"
-      tabIndex={-1}
-      className="w-93.75 max-h-[810px] ml-5 min-[1540px]:ml-15 flex flex-col gap-4 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="w-93.75 max-h-[810px] ml-5 min-[1540px]:ml-15 flex flex-col gap-4"
       data-editor-left-panel
     >
       <StylePanelSection

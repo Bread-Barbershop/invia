@@ -26,16 +26,6 @@ describe('LeftPanel 키보드 접근성', () => {
     jest.clearAllMocks();
   });
 
-  it('편집 도구 영역으로 이름을 갖고 스킵 링크의 목적지가 된다', () => {
-    mockIsEdit(false);
-    render(<LeftPanel />);
-
-    const region = screen.getByRole('region', { name: '편집 도구' });
-    expect(region).toHaveAttribute('id', 'editor-style-panel');
-    expect(region).toHaveAttribute('tabindex', '-1');
-    expect(region).toHaveAttribute('data-editor-left-panel');
-  });
-
   it('전체 스타일 접기/펼치기 버튼에 포커스 링을 준다', () => {
     mockIsEdit(false);
     render(<LeftPanel />);

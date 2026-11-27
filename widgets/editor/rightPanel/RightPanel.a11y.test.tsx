@@ -40,14 +40,6 @@ describe('RightPanel 키보드 접근성', () => {
     mockTypes(TYPE_ARRAY);
   });
 
-  it('블록 설정 영역으로 이름을 갖고 스킵 링크의 목적지가 된다', () => {
-    render(<RightPanel />);
-
-    const region = screen.getByRole('region', { name: '블록 설정' });
-    expect(region).toHaveAttribute('id', 'editor-block-panel');
-    expect(region).toHaveAttribute('tabindex', '-1');
-  });
-
   it('포스터·타입을 탭으로 읽고 선택 상태를 알린다', () => {
     render(<RightPanel />);
 
