@@ -188,6 +188,7 @@ export function Place({ blockInfo, id }: Props) {
               wrapperClassName="max-w-[480px] h-[640px]"
             >
               <DaumPostcode
+                scriptUrl="https://t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
                 defaultQuery={submittedQuery}
                 onComplete={data => {
                   searchAddress(data.address);
