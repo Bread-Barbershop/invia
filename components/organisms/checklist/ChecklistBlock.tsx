@@ -22,6 +22,7 @@ const TYPE_LABELS: Partial<Record<InvitationType, string>> = {
   firstBirthday: '돌잔치',
   birthday: '생일',
   seminar: '세미나',
+  bridalShower: '브라이덜샤워',
   etc: '기본',
 };
 
