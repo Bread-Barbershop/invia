@@ -5,6 +5,7 @@ import { familyCelebrationCollection } from './showcaseFamilyCelebrationCollecti
 import { firstBirthdayCollection } from './showcaseFirstBirthdayCollection';
 import { SHOWCASE_PHOTOS } from './showcaseImages';
 import { seminarCollection } from './showcaseSeminarCollection';
+import { studioCollection } from './showcaseStudioCollection';
 
 import type { SectionStyle } from './sectionStyles';
 import type { ShowcaseSection } from './showcaseSections';
@@ -2412,6 +2413,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
   ...birthdayCollection,
   ...seminarCollection,
   ...familyCelebrationCollection,
+  ...studioCollection,
 ];
 
 export function getShowcaseInvitation(id: string) {

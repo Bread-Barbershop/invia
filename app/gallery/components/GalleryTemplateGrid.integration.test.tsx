@@ -77,9 +77,9 @@ describe('초대장 갤러리', () => {
     await user.click(
       within(dialog).getByRole('button', { name: '다음 초대장' })
     );
-    expect(screen.getByTitle('볼드 비즈니스 초대장 내용')).toHaveAttribute(
+    expect(screen.getByTitle('빛이 머문 방 초대장 내용')).toHaveAttribute(
       'src',
-      '/showcase/showcase-12'
+      '/showcase/showcase-51'
     );
   });
 
