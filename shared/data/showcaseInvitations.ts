@@ -6,6 +6,7 @@ import { familyCelebrationCollection } from './showcaseFamilyCelebrationCollecti
 import { firstBirthdayCollection } from './showcaseFirstBirthdayCollection';
 import { SHOWCASE_PHOTOS } from './showcaseImages';
 import { seminarCollection } from './showcaseSeminarCollection';
+import { studioCollection } from './showcaseStudioCollection';
 
 import type { SectionStyle } from './sectionStyles';
 import type { ShowcaseSection } from './showcaseSections';
@@ -24,6 +25,11 @@ export type ShowcaseInvitation = {
   date: string;
   time: string;
   venue: string;
+  // 예식장 위치를 지도 블록에 그대로 연결하기 위한 실제 주소와 좌표.
+  venueAddress?: string;
+  venueLat?: number;
+  venueLng?: number;
+  venueTel?: string;
   sections: ShowcaseSection[];
   sectionStyle: SectionStyle;
 };
@@ -72,6 +78,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     id: 'showcase-0',
     name: '클래식 모먼트',
     date: '2026-08-08',
+    venue: '그랜드 하얏트 서울 · 그랜드볼룸',
+    venueAddress: '서울 용산구 소월로 322',
+    venueLat: 37.5394318,
+    venueLng: 126.997519,
     description: '한 장의 신문처럼, 오래 간직하고 싶은 우리의 첫 소식.',
     palette: ['#F8F5EF', '#705039', '#423A34'],
     eyebrow: 'THE BEGINNING OF FOREVER',
@@ -98,7 +108,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         caption:
           '촬영을 마치려던 참에 해가 났습니다. 그날 가장 좋아하게 된 사진이에요.',
       },
-      { component: 'calendar', title: '예식 일시' },
+      { component: 'calendar', title: '예식 일시', template: 'calendarType6' },
       {
         component: 'timeline',
         title: '그날의 식순',
@@ -118,7 +128,44 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '후식', dishes: ['복숭아 셔벗'] },
         ],
       },
-      { component: 'place', title: '예식장 안내' },
+      { component: 'place', title: '예식장 안내', detail: '호텔 본관 2층' },
+      {
+        component: 'transportation',
+        title: '호텔로 오시는 길',
+        subwayStation: '한강진역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '한강진역 3번 출구에서 남산 순환로를 따라 도보 약 20분입니다. 언덕길이니 택시를 이용하셔도 좋습니다.',
+        parkingHours: '예식 참석 차량은 호텔 지하 주차장에 두시고, 접수대에서 차량 번호를 등록해 주세요.',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '멀리서 축하해 주시는 분들을 위해 마음을 전하실 곳을 함께 적어 두었습니다. 오시는 길에 편한 마음으로 봐 주세요.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              {
+                name: '박민성',
+                bank: '신한은행',
+                account: '110-000-000000',
+              },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              {
+                name: '김아현',
+                bank: '국민은행',
+                account: '000-00-0000-000',
+              },
+            ],
+          },
+        ],
+      },
       {
         component: 'notice',
         title: '오늘의 신문을 드립니다',
@@ -140,6 +187,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     id: 'showcase-1',
     name: '어반 모노크롬',
     date: '2026-03-17',
+    venue: '문화역서울 284 · 대합실 홀',
+    venueAddress: '서울 중구 통일로 1',
+    venueLat: 37.5558824,
+    venueLng: 126.9715573,
     font: 'SUIT',
     description: '흑백 사진과 담백한 여백으로 전하는 단단한 약속.',
     palette: ['#FFFFFF', '#222222', '#454545'],
@@ -163,7 +214,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         story:
           '민성은 골목을 기억하고 아현은 가게 이름을 기억합니다. 낯선 동네에서도 둘이면 길을 잘 찾아요.',
       },
-      { component: 'calendar', title: '3월의 예식' },
+      { component: 'calendar', title: '3월의 예식', template: 'calendarType3' },
       {
         component: 'dressCode',
         title: '흑백사진에 담길 옷차림',
@@ -175,7 +226,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'gallery',
         title: '도시의 아침, 두 장',
-        template: 'galleryType5',
+        template: 'galleryType4',
         ratio: '4:3',
         images: [
           SHOWCASE_PHOTOS.monoCouple,
@@ -183,14 +234,43 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           SHOWCASE_PHOTOS.monoWindow,
         ],
       },
-      { component: 'place', title: '만나는 곳' },
+      { component: 'place', title: '만나는 곳', detail: '구 서울역사 1층' },
       {
         component: 'transportation',
-        title: '그랜드홀까지',
-        subwayStation: '강남역',
-        subwayExit: '11번 출구',
+        title: '서울역에서 걸어오시면',
+        subwayStation: '서울역',
+        subwayExit: '15번 출구',
         subwayWalk:
-          '테헤란로1길 입구에서 건물 로비로 들어와 8층으로 올라오세요.',
+          '서울역 15번 출구에서 구 역사 방향으로 도보 약 13분입니다. 1층 안내 데스크에서 대합실 홀로 안내해 드립니다.',
+        parkingHours: '서울역 서부 주차장을 이용하시고, 예식 참석 차량은 접수대에서 등록해 주세요.',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '흑백 사진 한 장으로 인사드리는 예식이라, 축의금도 조용히 전하실 수 있게 계좌만 남겨 둡니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'notice',
+        title: '흑백 촬영 안내',
+        heading: '필름 카메라도 환영합니다',
+        message:
+          '홀 안에서는 플래시 없이 찍어 주세요. 흑백으로 인화하고 싶은 사진이 있으면 식이 끝난 뒤 알려 주시면 함께 고르겠습니다.',
+        preset: 'shooting',
       },
       {
         component: 'faq',
@@ -214,6 +294,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     id: 'showcase-2',
     name: '블루 스카이',
     date: '2026-03-03',
+    venue: '반얀트리 클럽 앤 스파 서울 · 페스티벌 홀',
+    venueAddress: '서울 중구 장충단로 60',
+    venueLat: 37.5499721,
+    venueLng: 127.0007308,
     description: '맑은 하늘 아래, 가볍고 투명하게 피어나는 설렘.',
     palette: ['#F1F7FA', '#496D86', '#394F5F'],
     eyebrow: 'UNDER THE SAME SKY',
@@ -243,7 +327,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ratio: '1:1',
         images: [SHOWCASE_PHOTOS.skyHydrangea, SHOWCASE_PHOTOS.skyLinen],
       },
-      { component: 'place', title: '예식이 열리는 곳' },
+      { component: 'place', title: '예식이 열리는 곳', detail: '호텔 5층' },
+      {
+        component: 'transportation',
+        title: '장충단길로 오시면',
+        subwayStation: '동대입구역',
+        subwayExit: '6번 출구',
+        subwayWalk:
+          '동대입구역 6번 출구에서 장충단로를 따라 도보 약 20분입니다. 오르막이 이어지니 택시나 호텔 셔틀을 이용하셔도 좋습니다.',
+        parkingHours: '호텔 발렛과 지하 주차장을 이용하실 수 있습니다. 접수대에 차량 번호를 알려 주세요.',
+      },
       {
         component: 'timeline',
         title: '봄날의 식순',
@@ -260,7 +353,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           {
             question: '예식은 야외에서 하나요?',
             answer:
-              '예식은 실내 그랜드홀에서 진행합니다. 바깥에서 사진을 남기실 분은 가벼운 겉옷을 챙겨 주세요.',
+              '예식은 실내 페스티벌 홀에서 진행합니다. 바깥에서 사진을 남기실 분은 가벼운 겉옷을 챙겨 주세요.',
           },
         ],
       },
@@ -275,6 +368,32 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'dressCode',
+        title: '봄 하늘에 어울리는 옷',
+        colors: ['#BFD8E6', '#F3F0E7', '#6E8797'],
+        guidelines: [
+          '파란 하늘을 배경으로 사진을 찍어요. 하늘색이나 크림색을 한 가지씩 더해 주시면 사진이 환해집니다.',
+        ],
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message:
           '올봄을 떠올릴 때마다 이날의 얼굴들도 같이 떠오를 것 같아요. 민성·아현 드림',
@@ -285,7 +404,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-3',
     name: '선라이트 가든',
-    venue: '인비아 가든 · 야외 예식장',
+    venue: '세빛섬 · 가빛섬 야외 정원',
+    venueAddress: '서울 서초구 올림픽대로 2085-14',
+    venueLat: 37.511847,
+    venueLng: 126.995187,
     description: '햇살과 초록을 담은, 자연스러운 가든 세리머니.',
     palette: ['#F7F7EB', '#5C6541', '#434B36'],
     eyebrow: 'A DAY IN OUR GARDEN',
@@ -310,8 +432,17 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:40', title: '정원 식탁으로 이동' },
         ],
       },
-      { component: 'calendar', title: '가든 세리머니' },
-      { component: 'place', title: '정원 입구' },
+      { component: 'calendar', title: '가든 세리머니', template: 'calendarType8' },
+      { component: 'place', title: '정원 입구', detail: '1층 안내 데스크 앞' },
+      {
+        component: 'transportation',
+        title: '섬으로 오시는 길',
+        subwayStation: '신반포역',
+        subwayExit: '4번 출구',
+        subwayWalk:
+          '신반포역 4번 출구에서 한강공원으로 내려와 세빛섬 방향으로 도보 약 25분입니다. 예식 한 시간 전부터 가빛섬 입구까지 셔틀을 운행합니다.',
+        parkingHours: '세빛섬 주차장을 이용하시고, 접수대에서 차량 번호를 말씀해 주세요.',
+      },
       {
         component: 'mealMenu',
         title: '정원의 식탁',
@@ -329,6 +460,15 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '꽃길을 따라 자란 꽃들로 예식장을 꾸몄습니다. 축하 화환은 정중히 사양합니다.',
       },
       {
+        component: 'dressCode',
+        title: '정원에 어울리는 차림',
+        colors: ['#C9D3B4', '#F5F1E3', '#8A8F6E'],
+        guidelines: [
+          '잔디와 데크를 걸어요. 굽이 낮고 바닥이 넓은 신발을 신어 주세요.',
+          '해가 지면 한강 바람이 차가워요. 가벼운 겉옷을 하나 챙겨 주세요.',
+        ],
+      },
+      {
         component: 'faq',
         title: '정원에 오시기 전에',
         items: [
@@ -344,6 +484,26 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '식탁에 앉아 인사드리지 못한 분들을 위해 계좌를 남겨 둡니다. 마음만으로도 충분합니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message:
           '식사가 끝나도 서두르지 마세요. 나무 그늘에서 한 분씩 뵙고 싶습니다.',
@@ -354,6 +514,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-4',
     name: '로맨틱 레터',
+    venue: '그랜드 인터컨티넨탈 서울 파르나스 · 그랜드볼룸',
+    venueAddress: '서울 강남구 테헤란로 521',
+    venueLat: 37.5088823,
+    venueLng: 127.0608141,
     description: '크림빛 종이 위에 정성껏 적어 내려간 초대의 편지.',
     palette: ['#FAF7F2', '#806353', '#51443D'],
     eyebrow: 'WITH ALL OUR LOVE',
@@ -371,6 +535,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         caption: '말로는 쑥스러웠던 감사 인사도 함께 담았습니다.',
       },
       {
+        component: 'gallery',
+        title: '편지에 동봉한 사진',
+        template: 'galleryType1',
+        ratio: '3:4',
+        images: [SHOWCASE_PHOTOS.letterRings, SHOWCASE_PHOTOS.classicEnvelope],
+      },
+      {
         component: 'interview',
         title: '처음 건넨 편지',
         question: '첫 편지에는 무슨 말을 썼나요?',
@@ -378,7 +549,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '아현이 감기에 걸렸을 때 민성이 죽 통에 쪽지를 붙였어요. 다 먹으면 냉장고에 귤도 있다는 말. 아직 서랍 안에 있어요.',
         image: SHOWCASE_PHOTOS.letterRings,
       },
-      { component: 'calendar', title: '편지에 적어 둔 날' },
+      { component: 'calendar', title: '편지에 적어 둔 날', template: 'calendarType7' },
       {
         component: 'notice',
         title: '답장을 남기는 자리',
@@ -387,7 +558,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '준비한 엽서에 이름과 축하 한 줄을 적어 넣어 주세요. 신혼집에 돌아가 천천히 읽겠습니다.',
         preset: 'time',
       },
-      { component: 'place', title: '기다리고 있을 곳' },
+      { component: 'place', title: '기다리고 있을 곳', detail: '호텔 2층' },
+      {
+        component: 'transportation',
+        title: '파르나스로 오시는 길',
+        subwayStation: '삼성역',
+        subwayExit: '5번 출구',
+        subwayWalk:
+          '삼성역 5번 출구에서 지하 연결통로로 호텔 로비까지 도보 4분입니다. 엘리베이터로 2층에 오르면 그랜드볼룸입니다.',
+        parkingHours: '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
+      },
       {
         component: 'mealMenu',
         title: '편지 곁의 찻상',
@@ -405,6 +585,26 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '화환 대신 손글씨 한 줄을 부탁드려요. 두고두고 꺼내 읽을게요.',
       },
       {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '찾아오시는 길이 멀어 마음만 전하고 싶으신 분들을 위해 계좌를 적어 둡니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message:
           '와 주시면 손을 잡고 직접 인사드릴게요. 사랑을 담아, 민성·아현 올림',
@@ -415,6 +615,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-5',
     name: '오거스트 에디토리얼',
+    venue: '페어몬트 앰배서더 서울 · 그랜드 볼룸',
+    venueAddress: '서울 영등포구 여의대로 108',
+    venueLat: 37.5251539,
+    venueLng: 126.929072,
     font: 'SUIT',
     description: '선명한 날짜와 여백이 만드는 현대적인 웨딩 에디토리얼.',
     palette: ['#FFFFFF', '#344E57', '#394348'],
@@ -456,6 +660,14 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'dressCode',
+        title: '표지 화보의 색',
+        colors: ['#344E57', '#E7E1D5', '#A8B8B9'],
+        guidelines: [
+          '화보 촬영은 로비와 루프톱에서 진행해요. 청록이나 크림, 회색 계열을 하나씩 더해 주시면 사진이 잘 어울립니다.',
+        ],
+      },
+      {
         component: 'mealMenu',
         title: '리셉션 메뉴',
         subtitle: 'August Issue',
@@ -465,12 +677,43 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '디저트', dishes: ['바닐라 아이스크림과 자두'] },
         ],
       },
-      { component: 'place', title: '그랜드홀로 오시는 길' },
+      { component: 'place', title: '그랜드볼룸으로 오시는 길', detail: '호텔 3층' },
       {
         component: 'transportation',
-        title: '차를 가져오실 분께',
-        parkingHours: '예식 참석 차량은 두 시간 주차할 수 있습니다.',
+        title: '여의도로 오시는 길',
+        subwayStation: '여의도역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '여의도역 3번 출구에서 지하 보도를 따라 도보 약 12분입니다. 비가 오는 날에는 보도로 계속 이어집니다.',
+        parkingHours:
+          '예식 참석 차량은 호텔 지하 주차장을 두 시간 무료로 이용하실 수 있습니다.',
         alternativeParking: '귀가 전 1층 로비에서 차량 번호를 등록해 주세요.',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'notice',
+        title: '8월호 촬영 안내',
+        heading: '루프톱에서 단체 사진',
+        message:
+          '리셉션이 끝나면 루프톱으로 올라가 한 장씩 찍어요. 해가 지기 전 20분이 가장 예쁜 빛입니다.',
+        preset: 'shooting',
       },
       {
         component: 'closingComment',
@@ -482,6 +725,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-6',
     name: '콰이어트 프로미스',
+    venue: '조선 팰리스 서울 강남 · 그랜드볼룸',
+    venueAddress: '서울 강남구 테헤란로 231',
+    venueLat: 37.5028999,
+    venueLng: 127.0413106,
     description: '절제된 흑백과 세리프에 담긴 조용하고 깊은 마음.',
     palette: ['#FBFBF9', '#373737', '#505050'],
     eyebrow: 'WE ARE GETTING MARRIED',
@@ -507,6 +754,20 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       { component: 'calendar', title: '예식 일시' },
       {
+        component: 'myFamilyWedding',
+        title: '두 사람을 키운 가족',
+        groomFamilySuffix: '의 아들 민성',
+        brideFamilySuffix: '의 딸 아현',
+        groomFamily: [
+          { relation: '아버지', name: '박정호' },
+          { relation: '어머니', name: '이선영' },
+        ],
+        brideFamily: [
+          { relation: '아버지', name: '김도현' },
+          { relation: '어머니', name: '최은주' },
+        ],
+      },
+      {
         component: 'mealMenu',
         title: '서약 뒤의 저녁',
         subtitle: 'Quiet Dinner',
@@ -528,7 +789,37 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         declineMessage:
           '작은 예식이라 축하 화환은 사양합니다. 두 사람이 서약을 읽는 순간 함께 앉아 주시면 기쁘겠습니다.',
       },
-      { component: 'place', title: '예식 장소' },
+      { component: 'place', title: '예식 장소', detail: '호텔 2층' },
+      {
+        component: 'transportation',
+        title: '조용한 오후로 오시는 길',
+        subwayStation: '역삼역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '역삼역 3번 출구에서 테헤란로를 따라 도보 약 10분입니다. 호텔 로비에서 2층으로 안내해 드립니다.',
+        parkingHours:
+          '호텔 지하 주차장에 세우시고, 접수대에서 차량 번호를 알려 주세요.',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '작은 예식이라 자리를 따로 만들지 못했습니다. 멀리서 축하해 주시는 마음은 이곳으로 받겠습니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
       {
         component: 'faq',
         title: '조용한 예식이라',
@@ -542,7 +833,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'afterParty',
         title: '서약 뒤의 식탁',
-        venue: '그랜드홀 옆 식사 공간',
+        venue: '호텔 2층 라운지',
         dateTime: '예식 후 오후 4시',
         description: '두 사람이 테이블을 돌며 직접 인사드리겠습니다.',
       },
@@ -552,6 +843,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-7',
     name: '아워 서머 필름',
+    venue: '파크 하얏트 서울 · 그랜드 볼룸',
+    venueAddress: '서울 강남구 테헤란로 606',
+    venueLat: 37.5085791,
+    venueLng: 127.0641676,
     font: '고운 바탕',
     description: '초록 언덕과 파란 하늘, 한 편의 여름 영화 같은 날.',
     palette: ['#EFF5F2', '#426A64', '#344D46'],
@@ -592,7 +887,36 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:45', title: '엔딩 크레디트 대신 단체 사진' },
         ],
       },
-      { component: 'place', title: '예식이 열리는 곳' },
+      {
+        component: 'mealMenu',
+        title: '상영 뒤의 식탁',
+        subtitle: 'Summer Table',
+        style: 'garden',
+        courses: [
+          { name: '첫 장면', dishes: ['토마토와 복숭아 샐러드'] },
+          { name: '메인', dishes: ['허브 로스트 치킨과 구운 채소'] },
+          { name: '엔딩', dishes: ['바닐라 아이스크림'] },
+        ],
+      },
+      {
+        component: 'dressCode',
+        title: '여름 필름의 색',
+        colors: ['#426A64', '#DCE7D8', '#F0E6D2'],
+        guidelines: [
+          '초록과 크림, 두 가지 색을 맞춰 입으면 사진이 한 편의 영화처럼 남습니다. 린넨 소재를 추천해요.',
+        ],
+      },
+      { component: 'place', title: '예식이 열리는 곳', detail: '호텔 2층' },
+      {
+        component: 'transportation',
+        title: '초록 언덕으로 오시는 길',
+        subwayStation: '삼성역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '삼성역 3번 출구에서 도보 3분입니다. 호텔 2층으로 올라오시면 그랜드 볼룸이 나옵니다.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
+      },
       {
         component: 'notice',
         title: '예식 뒤 포토 타임',
@@ -604,7 +928,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'afterParty',
         title: '촬영이 끝나면',
-        venue: '그랜드홀 연회장',
+        venue: '호텔 2층 연회장',
         dateTime: '단체 사진을 찍은 뒤',
         description:
           '같은 테이블에 둘러앉아 방금 찍은 사진들을 같이 보려고 합니다.',
@@ -619,6 +943,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-8',
     name: '앰버 시티',
+    venue: '인터컨티넨탈 서울 코엑스 · 하모니 볼룸',
+    venueAddress: '서울 강남구 봉은사로 524',
+    venueLat: 37.5126864,
+    venueLng: 127.0574219,
     font: 'SUIT',
     description: '도시의 깊은 색과 앰버 포인트로 완성한 시크한 초대.',
     palette: ['#F6F2EB', '#95622D', '#494037'],
@@ -646,7 +974,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'afterParty',
         title: '예식 뒤의 건배',
-        venue: '그랜드홀 옆 라운지',
+        venue: '호텔 2층 앰버 라운지',
         dateTime: '예식 후 오후 4시',
         description:
           '앰버빛 라운지에서 웰컴 드링크와 작은 접시 요리를 나눕니다.',
@@ -665,7 +993,16 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       { component: 'calendar', title: '예식 시작' },
-      { component: 'place', title: '예식과 리셉션' },
+      {
+        component: 'timeline',
+        title: '도시의 오후 일정',
+        items: [
+          { time: '15:00', title: '하모니 볼룸 예식' },
+          { time: '15:40', title: '로비에서 기념사진' },
+          { time: '16:00', title: '앰버 라운지 건배' },
+        ],
+      },
+      { component: 'place', title: '예식과 리셉션', detail: '호텔 2층' },
       {
         component: 'dressCode',
         title: '라운지의 색',
@@ -677,10 +1014,32 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'transportation',
         title: '지하철로 오시면',
-        subwayStation: '강남역',
-        subwayExit: '11번 출구',
+        subwayStation: '봉은사역',
+        subwayExit: '6번 출구',
         subwayWalk:
-          '출구에서 테헤란로1길로 들어오세요. 로비에서 그랜드홀로 안내해 드립니다.',
+          '봉은사역 6번 출구에서 봉은사로를 따라 도보 약 6분입니다. 호텔 로비에서 2층으로 안내해 드립니다.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 라운지 입구에서 차량 번호를 등록해 주세요.',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '자리에 오지 못하더라도 마음은 충분히 받고 있습니다. 계좌는 참고로만 봐 주세요.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -692,6 +1051,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     ...wedding,
     id: 'showcase-9',
     name: '위켄드 인 러브',
+    venue: '더 리버사이드 호텔 서울 · 그랜드볼룸',
+    venueAddress: '서울 서초구 강남대로107길 6',
+    venueLat: 37.518644,
+    venueLng: 127.0181008,
     font: 'SUIT',
     description: '산책처럼 편안하고, 여행처럼 설레는 우리의 초대.',
     palette: ['#FFFFFF', '#5B7059', '#3E483C'],
@@ -733,7 +1096,17 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { name: '후식', dishes: ['레몬 케이크'] },
         ],
       },
-      { component: 'place', title: '산책의 출발점' },
+      { component: 'place', title: '산책의 출발점', detail: '호텔 3층' },
+      {
+        component: 'transportation',
+        title: '신사역에서 걸어오시면',
+        subwayStation: '신사역',
+        subwayExit: '4번 출구',
+        subwayWalk:
+          '신사역 4번 출구에서 강남대로107길로 들어와 도보 약 7분입니다. 길을 따라 걸으면 강변 산책로가 먼저 보입니다.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 등록해 주세요.',
+      },
       {
         component: 'notice',
         title: '걷기 좋은 신발',
@@ -744,7 +1117,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       {
         component: 'afterParty',
         title: '식후에 가볍게 한 바퀴',
-        venue: '웨딩홀 앞마당',
+        venue: '호텔 앞 강변 산책로',
         dateTime: '식사 후',
         description: '시간 되시는 분들과 앞마당을 걸으며 인사 나눌게요.',
       },
@@ -759,6 +1132,31 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           },
         ],
       },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '같이 걷지 못해도 마음은 같은 자리에 있습니다. 두 사람의 계좌를 남겨 둡니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'closingComment',
+        message:
+          '천천히 오셔도 됩니다. 도착하면 꼭 알려 주세요, 밖으로 나가서 같이 걸을게요. 민성·아현',
+      },
     ],
   },
   {
@@ -766,6 +1164,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     id: 'showcase-10',
     name: '러브 온 더 스트리트',
     date: '2026-03-03',
+    venue: '노보텔 앰배서더 서울 강남 · 그랜드볼룸',
+    venueAddress: '서울 강남구 봉은사로 130',
+    venueLat: 37.5055121,
+    venueLng: 127.0289196,
     font: 'SUIT',
     description: '자유로운 레드 레터링처럼, 우리다운 경쾌한 시작.',
     palette: ['#FFFCF8', '#C8463D', '#413A35'],
@@ -810,11 +1212,21 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           { time: '15:40', title: '친구들과 단체 사진' },
         ],
       },
-      { component: 'place', title: '함께 모일 홀' },
+      { component: 'place', title: '함께 모일 홀', detail: '호텔 2층' },
+      {
+        component: 'transportation',
+        title: '신논현역에서 걸어오시면',
+        subwayStation: '신논현역',
+        subwayExit: '6번 출구',
+        subwayWalk:
+          '신논현역 6번 출구에서 봉은사로를 따라 도보 약 8분입니다. 빨간 간판이 보이면 호텔 입구입니다.',
+        parkingHours:
+          '호텔 지하 주차장을 이용하시고, 접수대에서 차량 번호를 알려 주세요.',
+      },
       {
         component: 'afterParty',
         title: '서약 뒤의 작은 파티',
-        venue: '웨딩홀 라운지',
+        venue: '호텔 1층 라운지',
         dateTime: '오후 4시부터',
         description:
           '음악을 들으며 첫 잔을 나눠요. 무알코올 음료도 준비합니다.',
@@ -837,13 +1249,41 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           '라운지 입구에 작은 포토월을 세워 둘게요. 두 사람 이름 옆에 서서 마음껏 찍어 주세요.',
         preset: 'shooting',
       },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '와서 같이 웃어 주시는 것만으로 충분해요. 멀리서 축하하실 분들을 위해 계좌만 열어 둘게요.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
+        component: 'closingComment',
+        message:
+          '편한 옷, 편한 신발, 편한 얼굴로 오세요. 기다리고 있을게요. 민성·아현',
+      },
     ],
   },
   {
     ...wedding,
     id: 'showcase-11',
     name: '포레스트 서약',
-    venue: '인비아 포레스트 · 가든홀',
+    venue: '아침고요수목원 · 하경정원',
+    venueAddress: '경기 가평군 상면 수목원로 432',
+    venueLat: 37.7439678,
+    venueLng: 127.3524864,
     description: '짙은 숲의 고요함과 따뜻한 빛을 담은 서정적인 웨딩.',
     palette: ['#F4F3EB', '#4F5C42', '#444B3B'],
     eyebrow: 'ROOTED IN LOVE',
@@ -885,8 +1325,17 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           },
         ],
       },
-      { component: 'calendar', title: '서약의 오후' },
-      { component: 'place', title: '가든홀 입구' },
+      { component: 'calendar', title: '서약의 오후', template: 'calendarType4' },
+      { component: 'place', title: '가든홀 입구', detail: '매표소에서 안내 표지를 따라오세요' },
+      {
+        component: 'transportation',
+        title: '숲으로 오시는 길',
+        shuttleStop:
+          '청평역 1번 출구 앞에서 수목원 입구까지 예식 셔틀을 운행합니다.',
+        shuttleInterval: '예식 한 시간 전부터 20분 간격',
+        parkingHours:
+          '수목원 주차장을 무료로 이용하실 수 있습니다. 입구에서 가든홀까지 안내해 드립니다.',
+      },
       {
         component: 'faq',
         title: '숲길을 걸으실 때',
@@ -913,6 +1362,20 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         title: '꽃 대신 건네실 인사',
         declineMessage:
           '가든홀 주변의 나무와 풀꽃을 그대로 두고 싶습니다. 화환은 정중히 사양합니다.',
+      },
+      {
+        component: 'dressCode',
+        title: '숲길에 어울리는 차림',
+        colors: ['#4F5C42', '#EDE8D8', '#8C7A5E'],
+        guidelines: [
+          '숲길과 나무 데크를 걸어요. 굽이 낮고 바닥이 넓은 신발을 신어 주세요.',
+          '해가 지면 기온이 떨어져요. 가벼운 겉옷을 꼭 챙겨 주세요.',
+        ],
+      },
+      {
+        component: 'closingComment',
+        message:
+          '숲이 조용해지는 시간에 맞춰 서약을 읽겠습니다. 오시는 길 편하게 오세요. 민성·아현',
       },
     ],
   },
@@ -1723,7 +2186,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     name: '알파인 프로미스',
     font: 'Noto Serif KR',
     date: '2026-03-03',
-    venue: '인비아 알파인 · 마운틴홀',
+    venue: '오크밸리 리조트 · 컨벤션홀',
+    venueAddress: '강원 원주시 지정면 오크밸리2길 38',
+    venueLat: 37.4096158,
+    venueLng: 127.8069923,
     description: '산 능선과 맑은 공기, 함께 걷는 약속을 담은 웨딩 초대장.',
     palette: ['#F2F3EF', '#657465', '#414842'],
     eyebrow: 'A PROMISE ABOVE THE CITY',
@@ -1746,11 +2212,25 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
           SHOWCASE_PHOTOS.alpineCabin,
         ],
       },
-      { component: 'place', title: '마운틴홀에서 만나요' },
+      { component: 'place', title: '컨벤션홀에서 만나요' },
+      {
+        component: 'myFamilyWedding',
+        title: '함께 걸어온 가족',
+        groomFamilySuffix: '의 아들 민성',
+        brideFamilySuffix: '의 딸 아현',
+        groomFamily: [
+          { relation: '아버지', name: '박정호' },
+          { relation: '어머니', name: '이선영' },
+        ],
+        brideFamily: [
+          { relation: '아버지', name: '김도현' },
+          { relation: '어머니', name: '최은주' },
+        ],
+      },
       {
         component: 'calendar',
         title: '서약하는 날',
-        template: 'calendarType1',
+        template: 'calendarType2',
       },
       {
         component: 'dressCode',
@@ -1762,9 +2242,12 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       {
         component: 'transportation',
-        title: '홀까지 오시는 길',
-        shuttleStop: '건물 정문 앞 승차장에서 마운틴홀 입구까지 운행합니다.',
-        shuttleInterval: '예식 시작 한 시간 전부터 15분 간격',
+        title: '리조트까지 오시는 길',
+        shuttleStop:
+          '원주역 1번 출구 앞에서 컨벤션홀까지 예식 셔틀을 운행합니다.',
+        shuttleInterval: '예식 두 시간 전부터 30분 간격',
+        parkingHours:
+          '리조트 주차장을 무료로 이용하실 수 있습니다. 빌리지센터 안내 데스크에서 차량 번호를 등록해 주세요.',
       },
       {
         component: 'mealMenu',
@@ -1788,6 +2271,26 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'account',
+        title: '마음 보내실 곳',
+        message:
+          '먼 길 오시는 발걸음만으로 감사합니다. 마음을 전하실 곳은 아래에 적어 두었습니다.',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message: '먼 길 와 주시는 마음을 오래 기억하겠습니다. 민성 · 아현',
       },
@@ -1799,7 +2302,10 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     name: '브릭 시티 웨딩',
     font: 'Pretendard',
     date: '2026-08-08',
-    venue: '인비아 시티홀 · 브릭 라운지',
+    venue: '대림창고 · 갤러리홀',
+    venueAddress: '서울 성동구 성수이로 78',
+    venueLat: 37.54172,
+    venueLng: 127.05625,
     description: '붉은 벽돌 골목과 평범한 하루를 담은 도시의 웨딩 에디토리얼.',
     palette: ['#F5F1E9', '#A65D43', '#463C36'],
     eyebrow: 'OUR CITY, OUR STORY',
@@ -1811,8 +2317,8 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
     sections: [
       {
         component: 'place',
-        title: '벽돌 골목의 브릭 라운지',
-        detail: '붉은 벽돌 건물의 라운지 입구에서 맞이할게요.',
+        title: '벽돌 골목의 갤러리홀',
+        detail: '붉은 벽돌 건물 2층, 입구에서 맞이할게요.',
       },
       { component: 'greeting' },
       {
@@ -1828,6 +2334,13 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
         answer:
           '골목 끝 작은 빵집이요. 마지막 남은 소금빵을 반씩 나누고 다음 주에도 같이 오자고 했어요.',
         image: SHOWCASE_PHOTOS.brickAlley,
+      },
+      {
+        component: 'gallery',
+        title: '골목 사진관',
+        template: 'galleryType3',
+        ratio: '4:3',
+        images: [SHOWCASE_PHOTOS.brickBakery, SHOWCASE_PHOTOS.brickAlley],
       },
       {
         component: 'coupleIntroduction',
@@ -1857,11 +2370,39 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
       },
       {
         component: 'transportation',
-        title: '강남역에서 걸어오실 때',
-        subwayStation: '강남역',
-        subwayExit: '11번 출구',
+        title: '뚝섬역에서 걸어오실 때',
+        subwayStation: '뚝섬역',
+        subwayExit: '3번 출구',
         subwayWalk:
-          '11번 출구에서 테헤란로1길을 따라오세요. 브릭 라운지 입구에서 식장으로 안내해 드립니다.',
+          '뚝섬역 3번 출구에서 성수이로를 따라 도보 약 4분입니다. 붉은 벽돌 건물 1층에서 갤러리홀 안내를 드립니다.',
+        parkingHours:
+          '건물 뒤편 주차장을 이용하시고, 입구에서 차량 번호를 말씀해 주세요.',
+      },
+      {
+        component: 'notice',
+        title: '골목 촬영 안내',
+        heading: '벽돌 앞에서 한 장',
+        message:
+          '예식 전후로 골목에서 사진을 찍어요. 마음에 드는 벽돌 벽을 찾았다면 알려 주세요, 같이 서 드릴게요.',
+        preset: 'shooting',
+      },
+      {
+        component: 'account',
+        title: '마음 보내실 곳',
+        groups: [
+          {
+            name: '신랑 측',
+            accounts: [
+              { name: '박민성', bank: '신한은행', account: '110-000-000000' },
+            ],
+          },
+          {
+            name: '신부 측',
+            accounts: [
+              { name: '김아현', bank: '국민은행', account: '000-00-0000-000' },
+            ],
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -1875,6 +2416,7 @@ export const SHOWCASE_INVITATIONS: ShowcaseInvitation[] = [
   ...seminarCollection,
   ...familyCelebrationCollection,
   ...bridalShowerCollection,
+  ...studioCollection,
 ];
 
 export function getShowcaseInvitation(id: string) {

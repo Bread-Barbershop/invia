@@ -163,4 +163,27 @@ describe('Place', () => {
       checkedPlaceTel: true,
     });
   });
+
+  it('지도를 켰을 때 지도/미니멀 약도 탭을 보여 준다', () => {
+    render(<Place blockInfo={createBlock({ openMap: true })} id="place-block-1" />);
+
+    expect(screen.getByRole('tab', { name: '지도' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: '미니멀 약도' })).toBeInTheDocument();
+  });
+
+  it('미니멀 약도 탭을 누르면 mapStyle을 sketch로 저장한다', () => {
+    render(<Place blockInfo={createBlock({ openMap: true })} id="place-block-1" />);
+
+    fireEvent.click(screen.getByRole('tab', { name: '미니멀 약도' }));
+
+    expect(mockUpdateBlock).toHaveBeenCalledWith('place-block-1', {
+      mapStyle: 'sketch',
+    });
+  });
+
+  it('지도가 꺼져 있으면 약도 탭을 노출하지 않는다', () => {
+    render(<Place blockInfo={createBlock({ openMap: false })} id="place-block-1" />);
+
+    expect(screen.queryByRole('tab', { name: '미니멀 약도' })).not.toBeInTheDocument();
+  });
 });

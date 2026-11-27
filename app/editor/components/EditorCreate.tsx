@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   parseGuestPayload,
@@ -13,7 +13,9 @@ import {
   BLANK_EDITOR_DRAFT_KEY,
   loadEditorDraft,
   type EditorDraftKey,
+  type EditorDraftSnapshot,
 } from '@/features/editor/draft/editorDraft';
+import EditorDraftRecoveryDialog from '@/features/editor/draft/EditorDraftRecoveryDialog';
 import { useToastStore } from '@/shared/store/useToastStore';
 import type { BgmData } from '@/shared/types/invitationSave';
 import { hydrateShareUrlState } from '@/shared/utils/shareUrlDefaults';
@@ -131,6 +133,35 @@ async function loadPosterTemplateJson(templateId: string) {
   return templateResponse.json();
 }
 
+async function loadSampleSavedData(sampleId: string): Promise<SavedData> {
+  const manifestResponse = await fetch(SAMPLES_MANIFEST_URL);
+  if (!manifestResponse.ok) {
+    throw new Error(`sample_manifest_failed:${manifestResponse.status}`);
+  }
+
+  const manifest = (await manifestResponse.json()) as SamplesManifest;
+  const sample = manifest.samples.find(item => item.id === sampleId);
+  if (!sample) {
+    throw new Error(`sample_not_found:${sampleId}`);
+  }
+
+  const sampleResponse = await fetch(sample.dataUrl);
+  if (!sampleResponse.ok) {
+    throw new Error(`sample_data_failed:${sampleResponse.status}`);
+  }
+
+  const result = parseGuestPayload(await sampleResponse.json());
+  if (!result.ok) {
+    throw new Error(`sample_parse_failed:${result.reason}`);
+  }
+
+  const posterTemplateJson = await loadPosterTemplateJson(
+    sample.posterTemplateId ?? sample.id
+  );
+
+  return toSavedData(result.payload, posterTemplateJson);
+}
+
 function EditorCreate({
   initialIsLoggedIn = false,
 }: {
@@ -165,10 +196,14 @@ function SampleEditorCreate({
   sampleId: string | null;
 }) {
   const [savedData, setSavedData] = useState<SavedData | null>(null);
+  const [pendingDraft, setPendingDraft] = useState<EditorDraftSnapshot | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const showToast = useToastStore(state => state.showToast);
 
+  // 초안이 있으면 덮어쓰지 않고 먼저 사용자에게 물어본다.
   useEffect(() => {
     let cancelled = false;
 
@@ -180,39 +215,14 @@ function SampleEditorCreate({
         const draft = await loadEditorDraft(draftKey);
         if (cancelled) return;
         if (draft) {
-          setSavedData(toEditorDraftSavedData(draft));
-          showToast('작성 중이던 초대장을 이어서 불러왔어요.', 'info');
+          setPendingDraft(draft);
           return;
         }
         if (!sampleId) return;
 
-        const manifestResponse = await fetch(SAMPLES_MANIFEST_URL);
-        if (!manifestResponse.ok) {
-          throw new Error(`sample_manifest_failed:${manifestResponse.status}`);
-        }
-
-        const manifest = (await manifestResponse.json()) as SamplesManifest;
-        const sample = manifest.samples.find(item => item.id === sampleId);
-        if (!sample) {
-          throw new Error(`sample_not_found:${sampleId}`);
-        }
-
-        const sampleResponse = await fetch(sample.dataUrl);
-        if (!sampleResponse.ok) {
-          throw new Error(`sample_data_failed:${sampleResponse.status}`);
-        }
-
-        const result = parseGuestPayload(await sampleResponse.json());
-        if (!result.ok) {
-          throw new Error(`sample_parse_failed:${result.reason}`);
-        }
-
-        const posterTemplateJson = await loadPosterTemplateJson(
-          sample.posterTemplateId ?? sample.id
-        );
-
+        const data = await loadSampleSavedData(sampleId);
         if (!cancelled) {
-          setSavedData(toSavedData(result.payload, posterTemplateJson));
+          setSavedData(data);
         }
       } catch (error) {
         console.error('샘플 에디터 로드 실패:', error);
@@ -232,7 +242,39 @@ function SampleEditorCreate({
     return () => {
       cancelled = true;
     };
-  }, [draftKey, sampleId, showToast]);
+  }, [draftKey, sampleId]);
+
+  const startFreshEditor = useCallback(async () => {
+    setPendingDraft(null);
+    if (!sampleId) {
+      setSavedData(null);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setLoadError(false);
+      const data = await loadSampleSavedData(sampleId);
+      setSavedData(data);
+    } catch (error) {
+      console.error('샘플 에디터 로드 실패:', error);
+      setSavedData(null);
+      setLoadError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sampleId]);
+
+  const handleResumeDraft = useCallback(() => {
+    if (!pendingDraft) return;
+
+    setSavedData(toEditorDraftSavedData(pendingDraft));
+    setPendingDraft(null);
+    showToast(
+      '작성하던 초안을 이어서 불러왔어요. 저장을 마치면 이 기기의 초안은 지워져요.',
+      'info'
+    );
+  }, [pendingDraft, showToast]);
 
   if (isLoading) {
     return <ScreenTransitionLoader label="에디터를 준비하는 중" />;
@@ -240,6 +282,22 @@ function SampleEditorCreate({
 
   if (sampleId && loadError) {
     return <EditorCreateError />;
+  }
+
+  // 고르기 전에는 편집기를 띄우지 않는다. 빈 편집기가 잠깐 깔렸다가 초안으로
+  // 바뀌는 깜빡임 없이, 선택 후에 한 번만 초기화한다.
+  if (pendingDraft) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#E7E9EB]">
+        <EditorDraftRecoveryDialog
+          draft={pendingDraft}
+          draftKey={draftKey}
+          onResume={handleResumeDraft}
+          onDraftChange={setPendingDraft}
+          onDiscard={() => void startFreshEditor()}
+        />
+      </div>
+    );
   }
 
   return (

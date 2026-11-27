@@ -8,6 +8,14 @@ import { ReactNode } from 'react';
 import { ConfirmContainer } from '@/components/molecules/confirm/ConfirmContainer';
 import { ToastContainer } from '@/components/molecules/toast/ToastContainer';
 import ClarityInit from '@/features/monitoring/ClarityInit';
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  SERVICE_NAME,
+  SITE_URL,
+  WEBSITE_JSON_LD,
+  serializeJsonLd,
+} from '@/shared/config/seo';
 
 import './styles/globals.css';
 
@@ -47,38 +55,34 @@ const lineSeedKr = localFont({
   variable: '--line-seed-kr',
 });
 
-const serviceName = 'Invia';
-const defaultTitle = 'Invia | 초대장의 새로운 기준';
-const defaultDescription =
-  '함께하고 싶은 사람에게 마음을 전하는 일, 무료로 개인정보 없이 할 수 있어요.';
 const defaultOgImage = {
   url: '/opengraph-image.png',
   width: 1200,
   height: 630,
-  alt: serviceName,
+  alt: SERVICE_NAME,
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://invia.co.kr'),
-  applicationName: serviceName,
+  metadataBase: new URL(SITE_URL),
+  applicationName: SERVICE_NAME,
   title: {
-    default: defaultTitle,
-    template: `%s | ${serviceName}`,
+    default: DEFAULT_TITLE,
+    template: `%s | ${SERVICE_NAME}`,
   },
-  description: defaultDescription,
+  description: DEFAULT_DESCRIPTION,
   openGraph: {
-    title: defaultTitle,
-    description: defaultDescription,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     url: '/',
-    siteName: serviceName,
+    siteName: SERVICE_NAME,
     images: [defaultOgImage],
     locale: 'ko_KR',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: defaultTitle,
-    description: defaultDescription,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     images: [defaultOgImage.url],
   },
 };
@@ -100,6 +104,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased font-pretendard" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(WEBSITE_JSON_LD) }}
+        />
         <div id="app-root">{children}</div>
         <Analytics />
         <SpeedInsights />

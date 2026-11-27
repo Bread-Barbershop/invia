@@ -171,17 +171,21 @@ function GuestBgm({
       return;
     }
 
+    let cancelled = false;
     const tryPlay = () => {
-      void audio.play().catch(() => setIsOn(false));
+      void audio.play().catch(() => {
+        if (!cancelled) setIsOn(false);
+      });
     };
 
     if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
       tryPlay();
-      return;
+    } else {
+      audio.addEventListener('canplay', tryPlay, { once: true });
     }
 
-    audio.addEventListener('canplay', tryPlay, { once: true });
     return () => {
+      cancelled = true;
       audio.removeEventListener('canplay', tryPlay);
     };
   }, [isOn, src]);

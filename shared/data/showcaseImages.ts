@@ -102,4 +102,18 @@ export const SHOWCASE_PHOTOS = {
   weekendBakery: 'https://lh3.googleusercontent.com/d/12XMOM6CAgzNmgzh3tad4f7M1gi7K2Xuu',
   weekendBench: 'https://lh3.googleusercontent.com/d/1Ui3wcB8B4jr_zbWmqD0pjVgj5GWB8l2G',
   weekendPath: 'https://lh3.googleusercontent.com/d/1GMhe82rPX1Y63S3LVBpGHUhG2_D9VgTA',
+  exhibitionRoom:
+    'https://lh3.googleusercontent.com/d/1-FDlyGO1uUA1oT94SVLxWeNmY6ilxKG4',
+  exhibitionStudio:
+    'https://lh3.googleusercontent.com/d/140hvFE0kMRfPUFq7HWPOkwQqOw87Dw_Y',
+  exhibitionArtist:
+    'https://lh3.googleusercontent.com/d/1X_77a7tzknXHgxpEP_q_a3ierm2cypHe',
+  exhibitionChair:
+    'https://lh3.googleusercontent.com/d/1j1R4CJe0LYMWrBJNBa2C4XzoHq3m2bYa',
+  exhibitionSea:
+    'https://lh3.googleusercontent.com/d/1zXS4F8mqZR85l3aS7UU-QsX0I2yDo2jm',
+  exhibitionShadows:
+    'https://lh3.googleusercontent.com/d/1QRp-EDUNrdgtu5AGHHs_lM3J07MVKkEn',
+  exhibitionCup:
+    'https://lh3.googleusercontent.com/d/1tk19XEpk6nQ94zceBt2027-eq7ZRz3Rl',
 } as const;

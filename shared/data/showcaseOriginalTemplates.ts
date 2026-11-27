@@ -244,6 +244,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
     'Cormorant Garamond',
     'Prata',
   ]),
+  'showcase-51': original('seminar_10', ['Pretendard', 'Noto Serif KR']),
 };
 
 export function getShowcaseOriginalTemplate(id: string) {

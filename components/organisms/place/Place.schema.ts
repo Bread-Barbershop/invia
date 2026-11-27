@@ -1,3 +1,5 @@
+import type { SketchMapData } from '@/shared/map/sketch/sketchTypes';
+
 export const placeSchema = {
   type: null,
   fields: {
@@ -56,6 +58,40 @@ export const placeSchema = {
     lat: {
       default: 0,
       required: true,
+    },
+    /** 'naver'(인터랙티브 지도) 또는 'sketch'(미니멀 약도) */
+    mapStyle: {
+      default: 'naver',
+      required: false,
+    },
+    /** 생성된 약도 형상 데이터. 초대장 data.json에 함께 저장된다. */
+    sketch: {
+      default: null as SketchMapData | null,
+      required: false,
+    },
+    sketchPalette: {
+      default: 'ivory',
+      required: false,
+    },
+    sketchRadius: {
+      default: 500,
+      required: false,
+    },
+    sketchDensity: {
+      default: 'standard',
+      required: false,
+    },
+    sketchShowStations: {
+      default: true,
+      required: false,
+    },
+    sketchShowLabel: {
+      default: true,
+      required: false,
+    },
+    sketchShowScale: {
+      default: true,
+      required: false,
     },
   },
 } as const;

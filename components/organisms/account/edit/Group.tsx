@@ -1,23 +1,16 @@
 import { UtilityButton } from '@/components/atoms/button';
 import { ActionField } from '@/components/molecules/action-field';
-import { Checkbox } from '@/components/molecules/checkbox/Checkbox';
 import { MultiField } from '@/components/molecules/multi-field';
 import { NavigationBar } from '@/components/molecules/navigation-bar/NavigationBar';
 import { TextField } from '@/components/molecules/text-field';
 
+import type { AccountEntry } from '../Account.schema';
 import type { RefObject } from 'react';
 
 interface Props {
   groupIndex: number;
   groupName: string;
-  accountList: {
-    name: string;
-    bank: string;
-    account: string;
-    kakao: boolean;
-    kakaoPayUrl?: string;
-    tossUrl?: string;
-  }[];
+  accountList: AccountEntry[];
   handleUpdateBlock: (
     key: string,
     value:
@@ -25,8 +18,8 @@ interface Props {
       | number
       | boolean
       | { name: string }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[][]
+      | AccountEntry[]
+      | AccountEntry[][]
   ) => void;
   onOpenGroupPopup: () => void;
   groupPopupTriggerRef: RefObject<HTMLDivElement | null>;
@@ -80,7 +73,7 @@ export const Group = ({
           onClick: () => {
             const newAccounts = [
               ...accountList,
-              { name: '', bank: '', account: '', kakao: false },
+              { name: '', bank: '', account: '' },
             ];
             handleUpdateBlock(`accountList.${groupIndex}`, newAccounts);
           },
@@ -125,40 +118,6 @@ export const Group = ({
                 ),
             }}
           />
-          <label className="flex flex-col gap-1 text-xs text-text-secondary">
-            카카오페이 송금 링크 (선택)
-            <input className="h-9 w-full min-w-0 rounded-md border border-border-divider px-2 text-sm"
-              placeholder="https://qr.kakaopay.com/..."
-              value={account.kakaoPayUrl ?? ''} maxLength={2048}
-              onChange={e => handleUpdateBlock(
-                `accountList.${groupIndex}.${i}.kakaoPayUrl`, e.target.value
-              )} />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-text-secondary">
-            토스 송금 링크 (선택)
-            <input className="h-9 w-full min-w-0 rounded-md border border-border-divider px-2 text-sm"
-              placeholder="https://toss.me/..."
-              value={account.tossUrl ?? ''} maxLength={2048}
-              onChange={e => handleUpdateBlock(
-                `accountList.${groupIndex}.${i}.tossUrl`, e.target.value
-              )} />
-          </label>
-          <div className="flex items-center gap-2 w-full">
-            <p className="text-sm font-semibold px-1 select-none">추가기능</p>
-            <Checkbox
-              aria-label="간편 송금(카카오페이)"
-              direction="right"
-              checked={account.kakao || false}
-              onChange={e =>
-                handleUpdateBlock(
-                  `accountList.${groupIndex}.${i}.kakao`,
-                  e.target.checked
-                )
-              }
-            >
-              <span className="text-[13px]">간편 송금(카카오페이)</span>
-            </Checkbox>
-          </div>
         </div>
       ))}
     </div>

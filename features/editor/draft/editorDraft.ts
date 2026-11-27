@@ -37,7 +37,13 @@ export type EditorDraftInput = {
 export type EditorDraftSnapshot = EditorDraftInput & {
   version: typeof DRAFT_VERSION;
   savedAt: number;
+  revision?: string;
 };
+
+type DraftDiscardResult =
+  | { status: 'discarded' }
+  | { status: 'changed'; draft: EditorDraftSnapshot }
+  | { status: 'failed' };
 
 const memoryDrafts = new Map<EditorDraftKey, EditorDraftSnapshot>();
 let databasePromise: Promise<IDBDatabase | null> | null = null;
@@ -132,21 +138,49 @@ function writeDatabaseDraft(
 
 function deleteDatabaseDraft(
   database: IDBDatabase,
-  key: EditorDraftKey
-): Promise<void> {
+  key: EditorDraftKey,
+  expected?: EditorDraftSnapshot
+): Promise<DraftDiscardResult> {
   return new Promise(resolve => {
     try {
       const transaction = database.transaction(DRAFT_STORE_NAME, 'readwrite');
-      transaction.objectStore(DRAFT_STORE_NAME).delete(key);
+      const drafts = transaction.objectStore(DRAFT_STORE_NAME);
+      let result: DraftDiscardResult = { status: 'discarded' };
 
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => resolve();
-      transaction.onabort = () => resolve();
+      if (expected) {
+        // 같은 트랜잭션에서 확인하고 삭제해야 다른 탭의 저장이 사이에 들어올 수 없다.
+        const request = drafts.get(key);
+        request.onsuccess = () => {
+          const stored: unknown = request.result;
+          if (!isEditorDraftSnapshot(stored)) return;
+          if (matchesDraft(stored, expected)) {
+            drafts.delete(key);
+          } else {
+            result = { status: 'changed', draft: stored };
+          }
+        };
+      } else {
+        drafts.delete(key);
+      }
+
+      transaction.oncomplete = () => resolve(result);
+      transaction.onerror = () => resolve({ status: 'failed' });
+      transaction.onabort = () => resolve({ status: 'failed' });
     } catch (error) {
       console.warn('[editorDraft] 초안을 지우지 못했습니다.', error);
-      resolve();
+      resolve({ status: 'failed' });
     }
   });
+}
+
+function matchesDraft(
+  stored: EditorDraftSnapshot,
+  expected: EditorDraftSnapshot
+): boolean {
+  // 이전 버전에서 만든 초안에는 revision이 없어 저장 시각을 사용한다.
+  return (
+    stored.savedAt === expected.savedAt && stored.revision === expected.revision
+  );
 }
 
 // File/Blob은 그대로 두고, 구조화 복제가 불가능한 값만 덜어낸다.
@@ -226,6 +260,8 @@ export function createEditorDraftSnapshot(
   return {
     version: DRAFT_VERSION,
     savedAt,
+    revision:
+      globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2),
     bulkData: cloneForDraft(input.bulkData) as EditorDraftBulkData,
     blocks: cloneForDraft(input.blocks) as PersistedEditorBlock[],
     images: cloneForDraft(input.images) as UploadTask[],
@@ -271,6 +307,28 @@ export async function loadEditorDraft(
 
   const database = await openDatabase();
   return database ? readDatabaseDraft(database, key) : null;
+}
+
+export async function discardEditorDraft(
+  key: EditorDraftKey,
+  expected: EditorDraftSnapshot
+): Promise<DraftDiscardResult> {
+  const database = await openDatabase();
+  const memoryDraft = memoryDrafts.get(key);
+  if (memoryDraft && !matchesDraft(memoryDraft, expected)) {
+    return { status: 'changed', draft: memoryDraft };
+  }
+
+  const result: DraftDiscardResult = database
+    ? await deleteDatabaseDraft(database, key, expected)
+    : { status: 'discarded' };
+  const latestMemoryDraft = memoryDrafts.get(key);
+  if (latestMemoryDraft && latestMemoryDraft !== memoryDraft) {
+    return { status: 'changed', draft: latestMemoryDraft };
+  }
+
+  if (result.status !== 'failed') memoryDrafts.delete(key);
+  return result;
 }
 
 export async function clearEditorDraft(key: EditorDraftKey): Promise<void> {

@@ -1,4 +1,6 @@
 import { tiptapJsonToHtmlUniversal } from '@/components/molecules/text-editor/utils/tiptapJsonToHtml';
+import { normalizeChecklistItems } from '@/components/organisms/checklist/checklistItems';
+import { normalizeEventGuideItems } from '@/components/organisms/eventGuide/eventGuideItems';
 import { getInterviewCard } from '@/components/organisms/interview/interviewContent';
 import { safeRsvpFormUrl } from '@/components/organisms/rsvp/rsvpFormUrl';
 import type { EditorBlock } from '@/shared/types/block';
@@ -49,6 +51,18 @@ export function hasGuestBlockContent(block: GuestBlock) {
     case 'interview': {
       const props = block.props as EditorBlock<'interview'>['props'];
       return Boolean(props.questions?.some(getInterviewCard));
+    }
+    case 'eventGuide': {
+      const props = block.props as EditorBlock<'eventGuide'>['props'];
+      return Boolean(
+        normalizeEventGuideItems(props.items).some(item => item.title.trim())
+      );
+    }
+    case 'checklist': {
+      const props = block.props as EditorBlock<'checklist'>['props'];
+      return Boolean(
+        normalizeChecklistItems(props.items).some(item => item.label.trim())
+      );
     }
     default:
       return true;

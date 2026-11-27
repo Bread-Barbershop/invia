@@ -25,6 +25,8 @@ const ItemContent = React.memo(
 );
 ItemContent.displayName = 'ItemContent';
 
+const ACTION_BUTTON_CLASS =
+  'flex items-center justify-center rounded-full text-white opacity-0 transition-all duration-200 cursor-pointer group-hover:opacity-100 focus-visible:opacity-100';
 const SortableItems = React.memo(
   ({
     id,
@@ -49,6 +51,10 @@ const SortableItems = React.memo(
       componentCls
         .flatMap(category => category.list)
         .find(item => item.component === blockInfo.component);
+    const displayName =
+      typeof componentName?.contents === 'string'
+        ? componentName.contents
+        : '블록';
 
     const style = {
       transform: CSS.Translate.toString(transform),
@@ -62,6 +68,19 @@ const SortableItems = React.memo(
       listeners?.onPointerDown?.(e);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        event.target === event.currentTarget &&
+        (event.key === 'Enter' || event.key === ' ')
+      ) {
+        event.preventDefault();
+        onSelect(id);
+        return;
+      }
+
+      listeners?.onKeyDown?.(event);
+    };
+
     return (
       <div className="relative group">
         <div
@@ -70,7 +89,9 @@ const SortableItems = React.memo(
           {...attributes}
           {...listeners}
           role="button"
+          data-order-block-id={id}
           onContextMenu={e => onContextMenu(e, id)}
+          onKeyDown={handleKeyDown}
           onPointerDown={handlePointerDown}
           className={cn(
             'flex-center py-2 cursor-pointer rounded-sm w-24 transition-colors duration-200 select-none relative',
@@ -83,7 +104,8 @@ const SortableItems = React.memo(
           {!isDragging && onDeleteRequest && (
             <button
               type="button"
-              aria-label="삭제하기"
+              aria-label={`${displayName} 블록 삭제하기`}
+              title="삭제하기"
               onPointerDown={e => {
                 e.stopPropagation();
               }}
@@ -92,9 +114,12 @@ const SortableItems = React.memo(
                 e.preventDefault();
                 onDeleteRequest(id);
               }}
-              className="absolute right-1 top-1 z-10 flex size-4 items-center justify-center rounded-full bg-neutral-400/80 text-white opacity-0 transition-all duration-200 hover:bg-[#FF4D4D] hover:scale-110 active:scale-95 group-hover:opacity-100 cursor-pointer"
+              className={cn(
+                ACTION_BUTTON_CLASS,
+                'absolute right-1 top-1 z-10 size-4 bg-neutral-400/80 hover:bg-[#FF4D4D] hover:scale-110 active:scale-95'
+              )}
             >
-              <X size={10} strokeWidth={2.5} />
+              <X size={10} strokeWidth={2.5} aria-hidden="true" />
             </button>
           )}
         </div>
