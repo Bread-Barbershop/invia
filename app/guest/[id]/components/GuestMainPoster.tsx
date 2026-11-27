@@ -12,17 +12,22 @@ import {
 import { Image } from '@/components/atoms/image';
 import { useResolvedImageSource } from '@/shared/hooks/useResolvedImageSource';
 
+import { mainPosterAltText } from './mainPosterAlt';
+
 export const GuestMainPoster = ({
   thumbnailFileId,
+  title,
   onReady,
   fitToViewport = false,
 }: {
   onReady?: () => void;
   thumbnailFileId: string;
+  title?: string;
   fitToViewport?: boolean;
 }) => {
   const resolvedSrc = useResolvedImageSource(thumbnailFileId);
   const onReadyRef = useRef(onReady);
+  const alt = mainPosterAltText(title);
 
   useEffect(() => {
     onReadyRef.current = onReady;
@@ -41,6 +46,7 @@ export const GuestMainPoster = ({
     <GuestMainPosterImage
       key={resolvedSrc}
       src={resolvedSrc}
+      alt={alt}
       onReadyRef={onReadyRef}
       fitToViewport={fitToViewport}
     />
@@ -49,10 +55,12 @@ export const GuestMainPoster = ({
 
 function GuestMainPosterImage({
   src,
+  alt,
   onReadyRef,
   fitToViewport,
 }: {
   src: string;
+  alt: string;
   onReadyRef: MutableRefObject<(() => void) | undefined>;
   fitToViewport: boolean;
 }) {
@@ -109,7 +117,7 @@ function GuestMainPosterImage({
       {/* 공개 페이지의 preload와 중복되지 않도록 이미지 자체는 eager/high로 요청한다. */}
       <Image
         src={src}
-        alt="초대장 메인 포스터"
+        alt={alt}
         width={375}
         height={812}
         loading="eager"

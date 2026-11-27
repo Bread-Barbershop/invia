@@ -114,3 +114,35 @@ describe('GuestMainPoster image loading and layout', () => {
     expect(onReady).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('GuestMainPoster 대표 이미지 alt', () => {
+  beforeEach(() => {
+    mockImage.mockClear();
+  });
+
+  const imageAlt = () =>
+    (mockImage.mock.calls[0]?.[0] as Record<string, unknown>).alt;
+
+  it('초대장 제목이 있으면 제목을 담은 alt로 읽힌다', () => {
+    render(
+      <GuestMainPoster
+        thumbnailFileId="poster-file-id"
+        title="민성·아현 결혼식"
+      />
+    );
+
+    expect(imageAlt()).toBe('민성·아현 결혼식 대표 이미지');
+  });
+
+  it('제목이 없으면 일반 문구로 남는다', () => {
+    render(<GuestMainPoster thumbnailFileId="poster-file-id" />);
+
+    expect(imageAlt()).toBe('초대장 대표 이미지');
+  });
+
+  it('공백만 있는 제목은 alt에 넣지 않는다', () => {
+    render(<GuestMainPoster thumbnailFileId="poster-file-id" title="   " />);
+
+    expect(imageAlt()).toBe('초대장 대표 이미지');
+  });
+});

@@ -216,6 +216,8 @@ describe('GuestPage 서버 컴포넌트 테스트', () => {
 
     expect(guestMainPosterMock).toHaveBeenCalledWith({
       thumbnailFileId: 'thumbnail-file-id',
+      // 대표 이미지 alt에 쓸 초대장 제목(공유 제목 → 행사 이름 순) — 이 payload에는 공유 제목이 없다.
+      title: '',
     });
 
     expect(guestRendererMock).toHaveBeenCalledWith({
