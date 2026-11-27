@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react';
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useRef,
   useSyncExternalStore,
@@ -46,14 +47,15 @@ function PrivacyNoticeModal({
     onClose();
   }, [onClose]);
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(handleClose);
+  const onEscape = useEffectEvent(handleClose);
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
 
   useEffect(() => {
-    if (!open) return;
-
     const dialog = dialogRef.current;
+    if (!open || !mounted || !dialog) return;
+
     const previouslyFocused =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -63,27 +65,26 @@ function PrivacyNoticeModal({
     getHiddenRoot();
 
     // 열자마자 제목과 설명이 읽히도록 대화상자 자체로 포커스를 옮긴다.
-    const timer = window.setTimeout(() => dialog?.focus(), 0);
+    dialog.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        handleClose();
+        onEscape();
         return;
       }
 
-      if (dialog) trapFocus(event, dialog);
+      trapFocus(event, dialog);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.clearTimeout(timer);
       window.removeEventListener('keydown', handleKeyDown);
       enableRestore();
       removeHiddenRoot();
       if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
-  }, [handleClose, open]);
+  }, [mounted, open]);
 
   if (!mounted) return null;
 

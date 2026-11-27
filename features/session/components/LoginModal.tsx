@@ -1,7 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 import InviaSimpleLogo3d from '@/shared/assets/logo/invia-simple-logo-3d.png';
@@ -44,9 +51,11 @@ function LoginModal({
   }, [isClosing, onClose]);
 
   const backdropDismiss = useBackdropDismiss<HTMLDivElement>(closeWithFade);
+  const onEscape = useEffectEvent(closeWithFade);
 
   useEffect(() => {
-    if (!open || isClosing) return;
+    const dialog = modalRef.current;
+    if (!open || !dialog) return;
 
     const previouslyFocused =
       document.activeElement instanceof HTMLElement
@@ -55,30 +64,30 @@ function LoginModal({
     const enableRestore = disableBodyScroll();
     getHiddenRoot();
 
-    // 포커스를 Google 버튼으로 이동
-    const timer = setTimeout(() => {
-      googleButtonRef.current?.focus();
-    }, 0);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeWithFade();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onEscape();
+        return;
       }
-      if (modalRef.current) {
-        trapFocus(e, modalRef.current);
-      }
+      trapFocus(event, dialog);
     };
 
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      clearTimeout(timer);
       document.removeEventListener('keydown', handleKeyDown);
       enableRestore();
       removeHiddenRoot();
       if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
-  }, [closeWithFade, open, isClosing]);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const initialFocus = isLoading ? modalRef.current : googleButtonRef.current;
+    initialFocus?.focus();
+  }, [isLoading, open]);
 
   if (!open && !isClosing) return null;
 

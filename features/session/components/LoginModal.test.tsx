@@ -98,6 +98,30 @@ describe('LoginModal', () => {
     expect(googleButton).toHaveAttribute('aria-busy', 'true');
   });
 
+  it('로그인 요청으로 버튼이 비활성화되면 Tab과 Shift+Tab을 대화상자에 유지한다', async () => {
+    function Harness() {
+      const [isLoading, setIsLoading] = useState(false);
+      return (
+        <LoginModal
+          open
+          isLoading={isLoading}
+          onClose={() => {}}
+          onGoogleLogin={() => setIsLoading(true)}
+        />
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<Harness />);
+    const dialog = screen.getByRole('dialog');
+    await user.click(screen.getByRole('button', { name: /Google로 계속하기/ }));
+
+    expect(dialog).toHaveFocus();
+    expect(fireEvent.keyDown(dialog, { key: 'Tab' })).toBe(false);
+    expect(fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true })).toBe(false);
+    expect(dialog).toHaveFocus();
+  });
+
   it('열린 동안 뒤 화면(app-root)을 보조기기에서 감춘다', () => {
     const appRoot = document.createElement('div');
     appRoot.id = 'app-root';

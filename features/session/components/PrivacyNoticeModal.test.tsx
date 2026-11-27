@@ -12,6 +12,7 @@ describe('PrivacyNoticeModal', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     document.getElementById('app-root')?.remove();
   });
 
@@ -163,6 +164,32 @@ describe('PrivacyNoticeModal', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
 
     await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it.each([
+    { key: 'Tab', shiftKey: false },
+    { key: 'Shift+Tab', shiftKey: true },
+  ])('$key으로 안내창에 진입하고 포커스를 순환한다', ({ shiftKey }) => {
+    render(<PrivacyNoticeModal open onClose={mockOnClose} />);
+
+    const dialog = screen.getByRole('dialog');
+    const first = screen.getByRole('region', { name: '개인정보 안내 내용' });
+    const last = screen.getByRole('button', { name: '알겠어요' });
+    // jsdom에는 레이아웃이 없으므로 실제 화면에 보이는 두 경계를 지정한다.
+    jest.spyOn(first, 'offsetParent', 'get').mockReturnValue(dialog);
+    jest.spyOn(last, 'offsetParent', 'get').mockReturnValue(dialog);
+    const destination = shiftKey ? last : first;
+    const boundary = shiftKey ? first : last;
+    const pressTab = () =>
+      fireEvent.keyDown(document.activeElement ?? dialog, { key: 'Tab', shiftKey });
+
+    expect(dialog).toHaveFocus();
+    expect(pressTab()).toBe(false);
+    expect(destination).toHaveFocus();
+
+    boundary.focus();
+    expect(pressTab()).toBe(false);
+    expect(destination).toHaveFocus();
   });
 
   it('긴 안내문을 키보드로 스크롤할 수 있도록 이름 있는 포커스 영역으로 만든다', () => {
