@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { isAutoplayBlockedError } from '../bgmPlaybackMessages';
 import { useBgmStore } from '../store/useBgmStore';
-
-import type { BgmPlaybackError } from '../bgmPlaybackMessages';
 
 export function useBgmPlayer(currentSrc: string | null) {
   const { isLoop, volume, selectedBgmId, setSelectedBgmId, setIsLoop } =
@@ -13,9 +10,6 @@ export function useBgmPlayer(currentSrc: string | null) {
 
   // Audio 이벤트와 동기화되는 재생 상태 (스토어 불필요 — 언마운트 시 어차피 멈춤)
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackError, setPlaybackError] = useState<BgmPlaybackError | null>(
-    null
-  );
 
   // Audio 객체 초기화 및 이벤트 등록 (마운트 1회)
   useEffect(() => {
@@ -48,7 +42,6 @@ export function useBgmPlayer(currentSrc: string | null) {
     if (!audio) return;
 
     audio.pause();
-    setPlaybackError(null);
     if (!currentSrc) {
       audio.removeAttribute('src');
       audio.load();
@@ -75,25 +68,14 @@ export function useBgmPlayer(currentSrc: string | null) {
     audio.volume = volume;
   }, [volume]);
 
-  // 재생 실패 안내는 잠시 뒤 스스로 사라진다.
-  useEffect(() => {
-    if (!playbackError) return;
-
-    const timer = window.setTimeout(() => setPlaybackError(null), 8000);
-    return () => window.clearTimeout(timer);
-  }, [playbackError]);
-
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    setPlaybackError(null);
 
     if (audio.paused) {
       void audio.play().catch((error: unknown) => {
         console.error('BGM play() failed', error);
         setIsPlaying(false);
-        setPlaybackError(isAutoplayBlockedError(error) ? 'blocked' : 'play');
       });
     } else {
       audio.pause();
@@ -103,7 +85,6 @@ export function useBgmPlayer(currentSrc: string | null) {
   return {
     isLoop,
     isPlaying,
-    playbackError,
     selectedBgm: selectedBgmId,
     selectBgm: setSelectedBgmId,
     setIsLoop,
