@@ -257,6 +257,46 @@ describe('하객별 구분', () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
+  it('삭제와 목록 재조회가 둘 다 실패한 뒤 확인을 취소하면 해당 그룹의 복사 버튼만 잠근다', async () => {
+    const user = userEvent.setup();
+    const writeText = jest.spyOn(navigator.clipboard, 'writeText');
+    mockList([basicAudience, familyAudience]);
+    mockFetch
+      .mockResolvedValueOnce(
+        reply(
+          { message: '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.' },
+          false
+        )
+      )
+      .mockResolvedValueOnce(
+        reply({ message: '하객 그룹을 불러오지 못했어요.' }, false)
+      );
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.'
+    );
+
+    await user.click(screen.getByRole('button', { name: '취소' }));
+
+    expect(
+      screen.queryByRole('region', { name: '가족 그룹 삭제 확인' })
+    ).not.toBeInTheDocument();
+    const unverifiedCopyButton = screen.getByRole('button', {
+      name: '가족 링크 복사',
+    });
+    expect(unverifiedCopyButton).toBeDisabled();
+    await user.click(unverifiedCopyButton);
+    expect(writeText).not.toHaveBeenCalled();
+
+    const basicCopyButton = screen.getByRole('button', {
+      name: '기본 링크 복사',
+    });
+    expect(basicCopyButton).not.toBeDisabled();
+  });
+
   it('하객용 편집기에 직접 들어오면 기존 데이터 요청으로 편집 중인 그룹명을 표시한다', async () => {
     mockFetch.mockResolvedValueOnce(
       reply({

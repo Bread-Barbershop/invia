@@ -110,6 +110,7 @@ export default function InvitationAudiencesDialog({
     field?: 'name' | 'slug';
   } | null>(null);
   const [copiedFolderId, setCopiedFolderId] = useState('');
+  const [unverifiedFolderIds, setUnverifiedFolderIds] = useState<string[]>([]);
 
   const listKey = `${folderId}:${loadAttempt}`;
   const currentList = listResult?.key === listKey ? listResult : null;
@@ -170,6 +171,7 @@ export default function InvitationAudiencesDialog({
           return;
         }
         setListResult({ key: listKey, groups });
+        setUnverifiedFolderIds([]);
       },
       err => {
         if (!controller.signal.aborted) {
@@ -346,6 +348,9 @@ export default function InvitationAudiencesDialog({
       }
     } catch (err) {
       setError({ message: err instanceof Error ? err.message : DELETE_ERROR });
+      setCopiedFolderId(current =>
+        current === target.folderId ? '' : current
+      );
       if (folderId) {
         try {
           const params = new URLSearchParams({ folderId });
@@ -360,17 +365,26 @@ export default function InvitationAudiencesDialog({
             refreshed.rootGuestUrl
           ) {
             setListResult({ key: listKey, groups: refreshed });
+            setUnverifiedFolderIds(current =>
+              current.filter(id => id !== target.folderId)
+            );
             setCopiedFolderId(current => {
               const copiedGroup = refreshed.groups.find(
                 group => group.folderId === current
               );
               return copiedGroup?.linkRetired ? '' : current;
             });
+            return;
           }
         } catch {
           // 목록 재조회 실패 시 원래 삭제 에러 상태 유지
         }
       }
+      setUnverifiedFolderIds(current =>
+        current.includes(target.folderId)
+          ? current
+          : [...current, target.folderId]
+      );
     } finally {
       if (!opening) {
         setOperation(null);
@@ -420,7 +434,13 @@ export default function InvitationAudiencesDialog({
   }
 
   async function copyGroupLink(group: AudienceGroup) {
-    if (!list || group.linkRetired) return;
+    if (
+      !list ||
+      group.linkRetired ||
+      unverifiedFolderIds.includes(group.folderId)
+    ) {
+      return;
+    }
     try {
       const path = buildAudienceGuestUrl(list.rootGuestUrl, group.slug);
       await navigator.clipboard.writeText(
@@ -557,7 +577,8 @@ export default function InvitationAudiencesDialog({
                           busy ||
                           Boolean(pendingAction) ||
                           Boolean(deleteGroup) ||
-                          Boolean(group.linkRetired)
+                          Boolean(group.linkRetired) ||
+                          unverifiedFolderIds.includes(group.folderId)
                         }
                         onClick={() => void copyGroupLink(group)}
                       >
