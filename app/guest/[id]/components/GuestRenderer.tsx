@@ -26,10 +26,29 @@ import { GuestPrivacyNotice } from './GuestPrivacyNotice';
 import { hasGuestBlockContent } from './hasGuestBlockContent';
 
 import type { NormalizedGuestPayload } from '../validation/parseGuestPayload';
+import type { EditorBlock } from '@/shared/types/block';
 
 type GuestRendererBlock = NormalizedGuestPayload['blocks'][number];
 type GuestRendererBulkData = NormalizedGuestPayload['bulkData'];
 type GuestRendererRenderHints = NormalizedGuestPayload['renderHints'];
+
+/** 하객 화면의 일정 저장 버튼이 쓸 장소 문구를 장소 블록에서 꺼낸다. */
+function resolveCalendarLocation(
+  blocks: GuestRendererBlock[],
+  activePrivacyFields: NormalizedGuestPayload['activePrivacyFields']
+) {
+  if (activePrivacyFields?.includes('phone')) return undefined;
+
+  const placeBlock = blocks.find(block => block.component === 'place');
+  if (!placeBlock || placeBlock.privacyPlaceholder) return undefined;
+
+  const props = placeBlock.props as EditorBlock<'place'>['props'];
+  const parts = [props.placeName, props.placeDetail, props.placeAddress]
+    .map(value => (typeof value === 'string' ? value.trim() : ''))
+    .filter(value => value.length > 0);
+
+  return parts.length > 0 ? parts.join(' ') : undefined;
+}
 
 const GUEST_PAGE_PROP_COMPONENTS = new Set<GuestRendererBlock['component']>([
   'checklist',
@@ -79,6 +98,7 @@ function GuestRenderer({
   ) => React.ReactNode;
 }) {
   const { titleData, bodyData } = bulkData;
+  const calendarLocation = resolveCalendarLocation(blocks, activePrivacyFields);
   const darkCards = usesDarkInvitationCards(
     bulkData.backgroundColor,
     titleData,
@@ -174,6 +194,7 @@ function GuestRenderer({
           isGuestPage?: boolean;
           hideActions?: boolean;
           checklistStorageScope?: string;
+          calendarLocation?: string;
         }>;
 
         const hideActions = block.component === 'account'
@@ -193,6 +214,11 @@ function GuestRenderer({
                 : {})}
               {...(isGuestPage && GUEST_PAGE_PROP_COMPONENTS.has(block.component)
                 ? { isGuestPage: true }
+                : {})}
+              {...(isGuestPage &&
+              block.component === 'calendar' &&
+              calendarLocation
+                ? { calendarLocation }
                 : {})}
             />
           </>
