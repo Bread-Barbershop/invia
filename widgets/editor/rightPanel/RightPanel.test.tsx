@@ -44,7 +44,7 @@ describe('RightPanel 컴포넌트 테스트', () => {
     render(<RightPanel />);
 
     // Assert
-    const typeButton = screen.getByRole('button', { name: /타입/i });
+    const typeButton = screen.getByRole('tab', { name: /타입/i });
     expect(typeButton).toHaveClass('border-b text-text-primary');
   });
 
@@ -62,8 +62,8 @@ describe('RightPanel 컴포넌트 테스트', () => {
     render(<RightPanel />);
 
     // Assert
-    const posterButton = screen.getByRole('button', { name: /포스터/i });
-    const typeButton = screen.getByRole('button', { name: /타입/i });
+    const posterButton = screen.getByRole('tab', { name: /포스터/i });
+    const typeButton = screen.getByRole('tab', { name: /타입/i });
     expect(posterButton).toHaveClass('border-b text-text-primary');
     expect(typeButton).toBeDisabled();
     expect(typeButton).toHaveClass('cursor-not-allowed');
@@ -80,10 +80,10 @@ describe('RightPanel 컴포넌트 테스트', () => {
     });
 
     render(<RightPanel />);
-    const posterButton = screen.getByRole('button', { name: /포스터/i });
+    const posterButton = screen.getByRole('tab', { name: /포스터/i });
 
     // Act
-    fireEvent.pointerDown(posterButton);
+    fireEvent.click(posterButton);
 
     // Assert
     expect(posterButton).toHaveClass('border-b text-text-primary');
@@ -101,9 +101,9 @@ describe('RightPanel 컴포넌트 테스트', () => {
       });
 
       render(<RightPanel />);
-      const posterButton = screen.getByRole('button', { name: /포스터/i });
+      const posterButton = screen.getByRole('tab', { name: /포스터/i });
 
-      fireEvent.pointerDown(posterButton);
+      fireEvent.click(posterButton);
 
       expect(posterButton).toBeDisabled();
       expect(screen.getByTestId('type-panel')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('RightPanel 컴포넌트 테스트', () => {
     mockUseComponentType.mockReturnValue({ typeArray: STABLE_TYPE_ARRAY });
 
     const { rerender } = render(<RightPanel />);
-    expect(screen.getByRole('button', { name: /타입/i })).toHaveClass(
+    expect(screen.getByRole('tab', { name: /타입/i })).toHaveClass(
       'border-b text-text-primary'
     );
 
@@ -129,7 +129,7 @@ describe('RightPanel 컴포넌트 테스트', () => {
     rerender(<RightPanel />);
 
     // Assert
-    expect(screen.getByRole('button', { name: /포스터/i })).toHaveClass(
+    expect(screen.getByRole('tab', { name: /포스터/i })).toHaveClass(
       'border-b text-text-primary'
     );
   });
