@@ -5,6 +5,7 @@ import { HTMLAttributes, useState } from 'react';
 import { MiddlePreviewWrapper } from '@/components/organisms/wrapper/MiddlePreviewWrapper';
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
 import { resolveSketchPalette } from '@/shared/map/sketch/palettes';
+import { matchesSketchMapSettings } from '@/shared/map/sketch/sketchTypes';
 import type { EditorBlock } from '@/shared/types/block';
 import { formatPhoneNumber } from '@/shared/utils/phoneNumber';
 import {
@@ -46,9 +47,19 @@ export const PlacePreview = ({
     checkedPlaceTel = false,
     mapLocked,
   } = blockInfo.props;
-  const showMap = blockInfo.props.openMap && hasPlaceCoordinates(blockInfo.props.lng, blockInfo.props.lat);
+  const { lat, lng } = blockInfo.props;
+  const showMap = blockInfo.props.openMap && hasPlaceCoordinates(lng, lat);
   const sketchProps = resolvePlaceSketchProps(blockInfo.props);
-  const useSketch = sketchProps.mapStyle === 'sketch' && sketchProps.sketch !== null;
+  const currentSketch =
+    sketchProps.mapStyle === 'sketch' &&
+    matchesSketchMapSettings(sketchProps.sketch, {
+      lat,
+      lng,
+      radius: sketchProps.sketchRadius,
+      density: sketchProps.sketchDensity,
+    })
+      ? sketchProps.sketch
+      : null;
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const { fontFamily, fontSize } = useBodyFontInfo();
   const detailStyle = {
@@ -84,10 +95,10 @@ export const PlacePreview = ({
         </p>
       )}
 
-      {showMap && useSketch && sketchProps.sketch && (
+      {showMap && currentSketch && (
         <SketchErrorBoundary label="preview" fallback={null}>
           <SketchMapSvg
-            data={sketchProps.sketch}
+            data={currentSketch}
             palette={resolveSketchPalette(sketchProps.sketchPalette)}
             showStations={sketchProps.sketchShowStations}
             showVenueLabel={sketchProps.sketchShowLabel}
@@ -98,7 +109,7 @@ export const PlacePreview = ({
         </SketchErrorBoundary>
       )}
 
-      {showMap && !useSketch && isScriptLoaded && (
+      {showMap && !currentSketch && isScriptLoaded && (
         <PlaceMap
           lng={blockInfo.props.lng}
           lat={blockInfo.props.lat}

@@ -2,7 +2,7 @@ import {
   SKETCH_MAP_VERSION,
   distanceInMeters,
   isSketchMapData,
-  isSketchOutdated,
+  matchesSketchMapSettings,
   type SketchMapData,
 } from './sketchTypes';
 
@@ -84,30 +84,24 @@ describe('distanceInMeters', () => {
   });
 });
 
-describe('isSketchOutdated', () => {
+describe('matchesSketchMapSettings', () => {
   const sketch = createSketch();
 
-  it('같은 위치·반경이면 최신 상태로 본다', () => {
+  it('요청의 반올림 정밀도를 반영해 같은 좌표를 비교한다', () => {
     expect(
-      isSketchOutdated(sketch, { lat: 37.5088, lng: 127.0606 }, 500)
-    ).toBe(false);
-  });
-
-  it('주소가 40m 이상 바뀌면 다시 만들어야 한다', () => {
-    expect(
-      isSketchOutdated(sketch, { lat: 37.5108, lng: 127.0606 }, 500)
+      matchesSketchMapSettings(sketch, { ...sketch, lat: sketch.lat + 0.0000001 })
     ).toBe(true);
   });
 
-  it('반경 설정이 바뀌면 다시 만들어야 한다', () => {
-    expect(
-      isSketchOutdated(sketch, { lat: 37.5088, lng: 127.0606 }, 800)
-    ).toBe(true);
+  it.each([
+    ['주소', { lat: 37.509 }],
+    ['반경', { radius: 800 }],
+    ['밀도', { density: 'detailed' }],
+  ] as const)('%s가 달라졌으면 현재 설정과 일치하지 않는다', (_field, change) => {
+    expect(matchesSketchMapSettings(sketch, { ...sketch, ...change })).toBe(false);
   });
 
-  it('약도가 없으면 오래된 상태로 보지 않는다', () => {
-    expect(isSketchOutdated(null, { lat: 37.5088, lng: 127.0606 }, 500)).toBe(
-      false
-    );
+  it('저장된 약도가 없으면 현재 설정과 일치하지 않는다', () => {
+    expect(matchesSketchMapSettings(null, sketch)).toBe(false);
   });
 });

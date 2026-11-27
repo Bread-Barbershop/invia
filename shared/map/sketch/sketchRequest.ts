@@ -8,6 +8,7 @@ import {
   SKETCH_RADIUS_DEFAULT,
   SKETCH_RADIUS_MAX,
   SKETCH_RADIUS_MIN,
+  roundSketchCoordinate,
   type SketchDensity,
 } from './sketchTypes';
 
@@ -58,8 +59,8 @@ export function parseSketchRequest(
   return {
     ok: true,
     value: {
-      lat: Number(lat.toFixed(6)),
-      lng: Number(lng.toFixed(6)),
+      lat: roundSketchCoordinate(lat),
+      lng: roundSketchCoordinate(lng),
       radius: Math.round(radius),
       density: densityParam as SketchDensity,
     },

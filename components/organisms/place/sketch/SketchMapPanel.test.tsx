@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { SKETCH_MAP_VERSION, type SketchMapData } from '@/shared/map/sketch/sketchTypes';
 
@@ -79,7 +79,7 @@ describe('SketchMapPanel', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('좌표가 있고 약도가 없으면 자동으로 생성을 시작한다', async () => {
+  it('좌표가 있고 약도가 없으면 Strict Mode에서도 한 번만 자동 생성한다', async () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse(SKETCH));
     global.fetch = fetchMock;
     const onChange = jest.fn();
@@ -91,7 +91,8 @@ describe('SketchMapPanel', () => {
         venueLabel="라움아트센터"
         props={buildProps()}
         onChange={onChange}
-      />
+      />,
+      { reactStrictMode: true }
     );
 
     await waitFor(() => {
@@ -119,6 +120,9 @@ describe('SketchMapPanel', () => {
     expect(
       screen.getByRole('img', { name: '라움아트센터 약도' })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '다시 시도' })
+    ).not.toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -138,29 +142,100 @@ describe('SketchMapPanel', () => {
     expect(onChange).toHaveBeenCalledWith({ sketchPalette: 'sage' });
   });
 
-  it('주소가 바뀌면 다시 만들라고 안내한다', () => {
-    render(
+  it.each([
+    ['주소', { lat: 37.509 }],
+    ['반경', { radius: 800 }],
+    ['밀도', { density: 'detailed' }],
+  ] as const)('%s가 바뀌면 약도를 자동 갱신한다', async (_field, change) => {
+    const updatedSketch = { ...SKETCH, ...change };
+    const fetchMock = jest.fn().mockResolvedValue(okResponse(updatedSketch));
+    global.fetch = fetchMock;
+    const onChange = jest.fn();
+    const { rerender } = render(
       <SketchMapPanel
-        lat={37.5300}
-        lng={127.0900}
+        lat={SKETCH.lat}
+        lng={SKETCH.lng}
         venueLabel="라움아트센터"
         props={buildProps({ sketch: SKETCH })}
-        onChange={jest.fn()}
+        onChange={onChange}
       />
     );
 
-    expect(screen.getByText(/주소나 반경이 바뀌었어요/)).toBeInTheDocument();
+    rerender(
+      <SketchMapPanel
+        lat={updatedSketch.lat}
+        lng={updatedSketch.lng}
+        venueLabel="라움아트센터"
+        props={buildProps({
+          sketch: SKETCH,
+          sketchRadius: updatedSketch.radius,
+          sketchDensity: updatedSketch.density,
+        })}
+        onChange={onChange}
+      />
+    );
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({ sketch: updatedSketch })
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('생성에 실패하면 이유를 보여 준다', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: false,
-      status: 503,
-      json: async () => ({
-        ok: false,
-        message: '약도 데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.',
-      }),
+  it('주소가 연속으로 바뀌면 이전 주소 요청을 취소하고 늦게 도착한 응답을 무시한다', async () => {
+    let finishFirst!: () => void;
+    const firstResponse = new Promise<ReturnType<typeof okResponse>>(resolve => {
+      finishFirst = () => resolve(okResponse(SKETCH));
     });
+    const updatedSketch = { ...SKETCH, lat: 37.509 };
+    const fetchMock = jest
+      .fn()
+      .mockReturnValueOnce(firstResponse)
+      .mockResolvedValueOnce(okResponse(updatedSketch));
+    global.fetch = fetchMock;
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <SketchMapPanel
+        lat={SKETCH.lat}
+        lng={SKETCH.lng}
+        venueLabel="라움아트센터"
+        props={buildProps()}
+        onChange={onChange}
+      />
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    rerender(
+      <SketchMapPanel
+        lat={updatedSketch.lat}
+        lng={updatedSketch.lng}
+        venueLabel="라움아트센터"
+        props={buildProps()}
+        onChange={onChange}
+      />
+    );
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith({ sketch: updatedSketch })
+    );
+    await act(async () => finishFirst());
+
+    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('생성에 실패하면 이유를 보여 주고 다시 시도할 수 있다', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({
+          ok: false,
+          message: '약도 데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.',
+        }),
+      })
+      .mockResolvedValueOnce(okResponse(SKETCH));
+    const onChange = jest.fn();
 
     render(
       <SketchMapPanel
@@ -168,12 +243,14 @@ describe('SketchMapPanel', () => {
         lng={127.0606}
         venueLabel="라움아트센터"
         props={buildProps()}
-        onChange={jest.fn()}
+        onChange={onChange}
       />
     );
 
     expect(
       await screen.findByText(/약도 데이터를 불러오지 못했어요/)
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }));
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith({ sketch: SKETCH }));
   });
 });

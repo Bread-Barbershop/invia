@@ -64,6 +64,8 @@ export interface SketchMapData {
   generatedAt?: string;
 }
 
+export type SketchMapSettings = Pick<SketchMapData, 'lat' | 'lng' | 'radius' | 'density'>;
+
 const MAX_ROADS = 3000;
 const MAX_AREAS = 800;
 const MAX_STATIONS = 8;
@@ -126,19 +128,22 @@ export function isSketchMapData(value: unknown): value is SketchMapData {
   return true;
 }
 
-/**
- * 현재 블록 설정과 저장된 약도의 기준점이 일치하는지 확인한다.
- * 주소를 다시 검색한 뒤 이전 약도가 그대로 남아 있는 상황을 감지한다.
- */
-export function isSketchOutdated(
-  data: SketchMapData | null | undefined,
-  center: { lat: number; lng: number },
-  radius?: number
+export function roundSketchCoordinate(coordinate: number): number {
+  return Number(coordinate.toFixed(6));
+}
+
+/** 저장된 약도가 현재 위치와 생성 설정에 맞는지 확인한다. */
+export function matchesSketchMapSettings(
+  data: SketchMapData | null,
+  { lat, lng, radius, density }: SketchMapSettings
 ): boolean {
-  if (!data) return false;
-  const moved = distanceInMeters(data.lat, data.lng, center.lat, center.lng) > 40;
-  const radiusChanged = radius !== undefined && Math.abs(data.radius - radius) > 1;
-  return moved || radiusChanged;
+  return (
+    data !== null &&
+    data.lat === roundSketchCoordinate(lat) &&
+    data.lng === roundSketchCoordinate(lng) &&
+    data.radius === radius &&
+    data.density === density
+  );
 }
 
 /** 두 좌표 사이의 대략적인 거리(m). 약도 반경(1km 내외) 판정에 충분한 정확도. */
