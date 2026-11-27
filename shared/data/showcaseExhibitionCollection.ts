@@ -302,7 +302,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '갤러리 결',
-        detail: '· 북촌, 한옥 두 채 안쪽 마당',
+        detail: '· 한옥 두 채, 안쪽 마당',
       },
       {
         component: 'transportation',
