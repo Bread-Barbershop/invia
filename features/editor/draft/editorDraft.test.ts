@@ -7,6 +7,7 @@ import {
   EDITOR_DRAFT_MAX_AGE_MS,
   clearEditorDraft,
   createEditorDraftSnapshot,
+  discardEditorDraft,
   isEditorDraftUsable,
   loadEditorDraft,
   saveEditorDraft,
@@ -93,6 +94,28 @@ it('저장한 초안을 다시 불러오고 지울 수 있다', async () => {
 
   await clearEditorDraft(BLANK_EDITOR_DRAFT_KEY);
   expect(await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY)).toBeNull();
+});
+
+it('저장 시각이 같은 초안이라도 확인 이후 갱신됐으면 지우지 않는다', async () => {
+  const clock = jest.spyOn(Date, 'now').mockReturnValue(Date.now());
+  try {
+    const first = new File(['first'], 'first.png');
+    const latest = new File(['latest'], 'latest.png');
+
+    await saveEditorDraft(BLANK_EDITOR_DRAFT_KEY, createInput(first));
+    const shown = await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY);
+    if (!shown) throw new Error('삭제 확인에 표시할 초안을 불러오지 못했어요.');
+
+    await saveEditorDraft(BLANK_EDITOR_DRAFT_KEY, createInput(latest));
+    const result = await discardEditorDraft(BLANK_EDITOR_DRAFT_KEY, shown);
+
+    expect(result.status).toBe('changed');
+    const remaining = await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY);
+    expect(remaining?.savedAt).toBe(shown.savedAt);
+    expect(remaining?.images[0].file).toBe(latest);
+  } finally {
+    clock.mockRestore();
+  }
 });
 
 it('같은 이름의 샘플과 템플릿에서 보관한 초안을 따로 불러오고 지운다', async () => {

@@ -11,7 +11,6 @@ import {
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
 import {
   BLANK_EDITOR_DRAFT_KEY,
-  clearEditorDraft,
   loadEditorDraft,
   type EditorDraftKey,
   type EditorDraftSnapshot,
@@ -277,14 +276,6 @@ function SampleEditorCreate({
     );
   }, [pendingDraft, showToast]);
 
-  const handleStartFresh = useCallback(() => {
-    void startFreshEditor();
-  }, [startFreshEditor]);
-
-  const handleDiscardDraft = useCallback(() => {
-    void clearEditorDraft(draftKey).then(() => startFreshEditor());
-  }, [draftKey, startFreshEditor]);
-
   if (isLoading) {
     return <ScreenTransitionLoader label="에디터를 준비하는 중" />;
   }
@@ -300,9 +291,10 @@ function SampleEditorCreate({
       <div className="flex h-full w-full items-center justify-center bg-[#E7E9EB]">
         <EditorDraftRecoveryDialog
           draft={pendingDraft}
+          draftKey={draftKey}
           onResume={handleResumeDraft}
-          onStartFresh={handleStartFresh}
-          onDiscard={handleDiscardDraft}
+          onDraftChange={setPendingDraft}
+          onDiscard={() => void startFreshEditor()}
         />
       </div>
     );

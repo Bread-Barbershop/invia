@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
 import { DEFAULT_SCROLL_ANIMATION } from '@/components/molecules/scroll-fade-in/animationConfig';
 import {
-  clearEditorDraft,
   loadEditorDraft,
   type EditorDraftKey,
   type EditorDraftSnapshot,
@@ -139,14 +138,6 @@ export default function TemplateEditorEntry({
     setPendingDraft(null);
   }, [pendingDraft, templateId]);
 
-  const handleStartFresh = useCallback(() => {
-    void startFreshTemplate();
-  }, [startFreshTemplate]);
-
-  const handleDiscardDraft = useCallback(() => {
-    void clearEditorDraft(draftKey).then(() => startFreshTemplate());
-  }, [draftKey, startFreshTemplate]);
-
   useEffect(() => {
     if (!template || !savedData || startedTemplateIdRef.current === templateId)
       return;
@@ -192,9 +183,10 @@ export default function TemplateEditorEntry({
       <div className="flex h-full w-full items-center justify-center bg-[#E7E9EB]">
         <EditorDraftRecoveryDialog
           draft={pendingDraft}
+          draftKey={draftKey}
           onResume={handleResumeDraft}
-          onStartFresh={handleStartFresh}
-          onDiscard={handleDiscardDraft}
+          onDraftChange={setPendingDraft}
+          onDiscard={() => void startFreshTemplate()}
         />
       </div>
     );

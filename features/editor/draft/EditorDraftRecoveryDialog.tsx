@@ -11,16 +11,20 @@ import {
 } from '@/shared/utils/focusTrap';
 
 import { summarizeEditorDraft } from './draftRecovery';
-
-import type { EditorDraftSnapshot } from './editorDraft';
+import {
+  discardEditorDraft,
+  type EditorDraftKey,
+  type EditorDraftSnapshot,
+} from './editorDraft';
 
 type EditorDraftRecoveryDialogProps = {
   draft: EditorDraftSnapshot;
+  draftKey: EditorDraftKey;
   /** 테스트에서 시각을 고정하기 위해 주입한다. */
   now?: number;
   onResume: () => void;
-  onStartFresh: () => void;
-  /** 초안을 지우고 새로 시작한다. */
+  onDraftChange: (draft: EditorDraftSnapshot) => void;
+  /** 삭제가 끝난 뒤 새 편집기를 시작한다. */
   onDiscard: () => void;
 };
 
@@ -29,20 +33,25 @@ const SUMMARY_ID = 'editor-draft-recovery-summary';
 const DESCRIPTION_ID = 'editor-draft-recovery-description';
 
 /**
- * 로그인으로 막혀 이 기기에 남아 있던 초안을 만났을 때, 그대로 덮어쓰지 않고
- * 사용자가 '이어서 쓰기 / 새로 시작 / 초안 삭제'를 고르게 한다.
+ * 이 기기에 남은 초안을 이어서 작성하거나 삭제한 뒤 새로 시작한다.
  */
 export default function EditorDraftRecoveryDialog({
   draft,
+  draftKey,
   now,
   onResume,
-  onStartFresh,
+  onDraftChange,
   onDiscard,
 }: EditorDraftRecoveryDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const resumeButtonRef = useRef<HTMLButtonElement>(null);
   const cancelDiscardButtonRef = useRef<HTMLButtonElement>(null);
+  const discardPendingRef = useRef(false);
   const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
+  const [isDiscarding, setIsDiscarding] = useState(false);
+  const [discardNotice, setDiscardNotice] = useState<'changed' | 'failed' | null>(
+    null
+  );
 
   // 기본값을 렌더 중에 계산하지 않도록 마운트 시각을 한 번만 잡는다.
   const [mountedAt] = useState(() => Date.now());
@@ -57,28 +66,30 @@ export default function EditorDraftRecoveryDialog({
   useEffect(() => {
     const enableRestore = disableBodyScroll();
     getHiddenRoot();
-    const focusTimer = window.setTimeout(() => {
-      resumeButtonRef.current?.focus();
-    }, 0);
 
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.clearTimeout(focusTimer);
       document.removeEventListener('keydown', handleKeyDown);
       enableRestore();
       removeHiddenRoot();
     };
   }, [handleKeyDown]);
 
-  // Escape는 지우는 쪽이 아니라 남기는 쪽으로 닫는다. 초안은 지우면 되돌릴 수 없다.
+  const cancelDiscard = useCallback(() => {
+    if (discardPendingRef.current) return;
+    setIsConfirmingDiscard(false);
+    setDiscardNotice(null);
+  }, []);
+
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
 
       event.preventDefault();
+      if (discardPendingRef.current) return;
       if (isConfirmingDiscard) {
-        setIsConfirmingDiscard(false);
+        cancelDiscard();
         return;
       }
       onResume();
@@ -86,13 +97,36 @@ export default function EditorDraftRecoveryDialog({
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isConfirmingDiscard, onResume]);
+  }, [cancelDiscard, isConfirmingDiscard, onResume]);
 
   useEffect(() => {
-    if (isConfirmingDiscard) {
-      cancelDiscardButtonRef.current?.focus();
+    if (isDiscarding) return;
+
+    const button = isConfirmingDiscard ? cancelDiscardButtonRef : resumeButtonRef;
+    button.current?.focus();
+  }, [isConfirmingDiscard, isDiscarding]);
+
+  async function confirmDiscard() {
+    if (discardPendingRef.current) return;
+    discardPendingRef.current = true;
+    setIsDiscarding(true);
+    setDiscardNotice(null);
+    try {
+      const result = await discardEditorDraft(draftKey, draft);
+      if (result.status === 'changed') {
+        onDraftChange(result.draft);
+        setIsConfirmingDiscard(false);
+        setDiscardNotice('changed');
+      } else if (result.status === 'failed') {
+        setDiscardNotice('failed');
+      } else {
+        onDiscard();
+      }
+    } finally {
+      discardPendingRef.current = false;
+      setIsDiscarding(false);
     }
-  }, [isConfirmingDiscard]);
+  }
 
   if (typeof document === 'undefined') return null;
 
@@ -130,9 +164,16 @@ export default function EditorDraftRecoveryDialog({
             id={DESCRIPTION_ID}
             className="break-keep text-[13px] leading-5 text-text-secondary"
           >
-            로그인하기 전에 저장하려던 작업이에요. 이어서 작성하면 그대로 불러오고,
-            새로 시작하면 빈 초대장에서 시작해요. 초안은 일주일 동안 보관돼요.
+            로그인하기 전에 저장하려던 작업이에요. 초안은 일주일 동안 보관돼요.
           </p>
+          {discardNotice === 'changed' && (
+            <p
+              className="break-keep text-[13px] font-medium text-text-plain"
+              role="status"
+            >
+              다른 탭에서 초안이 갱신됐어요. 최신 초안을 확인해 주세요.
+            </p>
+          )}
         </div>
 
         {isConfirmingDiscard ? (
@@ -140,25 +181,33 @@ export default function EditorDraftRecoveryDialog({
             className="flex flex-col gap-3 rounded-2xl bg-[#F7F7F8] p-4"
             role="group"
             aria-label="초안 삭제 확인"
+            aria-busy={isDiscarding}
           >
             <p className="break-keep text-[13px] leading-5 text-text-plain">
               초안을 삭제하면 되돌릴 수 없어요. 정말 삭제할까요?
             </p>
+            {discardNotice === 'failed' && (
+              <p className="break-keep text-[13px] text-[#A52D32]" role="alert">
+                초안을 삭제하지 못했어요. 다시 시도해 주세요.
+              </p>
+            )}
             <div className="flex gap-2">
               <button
                 ref={cancelDiscardButtonRef}
                 type="button"
-                onClick={() => setIsConfirmingDiscard(false)}
+                disabled={isDiscarding}
+                onClick={cancelDiscard}
                 className="h-10 flex-1 rounded-lg bg-white text-[13px] font-semibold text-text-plain ring-1 ring-[#E4E4E7] ring-inset transition-colors hover:bg-[#FAFAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
               >
                 취소
               </button>
               <button
                 type="button"
-                onClick={onDiscard}
+                disabled={isDiscarding}
+                onClick={() => void confirmDiscard()}
                 className="h-10 flex-1 rounded-lg bg-[#C4362F] text-[13px] font-semibold text-white transition-colors hover:bg-[#A82C26] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C4362F] focus-visible:ring-offset-2"
               >
-                삭제하기
+                {isDiscarding ? '삭제하는 중' : '삭제하고 시작'}
               </button>
             </div>
           </div>
@@ -170,21 +219,17 @@ export default function EditorDraftRecoveryDialog({
               onClick={onResume}
               className="flex h-12 w-full items-center justify-center rounded-full bg-bg-plain px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[#202020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
             >
-              이어서 작성하기
+              이어서 작성
             </button>
             <button
               type="button"
-              onClick={onStartFresh}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-text-plain ring-1 ring-[#E4E4E7] ring-inset transition-colors hover:bg-[#FAFAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
+              onClick={() => {
+                setDiscardNotice(null);
+                setIsConfirmingDiscard(true);
+              }}
+              className="flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-[#A52D32] ring-1 ring-[#E4E4E7] ring-inset transition-colors hover:bg-[#FAFAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A52D32] focus-visible:ring-offset-2"
             >
-              새로 시작하기
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsConfirmingDiscard(true)}
-              className="mt-1 self-center rounded px-2 py-1 text-xs font-medium text-text-secondary underline underline-offset-4 transition-colors hover:text-text-plain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
-            >
-              초안 삭제
+              초안 삭제 후 새로 시작
             </button>
           </div>
         )}

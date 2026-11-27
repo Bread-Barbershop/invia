@@ -176,7 +176,7 @@ describe('템플릿 주소에 남아 있던 초안', () => {
     );
 
     fireEvent.click(
-      await screen.findByRole('button', { name: '이어서 작성하기' })
+      await screen.findByRole('button', { name: '이어서 작성' })
     );
     fireEvent.click(
       await screen.findByRole('button', { name: '개인정보 안내 확인' })
@@ -192,7 +192,7 @@ describe('템플릿 주소에 남아 있던 초안', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('새로 시작하기를 고르면 초안을 지우지 않고 템플릿 기본값으로 연다', async () => {
+  it('삭제를 확인하면 초안을 지우고 템플릿 기본값을 불러온다', async () => {
     await saveTemplateDraft();
 
     render(
@@ -203,14 +203,15 @@ describe('템플릿 주소에 남아 있던 초안', () => {
     );
 
     fireEvent.click(
-      await screen.findByRole('button', { name: '새로 시작하기' })
+      await screen.findByRole('button', { name: '초안 삭제 후 새로 시작' })
     );
+    fireEvent.click(screen.getByRole('button', { name: '삭제하고 시작' }));
 
     expect(
       await screen.findByRole('button', { name: '개인정보 안내 확인' })
     ).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(await loadEditorDraft(DRAFT_KEY)).not.toBeNull();
+    expect(await loadEditorDraft(DRAFT_KEY)).toBeNull();
     expect(loadOriginalPosterJson).toHaveBeenCalled();
   });
 });

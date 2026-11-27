@@ -77,7 +77,7 @@ describe('EditorCreate 초안 복원', () => {
 
     const { rerender } = render(<EditorCreate />);
     fireEvent.click(
-      await screen.findByRole('button', { name: '이어서 작성하기' })
+      await screen.findByRole('button', { name: '이어서 작성' })
     );
     expect(await screen.findByText(backgroundColor)).toBeInTheDocument();
 
@@ -103,7 +103,7 @@ describe('EditorCreate 초안 복원', () => {
     expect(screen.queryByText('#123456')).not.toBeInTheDocument();
   });
 
-  it('새로 시작하기를 고르면 초안을 남긴 채 빈 초대장으로 연다', async () => {
+  it('삭제 확인 중 갱신된 초안을 보여 주고 이어서 쓸 수 있다', async () => {
     await saveDraftFor(BLANK_EDITOR_DRAFT_KEY, '#123456');
     mockSearchParams.mockReturnValue(
       new URLSearchParams() as ReturnType<typeof useSearchParams>
@@ -111,12 +111,16 @@ describe('EditorCreate 초안 복원', () => {
 
     render(<EditorCreate />);
     fireEvent.click(
-      await screen.findByRole('button', { name: '새로 시작하기' })
+      await screen.findByRole('button', { name: '초안 삭제 후 새로 시작' })
     );
+    await saveDraftFor(BLANK_EDITOR_DRAFT_KEY, '#654321');
+    fireEvent.click(screen.getByRole('button', { name: '삭제하고 시작' }));
 
-    expect(await screen.findByText('빈 초대장')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY)).not.toBeNull();
+    expect(await screen.findByRole('status')).toHaveTextContent('다른 탭에서 초안이 갱신됐어요');
+    expect(screen.queryByText('빈 초대장')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '이어서 작성' }));
+    expect(await screen.findByText('#654321')).toBeInTheDocument();
+    expect((await loadEditorDraft(BLANK_EDITOR_DRAFT_KEY))?.bulkData.backgroundColor).toBe('#654321');
   });
 
   it('초안 삭제를 확인하면 기기에 남은 초안까지 지운다', async () => {
@@ -126,8 +130,8 @@ describe('EditorCreate 초안 복원', () => {
     );
 
     render(<EditorCreate />);
-    fireEvent.click(await screen.findByRole('button', { name: '초안 삭제' }));
-    fireEvent.click(screen.getByRole('button', { name: '삭제하기' }));
+    fireEvent.click(await screen.findByRole('button', { name: '초안 삭제 후 새로 시작' }));
+    fireEvent.click(screen.getByRole('button', { name: '삭제하고 시작' }));
 
     expect(await screen.findByText('빈 초대장')).toBeInTheDocument();
     await waitFor(() =>
