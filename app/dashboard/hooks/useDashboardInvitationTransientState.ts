@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
+import type { CardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import type { DashboardPendingInvitation } from '@/shared/constants/dashboardPendingInvitation';
 
 import type { InvitationResultMap } from './dashboardInvitationState';
@@ -9,7 +10,7 @@ type DeleteErrorMap = Record<string, string | null>;
 type GuestReadinessStateMap = Record<string, boolean>;
 type ShareStateMap = Record<string, boolean>;
 type VisibilityStateMap = Record<string, boolean>;
-type VisibilityErrorMap = Record<string, string | null>;
+type VisibilityErrorMap = Record<string, CardActionFailureMessage | null>;
 
 export function useDashboardInvitationTransientState(
   initialResults: InvitationResultMap

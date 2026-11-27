@@ -1,4 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
+import { hydrateRoot, type Root } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 
 import { useToastStore } from '@/shared/store/useToastStore';
 
@@ -30,7 +32,9 @@ describe('토스트 안내 읽기', () => {
     render(<ToastContainer />);
 
     act(() => {
-      useToastStore.getState().showToast('초대장 삭제에 실패했습니다.', 'error');
+      useToastStore
+        .getState()
+        .showToast('초대장 삭제에 실패했습니다.', 'error');
     });
 
     expect(screen.getByRole('alert')).toHaveTextContent(
@@ -58,5 +62,28 @@ describe('토스트 안내 읽기', () => {
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  });
+
+  it('서버가 렌더링한 토스트 영역을 오류 없이 연결한다', async () => {
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(<ToastContainer />);
+    document.body.append(container);
+    const onRecoverableError = jest.fn();
+    let root: Root | undefined;
+
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <ToastContainer />, {
+          onRecoverableError,
+        });
+      });
+
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(screen.getByRole('status')).toBeEmptyDOMElement();
+      expect(screen.getByRole('alert')).toBeEmptyDOMElement();
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+    }
   });
 });

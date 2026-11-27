@@ -256,6 +256,27 @@ describe('useDashboardInvitations', () => {
     );
   });
 
+  it('공개 전환 실패는 카드 안내로 전달하고 토스트를 띄우지 않는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => ({ ok: false, error: 'visibility_publish_failed' }),
+    });
+    const { result } = renderHook(() =>
+      useDashboardInvitations([sourceInvitation], { loadOnMount: false })
+    );
+
+    await act(() =>
+      result.current.handleToggleVisibility(sourceInvitation.folderId, true)
+    );
+
+    expect(result.current.getVisibilityError(sourceInvitation.folderId)).toEqual({
+      title: '초대장을 공개로 바꾸지 못했어요',
+      description: '공개 링크 권한을 설정하지 못했어요. 다시 시도해 주세요.',
+    });
+    expect(errorToastMock).not.toHaveBeenCalled();
+  });
+
   it('sessionStorage handoff 초대장을 Drive 목록과 readiness가 준비될 때까지 pending으로 유지한다', async () => {
     jest.useFakeTimers();
 

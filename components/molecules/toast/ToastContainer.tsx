@@ -1,7 +1,5 @@
 'use client';
 
-import { createPortal } from 'react-dom';
-
 import { useToastStore } from '@/shared/store/useToastStore';
 
 import { ToastBar } from './ToastBar';
@@ -23,13 +21,10 @@ const toastWrapperClass =
 export const ToastContainer = () => {
   const { message, variant, isVisible, options } = useToastStore();
 
-  // 서버 렌더링에서는 포털을 만들 document가 없다.
-  if (typeof document === 'undefined') return null;
-
   const isAssertive = variant === 'error' || variant === 'warning';
   const visibility = getToastVisibilityClass(isVisible, options.animation);
 
-  return createPortal(
+  return (
     <>
       {/*
         live region은 비어 있어도 화면에서 지우지 않아야 새 메시지를 스크린 리더가 읽는다.
@@ -54,7 +49,6 @@ export const ToastContainer = () => {
           <ToastBar message={message} variant={variant} />
         ) : null}
       </div>
-    </>,
-    document.body
+    </>
   );
 };
