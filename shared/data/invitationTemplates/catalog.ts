@@ -22,6 +22,7 @@ export const INVITATION_TEMPLATES: InvitationTemplate[] =
         ...(design.largePrint ? ['큰 글씨'] : []),
         '사진·문구 편집 가능',
       ],
+      searchKeywords: design.venue ? [design.venue] : [],
       colors: {
         background: design.palette[0],
         accent: design.palette[1],

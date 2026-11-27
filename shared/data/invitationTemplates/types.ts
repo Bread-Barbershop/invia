@@ -89,6 +89,8 @@ export type InvitationTemplate = {
   eyebrow: string;
   description: string;
   tags: string[];
+  /** 이름·설명·분류 밖에서 검색에 함께 걸리는 말. (예: 장소 이름) */
+  searchKeywords?: readonly string[];
   largePrint: boolean;
   colors: {
     background: string;

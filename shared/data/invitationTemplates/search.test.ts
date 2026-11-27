@@ -58,6 +58,26 @@ describe('표지·템플릿 검색', () => {
     );
   });
 
+  it('분류 이름 대신 쓰는 말로도 그 분류의 표지를 찾는다', () => {
+    const 결과 = filterInvitationTemplates(INVITATION_TEMPLATES, '청첩장');
+    const 웨딩 = INVITATION_TEMPLATES.filter(t => t.type === 'wedding');
+
+    expect(웨딩.length).toBeGreaterThan(0);
+    expect(결과.map(t => t.id).sort()).toEqual(웨딩.map(t => t.id).sort());
+  });
+
+  it('카드에 보이는 장소 이름으로도 찾는다', () => {
+    const 결과 = filterInvitationTemplates(INVITATION_TEMPLATES, '야외');
+    expect(결과.some(t => t.id === 'showcase-3')).toBe(true);
+
+    const 그랜드볼룸 = filterInvitationTemplates(
+      INVITATION_TEMPLATES,
+      '그랜드볼룸'
+    );
+    expect(그랜드볼룸.map(t => t.id)).toContain('showcase-0');
+    expect(그랜드볼룸.every(t => t.type === 'wedding')).toBe(true);
+  });
+
   it('맞는 표지가 없으면 빈 배열을 돌려준다', () => {
     expect(
       filterInvitationTemplates(INVITATION_TEMPLATES, '없는검색어xyz')
