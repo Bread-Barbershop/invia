@@ -346,6 +346,31 @@ export default function InvitationAudiencesDialog({
       }
     } catch (err) {
       setError({ message: err instanceof Error ? err.message : DELETE_ERROR });
+      if (folderId) {
+        try {
+          const params = new URLSearchParams({ folderId });
+          const refreshed = await readAudienceResponse<AudienceGroupList>(
+            `${AUDIENCES_API}?${params}`,
+            LOAD_ERROR,
+            { cache: 'no-store' }
+          );
+          if (
+            Array.isArray(refreshed.groups) &&
+            refreshed.groups.length &&
+            refreshed.rootGuestUrl
+          ) {
+            setListResult({ key: listKey, groups: refreshed });
+            setCopiedFolderId(current => {
+              const copiedGroup = refreshed.groups.find(
+                group => group.folderId === current
+              );
+              return copiedGroup?.linkRetired ? '' : current;
+            });
+          }
+        } catch {
+          // 목록 재조회 실패 시 원래 삭제 에러 상태 유지
+        }
+      }
     } finally {
       if (!opening) {
         setOperation(null);
@@ -395,7 +420,7 @@ export default function InvitationAudiencesDialog({
   }
 
   async function copyGroupLink(group: AudienceGroup) {
-    if (!list) return;
+    if (!list || group.linkRetired) return;
     try {
       const path = buildAudienceGuestUrl(list.rootGuestUrl, group.slug);
       await navigator.clipboard.writeText(

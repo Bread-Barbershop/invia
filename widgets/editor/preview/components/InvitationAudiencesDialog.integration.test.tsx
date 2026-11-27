@@ -187,6 +187,13 @@ describe('하객별 구분', () => {
       .mockResolvedValueOnce(
         reply({ message: '잠시 후 다시 시도해 주세요.' }, false)
       )
+      .mockResolvedValueOnce(
+        reply({
+          rootGuestUrl,
+          groups: [basicAudience, familyAudience, friendsAudience],
+          activeSlug: '',
+        })
+      )
       .mockResolvedValueOnce(reply({ success: true }));
     render(<Dialog />);
 
@@ -205,6 +212,49 @@ describe('하객별 구분', () => {
       screen.queryByRole('button', { name: '가족 링크 복사' })
     ).not.toBeInTheDocument();
     expect(openEditor).not.toHaveBeenCalled();
+  });
+
+  it('삭제 실패 후 확인을 취소하면 폐기된 링크 상태를 갱신하고 복사를 차단한다', async () => {
+    const user = userEvent.setup();
+    const writeText = jest.spyOn(navigator.clipboard, 'writeText');
+    mockList([basicAudience, familyAudience]);
+    mockFetch
+      .mockResolvedValueOnce(
+        reply(
+          { message: '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.' },
+          false
+        )
+      )
+      .mockResolvedValueOnce(
+        reply({
+          rootGuestUrl,
+          groups: [basicAudience, { ...familyAudience, linkRetired: true }],
+          activeSlug: '',
+        })
+      );
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.'
+    );
+
+    fireEvent(
+      screen.getByRole('dialog'),
+      new Event('cancel', { cancelable: true })
+    );
+
+    expect(
+      screen.queryByRole('region', { name: '가족 그룹 삭제 확인' })
+    ).not.toBeInTheDocument();
+    const retiredCopyButton = screen.getByRole('button', {
+      name: '가족 링크 복사',
+    });
+    expect(retiredCopyButton).toBeDisabled();
+    expect(retiredCopyButton).toHaveTextContent('링크 비활성');
+    await user.click(retiredCopyButton);
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it('하객용 편집기에 직접 들어오면 기존 데이터 요청으로 편집 중인 그룹명을 표시한다', async () => {
