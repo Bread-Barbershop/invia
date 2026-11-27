@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 
 import PrivacyNoticeModal from './PrivacyNoticeModal';
 
@@ -9,6 +10,18 @@ describe('PrivacyNoticeModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    document.getElementById('app-root')?.remove();
+  });
+
+  function renderAppRoot() {
+    const appRoot = document.createElement('div');
+    appRoot.id = 'app-root';
+    document.body.appendChild(appRoot);
+    return appRoot;
+  }
 
   it('renders modal with Google Drive link and folder info under item 3 when open is true', () => {
     render(<PrivacyNoticeModal open={true} onClose={mockOnClose} />);
@@ -106,5 +119,103 @@ describe('PrivacyNoticeModal', () => {
     expect(
       screen.getByRole('heading', { name: '안심하고 이용하세요.' })
     ).toBeInTheDocument();
+  });
+
+  it('대화상자의 이름과 설명으로 안내 제목·첫 문단을 연결한다', () => {
+    render(<PrivacyNoticeModal open onClose={mockOnClose} />);
+
+    const dialog = screen.getByRole('dialog', {
+      name: '안심하고 이용하세요',
+    });
+    const descriptionId = dialog.getAttribute('aria-describedby');
+
+    expect(descriptionId).toBeTruthy();
+    expect(document.getElementById(descriptionId!)).toHaveTextContent(
+      '이 모바일 청첩장 프로젝트는 누구나 쉽게 사용할 수 있도록 무료로 제공되고 있어요.'
+    );
+  });
+
+  it('열리면 대화상자로 포커스를 옮기고, 닫으면 열기 전 위치로 돌려준다', async () => {
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            개인정보 걱정 없어요
+          </button>
+          <PrivacyNoticeModal open={open} onClose={() => setOpen(false)} />
+        </>
+      );
+    }
+
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    const trigger = screen.getByRole('button', {
+      name: '개인정보 걱정 없어요',
+    });
+    await user.click(trigger);
+
+    const dialog = screen.getByRole('dialog', {
+      name: '안심하고 이용하세요',
+    });
+    await waitFor(() => expect(dialog).toHaveFocus());
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it.each([
+    { key: 'Tab', shiftKey: false },
+    { key: 'Shift+Tab', shiftKey: true },
+  ])('$key으로 안내창에 진입하고 포커스를 순환한다', ({ shiftKey }) => {
+    render(<PrivacyNoticeModal open onClose={mockOnClose} />);
+
+    const dialog = screen.getByRole('dialog');
+    const first = screen.getByRole('region', { name: '개인정보 안내 내용' });
+    const last = screen.getByRole('button', { name: '알겠어요' });
+    // jsdom에는 레이아웃이 없으므로 실제 화면에 보이는 두 경계를 지정한다.
+    jest.spyOn(first, 'offsetParent', 'get').mockReturnValue(dialog);
+    jest.spyOn(last, 'offsetParent', 'get').mockReturnValue(dialog);
+    const destination = shiftKey ? last : first;
+    const boundary = shiftKey ? first : last;
+    const pressTab = () =>
+      fireEvent.keyDown(document.activeElement ?? dialog, { key: 'Tab', shiftKey });
+
+    expect(dialog).toHaveFocus();
+    expect(pressTab()).toBe(false);
+    expect(destination).toHaveFocus();
+
+    boundary.focus();
+    expect(pressTab()).toBe(false);
+    expect(destination).toHaveFocus();
+  });
+
+  it('긴 안내문을 키보드로 스크롤할 수 있도록 이름 있는 포커스 영역으로 만든다', () => {
+    render(<PrivacyNoticeModal open onClose={mockOnClose} />);
+
+    const content = screen.getByRole('region', {
+      name: '개인정보 안내 내용',
+    });
+
+    expect(content).toHaveAttribute('tabindex', '0');
+  });
+
+  it('열린 동안 뒤 화면(app-root)을 보조기기에서 감추고, 닫으면 되돌린다', async () => {
+    const appRoot = renderAppRoot();
+    const { rerender } = render(
+      <PrivacyNoticeModal open onClose={mockOnClose} />
+    );
+
+    expect(appRoot).toHaveAttribute('aria-hidden', 'true');
+    expect(appRoot).toHaveAttribute('inert');
+
+    rerender(<PrivacyNoticeModal open={false} onClose={mockOnClose} />);
+
+    await waitFor(() => {
+      expect(appRoot).not.toHaveAttribute('aria-hidden');
+      expect(appRoot).not.toHaveAttribute('inert');
+    });
   });
 });
