@@ -114,7 +114,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '스페이스 온도',
-        detail: '1층, 골목 안쪽 흰 간판',
+        detail: '· 1층, 골목 안쪽 흰 간판',
       },
       {
         component: 'transportation',
@@ -191,7 +191,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
     heading: '손이 지나간 자리에 그릇이 남습니다',
     date: '2027-03-13',
     time: '16:00',
-    venue: '갤러리 결 · 북촌',
+    venue: '갤러리 결',
     venueAddress: '서울 종로구 북촌로5길 10',
     venueLat: 37.5794441,
     venueLng: 126.9844313,
@@ -302,7 +302,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '갤러리 결',
-        detail: '한옥 두 채, 안쪽 마당',
+        detail: '· 북촌, 한옥 두 채 안쪽 마당',
       },
       {
         component: 'transportation',
@@ -379,7 +379,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
     heading: '책을 읽는 저녁, 열 명의 살롱',
     date: '2027-02-06',
     time: '19:30',
-    venue: '살롱 오후 · 한남동',
+    venue: '살롱 오후',
     venueAddress: '서울 용산구 이태원로54길 12',
     venueLat: 37.5365561,
     venueLng: 127.0014816,
@@ -502,7 +502,7 @@ export const exhibitionCollection: ShowcaseInvitation[] = [
       {
         component: 'place',
         title: '살롱 오후',
-        detail: '2층, 초록 문',
+        detail: '· 한남동, 2층 초록 문',
       },
       {
         component: 'transportation',
