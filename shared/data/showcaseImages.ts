@@ -116,4 +116,35 @@ export const SHOWCASE_PHOTOS = {
     'https://lh3.googleusercontent.com/d/1QRp-EDUNrdgtu5AGHHs_lM3J07MVKkEn',
   exhibitionCup:
     'https://lh3.googleusercontent.com/d/1tk19XEpk6nQ94zceBt2027-eq7ZRz3Rl',
+  // 홈파티·집들이 (2027 새 카테고리) 본문 사진
+  h1BrunchFriends:
+    'https://lh3.googleusercontent.com/d/1lrrBXdhXg4PrjcoXJ3TMSr3XQPFixI4E',
+  h1BrunchHost:
+    'https://lh3.googleusercontent.com/d/1U3cJqXjT_aZLnBmPuoY39q-KE1psyEia',
+  h1BrunchLiving:
+    'https://lh3.googleusercontent.com/d/1MD6WizfwDQV0BotNvaawDoM6aP8jVwTF',
+  h1BrunchTable:
+    'https://lh3.googleusercontent.com/d/1XUzPCJWa9aPTUC9fuH9Mp53tJsV9avyv',
+  h1BrunchToast:
+    'https://lh3.googleusercontent.com/d/1VwIQ8bKTfkJ022j_z2ML8cWfGkAMiO1V',
+  h2PartyCheese:
+    'https://lh3.googleusercontent.com/d/1VQF0j44yHhrUMYjyoaOvO0oQGu4c8dxA',
+  h2PartyHost:
+    'https://lh3.googleusercontent.com/d/1CchN-rZyD80v1zlqZ399b30mZezbiDKp',
+  h2PartyRecord:
+    'https://lh3.googleusercontent.com/d/1_rEWoa2uKDl531XzGDaln-_Uj-tqfDG4',
+  h2PartyTerrace:
+    'https://lh3.googleusercontent.com/d/1XjXz44ZqbEePlIT00eqHvBIwy9Cw6Usr',
+  h2PartyWine:
+    'https://lh3.googleusercontent.com/d/1MnDocBxotL7DpQzE9AUYVPIYOM3gGyEi',
+  h3DinnerCouple:
+    'https://lh3.googleusercontent.com/d/1nqD2r2mbjCcNhBaGNwbzlzcltzrpFPlD',
+  h3DinnerDetail:
+    'https://lh3.googleusercontent.com/d/1ozA_xviBqyzQodx25rkLG1Qa1ulXgBnb',
+  h3DinnerKitchen:
+    'https://lh3.googleusercontent.com/d/1F6d6fvMcabgXvCj5aw1QHXC-dGqsJoEb',
+  h3DinnerTable:
+    'https://lh3.googleusercontent.com/d/1JrMkx8kCmE3wI1o-J8EwMFDxUJlxP5OL',
+  h3DinnerView:
+    'https://lh3.googleusercontent.com/d/17MCPWYoe31kWGLR2b5PdKHQ8AVhlhzWC',
 } as const;

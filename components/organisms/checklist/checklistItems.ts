@@ -50,6 +50,12 @@ const PRESETS: Partial<
     { label: '드레스코드 확인', note: '파티 분위기에 맞는 옷차림을 준비해 주세요.' },
     { label: '카메라', note: '주인공과의 특별한 순간을 남겨 주세요.' },
   ],
+  homeParty: [
+    { label: '초대장 링크 저장', note: '집 주소와 시간을 미리 확인해 주세요.' },
+    { label: '주차 등록', note: '골목이나 아파트 주차는 미리 알려 주세요.' },
+    { label: '빈손으로 오세요', note: '선물 없이 오셔도 충분합니다.' },
+    { label: '슬리퍼', note: '집에서 신을 편한 신발을 준비해 두었어요.' },
+  ],
 };
 
 export function createChecklistItem(

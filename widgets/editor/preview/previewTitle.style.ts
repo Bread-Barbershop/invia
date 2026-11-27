@@ -7,6 +7,7 @@ export const previewTitleVariants = cva('', {
       firstBirthday: 'text-text-firstbirthday',
       birthday: 'text-text-birthday',
       bridalShower: 'text-text-bridalshower',
+      homeParty: 'text-text-homeparty',
       seminar: 'text-text-seminar',
       etc: 'text-black',
     },

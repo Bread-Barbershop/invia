@@ -18,6 +18,7 @@ const COLORS = {
   firstBirthday: 'bg-[#F2A65A]',
   birthday: 'bg-[#7F7BFF]',
   bridalShower: 'bg-[#E393A8]',
+  homeParty: 'bg-[#C98B6B]',
   seminar: 'bg-[#3B82F6]',
   etc: 'bg-[#2CB9A8]',
   layout: 'bg-[#64748B]',

@@ -150,4 +150,21 @@ export type ShowcaseSection =
       title: string;
       members: { relation: string; name: string }[];
       message: string;
+    }
+  | {
+      component: 'checklist';
+      title: string;
+      description?: string;
+      items: { label: string; note?: string }[];
+    }
+  | {
+      component: 'eventGuide';
+      title: string;
+      intro?: string;
+      items: {
+        title: string;
+        description?: string;
+        time?: string;
+        place?: string;
+      }[];
     };

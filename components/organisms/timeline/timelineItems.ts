@@ -23,6 +23,11 @@ const PRESETS: Record<string, Omit<TimelineItem, 'id'>[]> = {
     { time: '10:00', title: '첫 번째 세션', description: '주요 발표' },
     { time: '11:00', title: '질의응답', description: '참석자와 이야기 나누기' },
   ],
+  homeParty: [
+    { time: '18:00', title: '도착과 집 구경', description: '편하게 들어와 둘러보세요.' },
+    { time: '19:00', title: '식사', description: '따뜻한 것부터 천천히 내어 드려요.' },
+    { time: '20:30', title: '커피와 이야기', description: '디저트와 함께 마무리해요.' },
+  ],
   bridalShower: [
     { time: '14:00', title: '도착과 환영 인사', description: '반가운 얼굴들과 한 잔으로 시작해요.' },
     { time: '14:30', title: '함께하는 시간', description: '질문 카드와 짧은 게임을 나눠요.' },

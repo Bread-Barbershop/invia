@@ -19,6 +19,9 @@ import portraitCover from '@/public/templates/thumbnails/firstBirthday_07.webp';
 import dinoCover from '@/public/templates/thumbnails/firstBirthday_08.webp';
 import postCover from '@/public/templates/thumbnails/firstBirthday_09.webp';
 import winterFirstBirthdayCover from '@/public/templates/thumbnails/firstBirthday_10.webp';
+import brunchCover from '@/public/templates/thumbnails/homeParty_01.webp';
+import jazzNightCover from '@/public/templates/thumbnails/homeParty_02.webp';
+import newHomeDinnerCover from '@/public/templates/thumbnails/homeParty_03.webp';
 import clayCover from '@/public/templates/thumbnails/seminar_06.webp';
 import prismCover from '@/public/templates/thumbnails/seminar_07.webp';
 import cityCover from '@/public/templates/thumbnails/seminar_08.webp';
@@ -108,6 +111,9 @@ export const showcaseItems = [
   { id: 'showcase-47', image: whiteRibbonCover },
   { id: 'showcase-50', image: brunchShowerCover },
   { id: 'showcase-51', image: exhibitionCover },
+  { id: 'showcase-52', image: brunchCover },
+  { id: 'showcase-53', image: jazzNightCover },
+  { id: 'showcase-54', image: newHomeDinnerCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

@@ -295,5 +295,27 @@ export function buildShowcaseSection(
         })),
         ...richText(section.message),
       });
+    case 'checklist':
+      return block('checklist', {
+        title: section.title,
+        description: section.description ?? '',
+        items: section.items.map((item, i) => ({
+          id: `${id}-check-${i}`,
+          label: item.label,
+          note: item.note ?? '',
+        })),
+      });
+    case 'eventGuide':
+      return block('eventGuide', {
+        title: section.title,
+        intro: section.intro ?? '',
+        items: section.items.map((item, i) => ({
+          id: `${id}-guide-${i}`,
+          title: item.title,
+          description: item.description ?? '',
+          time: item.time ?? '',
+          place: item.place ?? '',
+        })),
+      });
   }
 }

@@ -28,6 +28,7 @@ describe('블록 추가 패널 분류 정렬', () => {
       'firstBirthday',
       'seminar',
       'bridalShower',
+      'homeParty',
       'etc',
       'layout',
     ]);
@@ -37,6 +38,7 @@ describe('블록 추가 패널 분류 정렬', () => {
       'birthday',
       'seminar',
       'bridalShower',
+      'homeParty',
       'etc',
       'layout',
     ]);
@@ -51,6 +53,22 @@ describe('블록 추가 패널 분류 정렬', () => {
       'firstBirthday',
       'birthday',
       'seminar',
+      'homeParty',
+      'etc',
+      'layout',
+    ]);
+
+    const homePartyOrdered = prioritizeComponentCategories(
+      componentCls,
+      'homeParty'
+    );
+    expect(homePartyOrdered.map(category => category.english)).toEqual([
+      'homeParty',
+      'wedding',
+      'firstBirthday',
+      'birthday',
+      'seminar',
+      'bridalShower',
       'etc',
       'layout',
     ]);

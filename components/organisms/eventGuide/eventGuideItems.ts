@@ -129,6 +129,20 @@ const PRESETS: Record<InvitationType, Omit<EventGuideItem, 'id'>[]> = {
       place: '',
     },
   ],
+  homeParty: [
+    {
+      title: '집 구경',
+      description: '새로 꾸민 공간을 천천히 둘러보세요.',
+      time: '도착 후',
+      place: '거실 · 주방',
+    },
+    {
+      title: '함께 만드는 한 접시',
+      description: '한 사람당 한 가지씩 얹어 마지막 접시를 완성해요.',
+      time: '식사 전',
+      place: '주방',
+    },
+  ],
 };
 
 export function createEventGuideItem(

@@ -17,6 +17,7 @@ const CATEGORIES = [
   ['seminar', '세미나'],
   ['firstBirthday', '돌잔치'],
   ['bridalShower', '브라이덜샤워'],
+  ['homeParty', '홈파티·집들이'],
 ] as const;
 
 export const PosterPanel = () => {
