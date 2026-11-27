@@ -57,9 +57,11 @@ export function TimelineBlock({
               ? '돌잔치'
               : blockInfo.type === 'bridalShower'
                 ? '브라이덜샤워'
-                : blockInfo.type === 'seminar'
-                  ? '세미나'
-                  : '기본'}{' '}
+                : blockInfo.type === 'homeParty'
+                  ? '홈파티·집들이'
+                  : blockInfo.type === 'seminar'
+                    ? '세미나'
+                    : '기본'}{' '}
           식순 예시 적용
         </button>
         {showPresetConfirm && (

@@ -48,6 +48,7 @@ describe('초대장 갤러리', () => {
     'seminar',
     'firstBirthday',
     'bridalShower',
+    'homeParty',
   ])(
     '%s 카테고리에 공용 카탈로그의 모든 해당 디자인을 표시한다',
     category => {

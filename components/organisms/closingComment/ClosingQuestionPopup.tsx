@@ -63,7 +63,8 @@ function ClosingQuestionPopup({
     organizerName: organizer || organizerName,
   });
   const isEvent = activeCategory === 'seminar' || activeCategory === 'etc';
-  const nameField = isEvent ? 'eventName' : 'birthdayName';
+  const isHomeParty = activeCategory === 'homeParty';
+  const nameField = isEvent || isHomeParty ? 'eventName' : 'birthdayName';
 
   return (
     <Popup
@@ -93,15 +94,20 @@ function ClosingQuestionPopup({
         ))}
       </div>
 
-      {(isEvent || activeCategory === 'birthday' || activeCategory === 'bridalShower') && (
+      {(isEvent ||
+        isHomeParty ||
+        activeCategory === 'birthday' ||
+        activeCategory === 'bridalShower') && (
         <TextField
           className="px-2.5 pb-2"
           label={
             isEvent
               ? '행사명'
-              : activeCategory === 'bridalShower'
-                ? '예비 신부'
-                : '생일 주인공'
+              : isHomeParty
+                ? '모임 이름'
+                : activeCategory === 'bridalShower'
+                  ? '예비 신부'
+                  : '생일 주인공'
           }
           inputProps={{
             placeholder: '선택 입력',

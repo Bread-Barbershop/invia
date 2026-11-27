@@ -72,6 +72,7 @@ describe('홈과 편집기가 공유하는 초대장 컬렉션', () => {
     expect(getInvitationTemplates('birthday')).toHaveLength(13);
     expect(getInvitationTemplates('firstBirthday')).toHaveLength(10);
     expect(getInvitationTemplates('bridalShower')).toHaveLength(4);
+    expect(getInvitationTemplates('homeParty')).toHaveLength(3);
     expect(Object.keys(SHOWCASE_ORIGINAL_TEMPLATES)).toEqual(
       SHOWCASE_INVITATIONS.map(item => item.id)
     );

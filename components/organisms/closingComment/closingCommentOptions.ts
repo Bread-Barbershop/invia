@@ -6,6 +6,7 @@ export const CLOSING_CATEGORIES: { label: string; value: InvitationType }[] = [
   { label: '세미나', value: 'seminar' },
   { label: '생일', value: 'birthday' },
   { label: '브라이덜샤워', value: 'bridalShower' },
+  { label: '홈파티', value: 'homeParty' },
   { label: 'etc.', value: 'etc' },
 ];
 
@@ -125,6 +126,23 @@ function bridalShowerOptions(name = '') {
   ];
 }
 
+function homePartyOptions(name = '') {
+  const host = name.trim().normalize('NFC');
+  const possessive = host ? `${host}의 ` : '';
+  return [
+    '새 집에 놀러 오세요. 문 열어 두고 기다릴게요.',
+    `${possessive}새 집에서 처음 여는 저녁에 함께해 주세요.`,
+    '빈손으로 오셔도 충분합니다. 와 주시는 게 제일 반가워요.',
+    '집 구경하고, 같이 먹고, 늦게까지 이야기해요.',
+    `${possessive}이사 소식을 이 자리에서 가장 먼저 전하고 싶어요.`,
+    '새 집의 첫 저녁을 함께해 주시면 좋겠습니다.',
+    '슬리퍼는 준비해 두었어요. 편한 마음으로 오세요.',
+    '와 주시는 것만으로 이 집이 조금 더 집다워집니다.',
+    `${possessive}새 출발을 함께 축하해 주세요.`,
+    '문 앞에서 한 번 더 인사드릴게요. 조심히 오세요.',
+  ];
+}
+
 export function getClosingCommentOptions(
   category: InvitationType,
   names: ClosingExampleNames = {}
@@ -133,6 +151,7 @@ export function getClosingCommentOptions(
   if (category === 'birthday') return birthdayOptions(names.birthdayName);
   if (category === 'bridalShower')
     return bridalShowerOptions(names.birthdayName);
+  if (category === 'homeParty') return homePartyOptions(names.eventName);
   if (category === 'seminar' || category === 'etc')
     return eventOptions(category, names);
 
