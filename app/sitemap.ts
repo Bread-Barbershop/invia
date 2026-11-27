@@ -1,25 +1,31 @@
-import type { MetadataRoute } from 'next';
+import { SITE_URL } from '@/shared/config/seo';
 
-const siteUrl = 'https://invia.co.kr';
+import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
   return [
     {
-      url: siteUrl,
+      url: SITE_URL,
       lastModified,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: `${siteUrl}/faq`,
+      url: `${SITE_URL}/gallery`,
+      lastModified,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/faq`,
       lastModified,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${siteUrl}/policy`,
+      url: `${SITE_URL}/policy`,
       lastModified,
       changeFrequency: 'yearly',
       priority: 0.4,
