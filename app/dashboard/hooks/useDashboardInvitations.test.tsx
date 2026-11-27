@@ -174,6 +174,69 @@ describe('useDashboardInvitations', () => {
     ]);
   });
 
+  it('더 최신 목록이 적용되면 느린 카드 새로고침의 카드와 공유 결과를 버린다', async () => {
+    const initialInvite: InviteListItem = {
+      ...sourceInvitation,
+      folderId: 'folder-epoch',
+      name: 'Initial invitation',
+      dataJsonFileId: 'data-initial',
+      guestUrl: '/guest/initial',
+      published: true,
+      readiness: 'ready',
+    };
+    const newerInvite: InviteListItem = {
+      ...initialInvite,
+      name: 'New list invitation',
+      dataJsonFileId: 'data-new-list',
+      guestUrl: '/guest/new-list',
+    };
+    const staleRefreshInvite: InviteListItem = {
+      ...initialInvite,
+      name: 'Stale refresh invitation',
+      dataJsonFileId: 'data-stale-refresh',
+      guestUrl: '/guest/stale-refresh',
+    };
+    const listResponse = (invites: InviteListItem[]) => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ invites }),
+    });
+    let finishRefresh!: () => void;
+    mockFetch
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            finishRefresh = () => resolve(listResponse([staleRefreshInvite]));
+          })
+      )
+      .mockResolvedValueOnce(listResponse([newerInvite]));
+
+    const { result } = renderHook(() =>
+      useDashboardInvitations([initialInvite], { loadOnMount: false })
+    );
+    let refresh!: Promise<boolean>;
+    act(() => {
+      refresh = result.current.refreshInvitation(initialInvite.folderId);
+    });
+
+    await act(() => result.current.loadInvitations());
+    expect(result.current.invites[0].name).toBe('New list invitation');
+
+    await act(async () => {
+      finishRefresh();
+      await expect(refresh).resolves.toBe(false);
+    });
+
+    expect(result.current.invites[0]).toMatchObject({
+      name: 'New list invitation',
+      dataJsonFileId: 'data-new-list',
+      guestUrl: '/guest/new-list',
+    });
+    expect(result.current.getGuestUrl(initialInvite.folderId)).toBe(
+      'http://localhost/guest/new-list'
+    );
+  });
+
   it('공개 토글 후 guestReadiness가 준비될 때까지 폴링한다', async () => {
     jest.useFakeTimers();
 
@@ -254,6 +317,27 @@ describe('useDashboardInvitations', () => {
         signal: expect.any(AbortSignal),
       }
     );
+  });
+
+  it('공개 전환 실패는 카드 안내로 전달하고 토스트를 띄우지 않는다', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: async () => ({ ok: false, error: 'visibility_publish_failed' }),
+    });
+    const { result } = renderHook(() =>
+      useDashboardInvitations([sourceInvitation], { loadOnMount: false })
+    );
+
+    await act(() =>
+      result.current.handleToggleVisibility(sourceInvitation.folderId, true)
+    );
+
+    expect(result.current.getVisibilityError(sourceInvitation.folderId)).toEqual({
+      title: '초대장을 공개로 바꾸지 못했어요',
+      description: '공개 링크 권한을 설정하지 못했어요. 다시 시도해 주세요.',
+    });
+    expect(errorToastMock).not.toHaveBeenCalled();
   });
 
   it('sessionStorage handoff 초대장을 Drive 목록과 readiness가 준비될 때까지 pending으로 유지한다', async () => {

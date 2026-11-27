@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useEffect, useId, useRef } from 'react';
+import { forwardRef, useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
@@ -31,6 +31,7 @@ type ConfirmProps = {
   initialFocus?: 'dialog' | 'cancel';
   isBusy?: boolean;
   errorMessage?: string | null;
+  footer?: ReactNode;
 };
 
 const Confirm = forwardRef<HTMLDivElement, ConfirmProps>(
@@ -52,6 +53,7 @@ const Confirm = forwardRef<HTMLDivElement, ConfirmProps>(
       initialFocus = 'dialog',
       isBusy = false,
       errorMessage,
+      footer,
     }: ConfirmProps,
     ref
   ) => {
@@ -128,7 +130,10 @@ const Confirm = forwardRef<HTMLDivElement, ConfirmProps>(
           }
           tabIndex={-1}
           onClick={e => e.stopPropagation()}
-          className={cn(confirmVariants({ variant }), 'max-w-[calc(100%_-_2rem)]')}
+          className={cn(
+            confirmVariants({ variant }),
+            'max-w-[calc(100%_-_2rem)]'
+          )}
         >
           <div>
             <p
@@ -182,6 +187,7 @@ const Confirm = forwardRef<HTMLDivElement, ConfirmProps>(
               {cancelText}
             </button>
           </div>
+          {footer}
         </div>
       </div>,
       document.body

@@ -18,6 +18,7 @@ export type InvitationReadiness =
 export type InviteListItem = {
   hasAudienceGroups?: boolean;
   audienceVisibility?: AudienceVisibilityStatus;
+  audienceOptionsRevision?: number;
   folderId: string;
   name: string;
   displayTitle?: string;

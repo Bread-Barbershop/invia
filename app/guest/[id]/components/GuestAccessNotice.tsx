@@ -5,7 +5,7 @@ import inviaLogo3d from '@/shared/assets/logo/invia-simple-logo-3d.png';
 import type { ReactNode } from 'react';
 
 type GuestAccessNoticeProps = {
-  kind?: 'private' | 'link';
+  kind?: 'private' | 'link' | 'expired';
   title: string;
   description: ReactNode;
 };
@@ -43,6 +43,10 @@ export function GuestAccessNotice({
                 초대장을 보내준 분에게 공개 상태를 확인해 주세요.
               </span>
             </>
+          ) : kind === 'expired' ? (
+            <span className="block">
+              초대장을 보내준 분에게 새 링크를 받아 주세요.
+            </span>
           ) : (
             <span className="block">
               초대장을 보내준 분에게 링크를 확인해 주세요.

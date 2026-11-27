@@ -3,6 +3,7 @@ import 'server-only';
 import { NextResponse } from 'next/server';
 
 import { AudienceLinkStoreUnavailableError } from '@/app/api/drive/_lib/audienceLinkStore';
+import { deleteInvitationAudience } from '@/app/api/drive/_lib/audienceVisibility';
 import { captureDriveError } from '@/app/api/drive/_lib/captureDriveError';
 import { InvitationCloneError } from '@/app/api/drive/_lib/cloneDriveFiles';
 import { isJsonRecord } from '@/app/api/drive/_lib/cloneInvitationData';
@@ -52,6 +53,12 @@ function handleFailure(error: unknown, operation: string) {
   const status = error instanceof DriveHttpError ? error.status : undefined;
   captureDriveError({ error, operation, status });
   if (error instanceof AudienceLinkStoreUnavailableError) {
+    if (operation === 'drive_audience_delete') {
+      return failure(
+        '하객 그룹 링크를 비활성화하지 못했어요. 삭제를 다시 시도해 주세요.',
+        503
+      );
+    }
     return failure(
       '하객 그룹의 링크를 준비할 수 없습니다. 잠시 후 다시 시도해 주세요.',
       503
@@ -60,6 +67,12 @@ function handleFailure(error: unknown, operation: string) {
   if (status === 403)
     return failure('Google Drive 접근 권한을 확인해 주세요.', 403);
   if (status === 404) return failure('초대장 파일을 찾을 수 없습니다.', 404);
+  if (operation === 'drive_audience_delete') {
+    return failure(
+      '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.',
+      status ?? 502
+    );
+  }
   return failure('하객 그룹을 불러오지 못했습니다. 다시 시도해 주세요.', 502);
 }
 
@@ -121,5 +134,23 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     return handleFailure(error, 'drive_audience_create');
+  }
+}
+
+export async function DELETE(req: Request) {
+  const body: unknown = await req.json().catch(() => null);
+  if (
+    !isJsonRecord(body) ||
+    !isValidId(body.rootFolderId) ||
+    !isValidId(body.groupFolderId)
+  ) {
+    return failure('삭제할 하객 그룹 정보를 확인해 주세요.', 400);
+  }
+
+  try {
+    await deleteInvitationAudience(body.rootFolderId, body.groupFolderId);
+    return NextResponse.json({ success: true }, { headers: HEADERS });
+  } catch (error) {
+    return handleFailure(error, 'drive_audience_delete');
   }
 }

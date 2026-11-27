@@ -2,6 +2,7 @@ import type {
   InvitationPreviewTarget,
   InviteListItem,
 } from '@/app/dashboard/types';
+import type { CardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import { cn } from '@/shared/utils/cn';
 
 import createdDateStyles from './carouselCreatedDate.module.css';
@@ -53,7 +54,7 @@ type CarouselTrackProps = {
   isDeleting?: (folderId: string) => boolean;
   isSharing?: (folderId: string) => boolean;
   isVisibilityUpdating?: (folderId: string) => boolean;
-  getVisibilityError?: (folderId: string) => string | null;
+  getVisibilityError?: (folderId: string) => CardActionFailureMessage | null;
 };
 
 function CarouselTrack({
