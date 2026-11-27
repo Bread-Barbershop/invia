@@ -6,6 +6,7 @@ import type {
   InvitationPreviewTarget,
   InviteListItem,
 } from '@/app/dashboard/types';
+import type { CardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import { formatInvitationCreatedDate } from '@/app/dashboard/utils/formatInvitationCreatedDate';
 import KakaoIcon from '@/shared/assets/icons/kakao2.svg';
 import LinkIcon from '@/shared/assets/icons/link.svg';
@@ -22,6 +23,7 @@ import {
 } from '../carouselTypes';
 
 import DashboardActionButton from './actions/DashboardActionButton';
+import DashboardCardActionAlert from './actions/DashboardCardActionAlert';
 import DeleteButton from './actions/DeleteButton';
 import InvitationAudienceButton from './actions/InvitationAudienceButton';
 import { useAudienceShare } from './actions/useAudienceShare';
@@ -56,7 +58,7 @@ type CarouselItemProps = {
   isDeleting: boolean;
   isSharing: boolean;
   isVisibilityUpdating: boolean;
-  visibilityError: string | null;
+  visibilityError: CardActionFailureMessage | null;
 };
 
 function CarouselItem({
@@ -91,6 +93,10 @@ function CarouselItem({
     ? `${(Number.parseFloat(dashboardCarouselLayout.cardHeight) * collectionTemplate.poster.width) / collectionTemplate.poster.height}px`
     : dashboardCarouselLayout.cardWidth;
   const [hasImageError, setHasImageError] = useState(false);
+  const [dismissedVisibilityFailure, setDismissedVisibilityFailure] =
+    useState<CardActionFailureMessage | null>(null);
+  const [dismissedShareFailure, setDismissedShareFailure] =
+    useState<CardActionFailureMessage | null>(null);
   const invite = item.invite;
   const title = invite?.displayTitle ?? invite?.name ?? item.alt;
   const createdDateId = useId();
@@ -115,6 +121,13 @@ function CarouselItem({
   const canToggleVisibility = Boolean(
     invite && !isPending && !isVisibilityUpdating
   );
+  // 문구가 같아도 실패한 요청이 다르면 새로 안내한다.
+  const visibilityFailure =
+    visibilityError === dismissedVisibilityFailure ? null : visibilityError;
+  const shareFailure =
+    audienceShare.failure === dismissedShareFailure
+      ? null
+      : audienceShare.failure;
   const showSelectedOverlay =
     showHeader || showSideActions || showCenterActions;
   const hoverLift = showHeader
@@ -254,10 +267,11 @@ function CarouselItem({
                 isDeleting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
               }
               aria-disabled={isDeleting}
-              aria-label="초대장 삭제"
+              aria-busy={isDeleting}
+              aria-label={isDeleting ? '초대장 삭제 중' : '초대장 삭제'}
               aria-haspopup="dialog"
             >
-              <DeleteButton />
+              <DeleteButton isBusy={isDeleting} />
             </button>
           </div>
         )}
@@ -292,6 +306,23 @@ function CarouselItem({
                 }}
               />
             </div>
+          )}
+
+          {visibilityFailure && isSelected && showHeader && (
+            <DashboardCardActionAlert
+              title={visibilityFailure.title}
+              description={visibilityFailure.description}
+              actionLabel="다시 시도"
+              onAction={() => {
+                if (!invite || !canToggleVisibility) return;
+                void onToggleVisibility?.(invite.folderId, !isPublished);
+              }}
+              onDismiss={() => setDismissedVisibilityFailure(visibilityFailure)}
+              className="absolute inset-x-2 z-30"
+              style={{
+                top: `calc(${dashboardCarouselLayout.headerHeight} + 8px)`,
+              }}
+            />
           )}
 
           <div
@@ -364,6 +395,16 @@ function CarouselItem({
                     dashboardCarouselLayout.centerActionBottomPadding,
                 }}
               >
+                {shareFailure && (
+                  <DashboardCardActionAlert
+                    title={shareFailure.title}
+                    description={shareFailure.description}
+                    actionLabel="다시 준비"
+                    onAction={audienceShare.retry}
+                    onDismiss={() => setDismissedShareFailure(shareFailure)}
+                    className="mb-1 w-full"
+                  />
+                )}
                 <DashboardActionButton
                   icon={KakaoIcon}
                   variant="kakao"

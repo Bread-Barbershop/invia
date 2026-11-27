@@ -9,6 +9,7 @@ import {
   InviteListItem,
   LoadInvitationResponse,
 } from '@/app/dashboard/types';
+import { resolveCardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import type { DashboardPendingInvitation } from '@/shared/constants/dashboardPendingInvitation';
 import { useToast } from '@/shared/hooks/useToast';
 import {
@@ -535,17 +536,18 @@ function useDashboardInvitations(
           .catch(() => ({}))) as InvitationVisibilityResult;
 
         if (!res.ok || json.ok === false) {
+          const failure = resolveCardActionFailureMessage(
+            'visibility',
+            json.error?.trim() || String(res.status)
+          );
           setInvitationResults(prev => ({
             ...prev,
             [invitationFolderId]: json,
           }));
           setVisibilityErrors(prev => ({
             ...prev,
-            [invitationFolderId]: json.error
-              ? `Visibility update failed: ${json.error}`
-              : `Visibility update failed: ${res.status}`,
+            [invitationFolderId]: failure,
           }));
-          errorToast(json.error ?? '초대장 공개 상태 변경에 실패했습니다.');
           return;
         }
 
@@ -575,15 +577,15 @@ function useDashboardInvitations(
           void pollGuestReadiness(invitationFolderId, json);
         }
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : 'Visibility update request failed.';
+        const failure = resolveCardActionFailureMessage(
+          'visibility',
+          (err instanceof Error && err.message.trim()) ||
+            'Visibility update request failed.'
+        );
         setVisibilityErrors(prev => ({
           ...prev,
-          [invitationFolderId]: message,
+          [invitationFolderId]: failure,
         }));
-        errorToast('초대장 공개 상태 변경 중 오류가 발생했습니다.');
       } finally {
         setVisibilityBusy(prev => ({
           ...prev,
@@ -593,7 +595,6 @@ function useDashboardInvitations(
     },
     [
       abortReadinessPolling,
-      errorToast,
       patchInvite,
       pollGuestReadiness,
       successToast,
