@@ -47,6 +47,9 @@ const CLAIM_SCRIPT =
   PENDING_LEASES_SCRIPT +
   `
 local slug, nameHash, requestId = ARGV[3], ARGV[4], ARGV[5]
+if redis.call('HEXISTS', KEYS[1], 'retired:' .. slug) == 1 then
+  return {'duplicate-slug'}
+end
 local requestSlug = redis.call('HGET', KEYS[1], 'request:' .. requestId)
 if requestSlug and requestSlug ~= slug then return {'request-conflict'} end
 local ready = redis.call('HGET', KEYS[1], 'slug:' .. slug)
@@ -78,6 +81,7 @@ const FINALIZE_CLAIM_SCRIPT =
   PENDING_LEASES_SCRIPT +
   `
 local slug, requestId, child = ARGV[3], ARGV[4], ARGV[5]
+if redis.call('HEXISTS', KEYS[1], 'retired:' .. slug) == 1 then return 0 end
 local field = 'slug:' .. slug
 local ready = redis.call('HGET', KEYS[1], field)
 if ready then
@@ -104,12 +108,61 @@ return 0
 
 const REFRESH_SCRIPT = `
 local field = 'slug:' .. ARGV[1]
+if redis.call('HEXISTS', KEYS[1], 'retired:' .. ARGV[1]) == 1 then return 0 end
 local ready = redis.call('HGET', KEYS[1], field)
 if not ready then return 0 end
 local record = cjson.decode(ready)
 record.dataJsonFileId = ARGV[2]
 redis.call('HSET', KEYS[1], field, cjson.encode(record))
 return 1
+`;
+
+const RETIRE_SCRIPT =
+  PENDING_LEASES_SCRIPT +
+  `
+local slug, folderId = ARGV[3], ARGV[4]
+local retiredField = 'retired:' .. slug
+local retiredFolder = redis.call('HGET', KEYS[1], retiredField)
+if retiredFolder then
+  if retiredFolder == folderId then
+    redis.call('HSET', KEYS[1], 'retired-folder:' .. folderId, slug)
+    return 1
+  end
+  return 0
+end
+
+local linkField = 'slug:' .. slug
+local raw = redis.call('HGET', KEYS[1], linkField)
+if raw then
+  local record = cjson.decode(raw)
+  local nameField = 'name:' .. record.nameHash
+  local requestField = 'request:' .. record.requestId
+  if redis.call('HGET', KEYS[1], nameField) == slug then
+    redis.call('HDEL', KEYS[1], nameField)
+  end
+  if redis.call('HGET', KEYS[1], requestField) == slug then
+    redis.call('HDEL', KEYS[1], requestField)
+  end
+  redis.call('HDEL', KEYS[1], linkField)
+end
+
+for index = #pending, 1, -1 do
+  if pending[index].slug == slug then table.remove(pending, index) end
+end
+savePending()
+redis.call('HSET', KEYS[1], retiredField, folderId)
+redis.call('HSET', KEYS[1], 'retired-folder:' .. folderId, slug)
+return 1
+`;
+
+const INSPECT_LINK_SCRIPT = `
+local target = redis.call('HGET', KEYS[1], 'slug:' .. ARGV[1])
+local child = ''
+if target then child = cjson.decode(target).dataJsonFileId or '' end
+return {
+  redis.call('HGET', KEYS[1], 'retired:' .. ARGV[1]) or '',
+  child
+}
 `;
 
 function audienceKeys(rootDataFileId: string): [string, string] {
@@ -121,11 +174,14 @@ function leaseArguments() {
   return [Math.floor(Date.now() / 1000), CLAIM_SECONDS];
 }
 
-async function withAudienceRedis<T>(run: (redis: Redis) => Promise<T>) {
+async function withAudienceRedis<T>(
+  run: (redis: Redis) => Promise<T>,
+  options?: { automaticDeserialization?: boolean }
+) {
   if (!isShortUrlStoreConfigured())
     throw new AudienceLinkStoreUnavailableError();
   try {
-    return await run(Redis.fromEnv());
+    return await run(Redis.fromEnv(options));
   } catch (error) {
     throw new AudienceLinkStoreUnavailableError(error);
   }
@@ -201,6 +257,76 @@ export async function refreshAudienceLink(
     )
   );
   if (result !== 1) throw new Error('Audience link is not registered');
+}
+
+/**
+ * Retire a deleted group's slug before touching Drive. The tombstone and link
+ * removal are atomic, so a concurrent list/share refresh cannot restore the
+ * old public URL after deletion starts.
+ */
+export async function retireAudienceLink(
+  rootDataFileId: string,
+  slug: string,
+  folderId: string
+) {
+  if (!slug || !folderId) throw new Error('Invalid audience retirement');
+  const result = await withAudienceRedis(redis =>
+    redis.eval<(string | number)[], number>(
+      RETIRE_SCRIPT,
+      audienceKeys(rootDataFileId),
+      [...leaseArguments(), slug, folderId]
+    )
+  );
+  if (result !== 1)
+    throw new Error('Audience slug is retired by another group');
+}
+
+export async function isAudienceLinkRetired(
+  rootDataFileId: string,
+  slug: string,
+  folderId?: string
+) {
+  const [key] = audienceKeys(rootDataFileId);
+  const retiredFolder = await withAudienceRedis(redis =>
+    redis.hget<string>(key, `retired:${slug}`)
+  );
+  if (typeof retiredFolder !== 'string' || !retiredFolder) return false;
+  return folderId ? retiredFolder === folderId : true;
+}
+
+export async function inspectAudienceLink(
+  rootDataFileId: string,
+  slug: string
+) {
+  const [key] = audienceKeys(rootDataFileId);
+  const [retiredFolder, rawTarget] = await withAudienceRedis(redis =>
+    redis.eval<string[], [string, string]>(INSPECT_LINK_SCRIPT, [key], [slug])
+  );
+  const dataJsonFileId: unknown = rawTarget || null;
+  if (
+    dataJsonFileId !== null &&
+    (typeof dataJsonFileId !== 'string' ||
+      !dataJsonFileId ||
+      dataJsonFileId === rootDataFileId)
+  ) {
+    throw new AudienceLinkStoreUnavailableError();
+  }
+  return {
+    retired: Boolean(retiredFolder),
+    retiredFolderId: retiredFolder || null,
+    dataJsonFileId: typeof dataJsonFileId === 'string' ? dataJsonFileId : null,
+  };
+}
+
+export async function getRetiredAudienceSlug(
+  rootDataFileId: string,
+  folderId: string
+) {
+  const [key] = audienceKeys(rootDataFileId);
+  return withAudienceRedis(redis =>
+    redis.hget<string>(key, `retired-folder:${folderId}`),
+    { automaticDeserialization: false }
+  );
 }
 
 export async function resolveAudienceLink(

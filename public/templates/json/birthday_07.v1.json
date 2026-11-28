@@ -88,7 +88,7 @@
       "scaleY": 0.375,
       "cropX": 0,
       "cropY": 110.66666666666669,
-      "src": "/images/showcase/cinema.webp",
+      "src": "https://lh3.googleusercontent.com/d/1jhGlxNYEzZzjOhjRREsz7UF6ZteLJuMt",
       "crossOrigin": "anonymous",
       "slot": {
         "key": "birthday_07-photo",
@@ -528,7 +528,7 @@
       "left": 32,
       "top": 746,
       "strokeWidth": 0,
-      "text": "인비아 시네마 · 소극장",
+      "text": "아트나인",
       "width": 306,
       "fontSize": 13,
       "fontFamily": "SUIT",

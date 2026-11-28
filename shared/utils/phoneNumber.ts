@@ -31,6 +31,14 @@ export function formatPhoneNumber(value: string) {
   }
 
   if (numbers.length <= 3) return numbers;
+  // 대표번호(1544·1600·1800 등)는 4자리-4자리로 표기한다.
+  if (numbers.length === 8) {
+    return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+  }
+  // 평생번호(0505·0507 등)는 4자리-4자리-4자리로 표기한다.
+  if (/^050\d/.test(numbers) && numbers.length === 12) {
+    return `${numbers.slice(0, 4)}-${numbers.slice(4, 8)}-${numbers.slice(8)}`;
+  }
   if (numbers.length <= 7) {
     return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
   }

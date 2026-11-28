@@ -3,6 +3,8 @@ export type AudienceGroup = {
   slug: string;
   folderId: string;
   invitationUuid: string;
+  /** The group remains editable after deletion starts, but its public slug is retired. */
+  linkRetired?: boolean;
 };
 
 export type AudienceGroupList = {

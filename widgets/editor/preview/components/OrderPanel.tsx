@@ -17,16 +17,34 @@ import { useShallow } from 'zustand/shallow';
 
 import { EditorCallout } from '@/components/molecules/editor-callout';
 import { isBlockEnabled } from '@/shared/data/registry/blockAvailability';
+import { useToast } from '@/shared/hooks/useToast';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
 import { useEditorCalloutStore } from '@/shared/store/useEditorCalloutStore';
-import { shouldIgnoreEditorShortcut } from '@/shared/utils/editorShortcutGuard';
+import {
+  getBlockDisplayName,
+  getReorderIndexes,
+  type BlockMoveDirection,
+} from '@/shared/utils/blockManagement';
+import {
+  isEditorShortcutBlocked,
+  shouldIgnoreEditorShortcut,
+} from '@/shared/utils/editorShortcutGuard';
 import ChipCarousel from '@/widgets/editor/preview/components/ChipCarousel';
 
+import {
+  BlockContextMenu,
+  type BlockContextMenuAction,
+} from './BlockContextMenu';
 import DeleteModal from './DeleteModal';
 import SortableItems from './SortableItems';
 
-const reorderHint = '블록을 꾹 누른 채로 끌면 순서를 바꿀 수 있어요.';
-const deleteHint = '선택한 블록은 Delete 키로 삭제할 수 있어요.';
+const reorderHint =
+  '블록을 꾹 누른 채로 끌거나 Alt+↑/↓ 로 순서를 바꿀 수 있어요.';
+const deleteHint =
+  '선택한 블록은 Delete 키로 삭제, Ctrl+D(⌘+D)로 복제할 수 있어요.';
+
+const CONTEXT_MENU_WIDTH = 140;
+const CONTEXT_MENU_HEIGHT = 132;
 
 /*todo : 
 max-h넘어가면 아래 방향 추가
@@ -41,6 +59,7 @@ function OrderPanel() {
     selectedId,
     setIsEdit,
     deleteBlock,
+    duplicateBlock,
   } = useEditorStore(
     useShallow(state => ({
       block: state.block,
@@ -49,6 +68,7 @@ function OrderPanel() {
       selectedId: state.selectedId,
       setIsEdit: state.setIsEdit,
       deleteBlock: state.deleteBlock,
+      duplicateBlock: state.duplicateBlock,
     }))
   );
   const isOrderCalloutOpen = useEditorCalloutStore(
@@ -56,10 +76,12 @@ function OrderPanel() {
   );
   const showCalloutFor = useEditorCalloutStore(state => state.showCalloutFor);
   const hideCallout = useEditorCalloutStore(state => state.hideCallout);
+  const { success: successToast } = useToast();
   const visibleBlocks = block.filter(item => isBlockEnabled(item.component));
   const canReorder = visibleBlocks.length >= 2;
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
   const [isDrag, setIsDrag] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(
@@ -80,6 +102,93 @@ function OrderPanel() {
     if (canReorder) showCalloutFor('order-panel');
     return () => hideCallout('order-panel');
   }, [canReorder, hideCallout, showCalloutFor]);
+
+  const closeContextMenu = useCallback((restoreFocusTo?: string) => {
+    setContextMenu(null);
+    if (restoreFocusTo) {
+      document
+        .querySelector<HTMLElement>(`[data-order-block-id="${restoreFocusTo}"]`)
+        ?.focus();
+    }
+  }, []);
+
+  const focusSelectedBlock = useCallback((id: string) => {
+    window.setTimeout(() => {
+      document
+        .querySelector<HTMLElement>(`[data-order-block-id="${id}"]`)
+        ?.focus();
+    }, 0);
+  }, []);
+
+  const handleDuplicate = useCallback(
+    (id: string) => {
+      const sourceBlock = useEditorStore
+        .getState()
+        .block.find(item => item.id === id);
+      if (!sourceBlock) return;
+
+      const newId = duplicateBlock(id);
+      if (!newId) return;
+
+      selectedBlock(newId);
+      setIsEdit(false);
+      setAnnouncement(
+        `${getBlockDisplayName(sourceBlock.component)} 블록을 복제했어요.`
+      );
+      successToast('블록을 복제했어요');
+      focusSelectedBlock(newId);
+    },
+    [duplicateBlock, focusSelectedBlock, selectedBlock, setIsEdit, successToast]
+  );
+
+  const handleMove = useCallback(
+    (id: string, direction: BlockMoveDirection) => {
+      const indexes = getReorderIndexes(block, id, direction);
+      if (!indexes) return;
+
+      moveBlock(indexes.from, indexes.to);
+      selectedBlock(id);
+
+      const movedBlock = block.find(item => item.id === id);
+      setAnnouncement(
+        `${movedBlock ? getBlockDisplayName(movedBlock.component) : '블록'} ${
+          direction === 'up' ? '위' : '아래'
+        }로 옮겼어요.`
+      );
+    },
+    [block, moveBlock, selectedBlock]
+  );
+
+  const handleMenuAction = useCallback(
+    (action: BlockContextMenuAction) => {
+      if (!contextMenu) return;
+      const targetId = contextMenu.tabId;
+      closeContextMenu();
+
+      switch (action) {
+        case 'duplicate':
+          handleDuplicate(targetId);
+          return;
+        case 'moveUp':
+        case 'moveDown':
+          handleMove(targetId, action === 'moveUp' ? 'up' : 'down');
+          focusSelectedBlock(targetId);
+          return;
+        case 'delete':
+          setDeleteTargetId(targetId);
+          return;
+        default:
+      }
+    },
+    [
+      closeContextMenu,
+      contextMenu,
+      focusSelectedBlock,
+      handleDuplicate,
+      handleMove,
+      setDeleteTargetId,
+    ]
+  );
 
   useEffect(() => {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
@@ -103,6 +212,47 @@ function OrderPanel() {
     return () => window.removeEventListener('keydown', handleDeleteShortcut);
   }, []);
 
+  useEffect(() => {
+    const handleBlockShortcut = (event: KeyboardEvent) => {
+      const isDuplicateShortcut =
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey &&
+        !event.shiftKey &&
+        event.key.toLowerCase() === 'd';
+      const isMoveShortcut =
+        event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.shiftKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown');
+
+      if (!isDuplicateShortcut && !isMoveShortcut) return;
+      if (isEditorShortcutBlocked(event)) return;
+
+      const targetId = useEditorStore.getState().selectedId;
+      if (!targetId || targetId === 'mainPoster') return;
+
+      const isSelectedBlock = useEditorStore
+        .getState()
+        .block.some(
+          block => block.id === targetId && isBlockEnabled(block.component)
+        );
+      if (!isSelectedBlock) return;
+
+      event.preventDefault();
+
+      if (isDuplicateShortcut) {
+        handleDuplicate(targetId);
+        return;
+      }
+
+      handleMove(targetId, event.key === 'ArrowUp' ? 'up' : 'down');
+    };
+
+    window.addEventListener('keydown', handleBlockShortcut);
+    return () => window.removeEventListener('keydown', handleBlockShortcut);
+  }, [handleDuplicate, handleMove]);
+
   // 각 탭 아이템에 연결
   const handleContextMenu = (e: React.MouseEvent, tabId: string) => {
     e.preventDefault(); // 기본 브라우저 메뉴 차단
@@ -114,8 +264,20 @@ function OrderPanel() {
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (containerRect) {
       setContextMenu({
-        x: e.clientX - containerRect.left,
-        y: e.clientY - containerRect.top,
+        x: Math.max(
+          0,
+          Math.min(
+            e.clientX - containerRect.left,
+            containerRect.width - CONTEXT_MENU_WIDTH
+          )
+        ),
+        y: Math.max(
+          0,
+          Math.min(
+            e.clientY - containerRect.top,
+            containerRect.height - CONTEXT_MENU_HEIGHT
+          )
+        ),
         tabId,
       });
     }
@@ -174,6 +336,13 @@ function OrderPanel() {
     [selectedBlock, setIsEdit]
   );
 
+  const contextMenuBlock = contextMenu
+    ? visibleBlocks.find(item => item.id === contextMenu.tabId)
+    : undefined;
+  const contextMenuIndex = contextMenuBlock
+    ? visibleBlocks.findIndex(item => item.id === contextMenuBlock.id)
+    : -1;
+
   return (
     <DndContext
       sensors={sensors}
@@ -225,30 +394,28 @@ function OrderPanel() {
             </SortableContext>
           </ChipCarousel>
         </div>
-        {contextMenu && (
-          <ul
-            role="menu"
-            style={{
-              position: 'absolute',
-              top: contextMenu.y,
-              left: contextMenu.x,
-            }}
-            className="w-35 h-12 bg-bg-base flex-center z-10 rounded-sm shadow-edit"
-            onContextMenu={e => e.preventDefault()}
-          >
-            <li
-              role="button"
-              onClick={e => {
-                e.stopPropagation();
-                setDeleteTargetId(contextMenu.tabId);
-                setContextMenu(null);
-              }}
-              className="w-31 text-[13px] text-text-primary p-1 rounded-sm hover:bg-[#FFE8E8] select-none"
-            >
-              삭제하기
-            </li>
-          </ul>
+        {contextMenu && contextMenuBlock && (
+          <BlockContextMenu
+            label={getBlockDisplayName(contextMenuBlock.component)}
+            x={contextMenu.x}
+            y={contextMenu.y}
+            canMoveUp={contextMenuIndex > 0}
+            canMoveDown={
+              contextMenuIndex >= 0 &&
+              contextMenuIndex < visibleBlocks.length - 1
+            }
+            onAction={handleMenuAction}
+            onClose={() => closeContextMenu(contextMenu.tabId)}
+          />
         )}
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="order-announcement"
+          className="sr-only"
+        >
+          {announcement}
+        </div>
       </div>
       {visibleBlocks.length > 0 && (
         <EditorCallout

@@ -24,25 +24,16 @@ export const trapFocus = (event: KeyboardEvent, element: HTMLElement): void => {
   if (event.key !== 'Tab') return;
 
   const focusableElements = getFocusableElements(element);
-  if (focusableElements.length === 0) return;
-
   const firstElement = focusableElements[0];
   const lastElement = focusableElements[focusableElements.length - 1];
-  const activeElement = document.activeElement as HTMLElement;
+  const activeElement = element.ownerDocument.activeElement;
+  const boundary = event.shiftKey ? firstElement : lastElement;
 
-  if (event.shiftKey) {
-    // Shift + Tab
-    if (activeElement === firstElement) {
-      event.preventDefault();
-      lastElement.focus();
-    }
-  } else {
-    // Tab
-    if (activeElement === lastElement) {
-      event.preventDefault();
-      firstElement.focus();
-    }
-  }
+  if (activeElement !== element && activeElement !== boundary) return;
+
+  event.preventDefault();
+  const nextElement = event.shiftKey ? lastElement : firstElement;
+  nextElement?.focus();
 };
 
 export const disableBodyScroll = (): (() => void) => {

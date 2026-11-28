@@ -24,7 +24,7 @@ export function StylePanelSection({
         aria-controls={panelId}
         onClick={onToggle}
         className={cn(
-          'flex-center relative h-11 w-full rounded-lg border border-black/5 bg-white text-sm font-semibold transition-default',
+          'flex-center relative h-11 w-full rounded-lg border border-black/5 bg-white text-sm font-semibold transition-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
           expanded ? 'rounded-b-none border-b-0' : 'shadow-edit'
         )}
       >

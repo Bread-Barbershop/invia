@@ -2,11 +2,13 @@ import { accountDefinition } from '@/components/organisms/account/Account.defini
 import { afterPartyDefinition } from '@/components/organisms/afterParty/AfterParty.definition';
 import { bgmDefinition } from '@/components/organisms/bgm/Bgm.definition';
 import { calendarDefinition } from '@/components/organisms/calendar/Calendar.definition';
+import { checklistDefinition } from '@/components/organisms/checklist/Checklist.definition';
 import { closingCommentDefinition } from '@/components/organisms/closingComment/ClosingComment.definition';
 import { countdownDefinition } from '@/components/organisms/countdown/Countdown.definition';
 import { coupleIntroductionDefinition } from '@/components/organisms/couple-introduction/CoupleIntroduction.definition';
 import { dividerDefinition } from '@/components/organisms/divider/Divider.definition';
 import { dressCodeDefinition } from '@/components/organisms/dressCode/DressCode.definition';
+import { eventGuideDefinition } from '@/components/organisms/eventGuide/EventGuide.definition';
 import { faqDefinition } from '@/components/organisms/faq/Faq.definition';
 import { galleryDefinition } from '@/components/organisms/gallery/Gallery.definition';
 import { greetingDefinition } from '@/components/organisms/greeting/Greeting.definition';
@@ -58,10 +60,12 @@ export const blockRegistry = {
   video: { ...blockSchema.video, ...videoDefinition },
   notice: { ...blockSchema.notice, ...noticeDefinition },
   calendar: { ...blockSchema.calendar, ...calendarDefinition },
+  checklist: { ...blockSchema.checklist, ...checklistDefinition },
   timeline: { ...blockSchema.timeline, ...timelineDefinition },
   mealMenu: { ...blockSchema.mealMenu, ...mealMenuDefinition },
   countdown: { ...blockSchema.countdown, ...countdownDefinition },
   dressCode: { ...blockSchema.dressCode, ...dressCodeDefinition },
+  eventGuide: { ...blockSchema.eventGuide, ...eventGuideDefinition },
   interview: { ...blockSchema.interview, ...interviewDefinition },
   organizerInformation: {
     ...blockSchema.organizerInformation,

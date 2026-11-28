@@ -2,12 +2,14 @@ import { cn } from '@/shared/utils/cn';
 import { getContrastingTextColor } from '@/shared/utils/invitationBackgroundColor';
 
 import { CalendarTemplateProps } from '../types/calendar';
+import { parseCalendarClock } from '../utils/utils';
 
 export function CalendarType3({
   currentYear,
   calendarDays,
   headerDays,
-  timeInfo,
+  time,
+  language = 'ko',
   monthText,
   accentColor,
 }: CalendarTemplateProps) {
@@ -15,6 +17,10 @@ export function CalendarType3({
     backgroundColor: accentColor,
     color: getContrastingTextColor(accentColor),
   };
+  const clock = parseCalendarClock(time);
+  const savedKoreanPeriod = /^\s*오[전후]/.test(time ?? '');
+  const [amLabel, pmLabel] =
+    savedKoreanPeriod || language === 'ko' ? ['오전', '오후'] : ['AM', 'PM'];
 
   return (
     <div className="w-full px-4 flex flex-col shadow-edit font-lineseed">
@@ -50,13 +56,13 @@ export function CalendarType3({
               style={dayObj.isTargetDate ? selectedDayStyle : undefined}
             >
               <span>{dayObj.num}</span>
-              {dayObj.isTargetDate && (
+              {dayObj.isTargetDate && clock && (
                 <div className="bottom-1 w-full text-center flex flex-col items-center">
                   <span className="text-[11px] font-sans leading-[1.1] block">
-                    {timeInfo.timeText}
+                    {clock.hour % 12 || 12}:{String(clock.minute).padStart(2, '0')}
                   </span>
                   <span className="text-[11px] font-sans leading-[1.1] block">
-                    {timeInfo.ampm}
+                    {clock.hour < 12 ? amLabel : pmLabel}
                   </span>
                 </div>
               )}

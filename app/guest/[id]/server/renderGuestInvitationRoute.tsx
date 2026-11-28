@@ -46,7 +46,7 @@ export function renderGuestInvitationRoute(
     notFound();
   }
 
-  const { payload } = result;
+  const { payload, checklistStorageScope } = result;
   const thumbnailFileId = payload.mainPoster?.thumbnailFileId;
   const posterSrc = thumbnailFileId
     ? resolveDriveImageSource(thumbnailFileId, { mode: 'public' })
@@ -57,7 +57,11 @@ export function renderGuestInvitationRoute(
       {posterSrc && (
         <link rel="preload" as="image" href={posterSrc} fetchPriority="high" />
       )}
-      <GuestInvitationView payload={payload} mode="guest" />
+      <GuestInvitationView
+        payload={payload}
+        mode="guest"
+        checklistStorageScope={checklistStorageScope}
+      />
     </>
   );
 }

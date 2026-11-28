@@ -126,6 +126,8 @@ function CarouselWrapper({
     loading,
     handleClone,
     handleDelete,
+    handleDeleteAudience,
+    refreshInvitation,
     handleUpdate,
     handleToggleVisibility,
     loadInvitations,
@@ -330,9 +332,12 @@ function CarouselWrapper({
           key={deleteTarget.folderId}
           invite={deleteTarget}
           onClose={closeDeleteDialog}
-          onConfirm={() => {
-            closeDeleteDialog();
-            void handleDelete(deleteTarget.folderId);
+          onDeleteAll={() => handleDelete(deleteTarget.folderId)}
+          onDeleteAudience={groupFolderId =>
+            handleDeleteAudience(deleteTarget.folderId, groupFolderId)
+          }
+          onScopeChanged={() => {
+            void refreshInvitation(deleteTarget.folderId);
           }}
         />
       )}

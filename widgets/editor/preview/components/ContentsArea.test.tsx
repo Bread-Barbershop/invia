@@ -96,7 +96,7 @@ describe('ContentsArea 컴포넌트', () => {
     expect(mockSetIsEdit).toHaveBeenCalledWith(false);
   });
 
-  it('4개 행사 분류에 템플릿 선택을 제공하고 기타 분류는 제외한다', () => {
+  it('행사 분류마다 템플릿 선택을 제공하고 기타 분류는 제외한다', () => {
     render(
       <ContentsArea
         scrollContainerRef={scrollContainerRef}
@@ -110,11 +110,51 @@ describe('ContentsArea 컴포넌트', () => {
     const templateButtons = screen.getAllByRole('button', {
       name: /템플릿 선택 열기/,
     });
-    expect(templateButtons).toHaveLength(4);
+    expect(templateButtons).toHaveLength(5);
 
     fireEvent.click(
       screen.getByRole('button', { name: '돌잔치 템플릿 선택 열기' })
     );
     expect(mockOpenTemplatePicker).toHaveBeenCalledWith('firstBirthday');
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '브라이덜샤워 템플릿 선택 열기' })
+    );
+    expect(mockOpenTemplatePicker).toHaveBeenCalledWith('bridalShower');
+  });
+
+  it('지금 만드는 초대장 분류를 맨 앞에 두고 표시를 붙인다', () => {
+    render(
+      <ContentsArea
+        scrollContainerRef={scrollContainerRef}
+        sectionRefs={sectionRefs}
+        searchQuery=""
+        currentType="birthday"
+        onOpenTemplatePicker={mockOpenTemplatePicker}
+        onOpenMealMenuPicker={mockOpenMealMenuPicker}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings[0]).toHaveTextContent('생일');
+    expect(headings[1]).toHaveTextContent('결혼식');
+    expect(screen.getByText('현재 초대장')).toBeInTheDocument();
+  });
+
+  it('검색 중에는 분류 순서를 바꾸지 않고 결과만 보여준다', () => {
+    render(
+      <ContentsArea
+        scrollContainerRef={scrollContainerRef}
+        sectionRefs={sectionRefs}
+        searchQuery="인사말"
+        currentType="birthday"
+        onOpenTemplatePicker={mockOpenTemplatePicker}
+        onOpenMealMenuPicker={mockOpenMealMenuPicker}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    expect(headings[0]).toHaveTextContent('결혼식');
+    expect(screen.queryByText('현재 초대장')).not.toBeInTheDocument();
   });
 });

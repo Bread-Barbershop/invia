@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -156,44 +157,134 @@ describe('대시보드 초대장', () => {
       return { user, trigger, dialog: screen.getByRole('dialog') };
     }
 
-    it('행사 제목과 함께 삭제될 그룹 이름·개수와 링크 영향을 표시하고 원본 폴더만 삭제한다', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ audiences: [familyGroup, workGroup] }),
+    it('그룹 삭제 확인 후 카드와 남은 그룹을 유지하고 전체 삭제를 고를 수 있다', async () => {
+      mockFetch.mockImplementation(async (url, init) => {
+        if (url === optionsUrl)
+          return {
+            ok: true,
+            json: async () => ({ audiences: [familyGroup, workGroup] }),
+          };
+        if (
+          url === '/api/drive/invitationAudiences' &&
+          init?.method === 'DELETE'
+        )
+          return { ok: true, json: async () => ({ success: true }) };
+        if (url === '/api/drive/loadInvitation')
+          return { ok: true, json: async () => ({ invites: [weddingInvite] }) };
+        return { ok: true, json: async () => ({}) };
+      });
+      const { user } = await openDeleteDialog();
+      await screen.findByRole('dialog', {
+        name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
+      });
+      expect(screen.getByText('기본 초대장')).toBeVisible();
+      expect(screen.getByText('가족용')).toBeVisible();
+      expect(screen.getByText('직장용')).toBeVisible();
+      expect(
+        screen.getByText('기본 초대장은 전체 삭제에서만 삭제할 수 있어요.')
+      ).toBeVisible();
+      await user.click(screen.getByRole('button', { name: '가족용 삭제' }));
+      const groupConfirm = await screen.findByRole('dialog', {
+        name: '‘가족용’ 하객 그룹을 삭제할까요?',
+      });
+      expect(groupConfirm).toHaveAccessibleDescription(
+        '이미 보낸 ‘가족용’ 링크로는 초대장을 열 수 없어요.'
+      );
+      await user.click(screen.getByRole('button', { name: '뒤로' }));
+      expect(
+        await screen.findByRole('dialog', {
+          name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
         })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ success: true }),
-        });
-      const { user, dialog } = await openDeleteDialog();
-      expect(dialog).toHaveAccessibleName(
-        '‘민서·지훈 결혼식’ 전체를 삭제할까요?'
+      ).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await user.click(screen.getByRole('button', { name: '가족용 삭제' }));
+      await user.click(screen.getByRole('button', { name: '그룹 삭제' }));
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        '/api/drive/invitationAudiences',
+        expect.objectContaining({
+          method: 'DELETE',
+          body: JSON.stringify({
+            rootFolderId: weddingInvite.folderId,
+            groupFolderId: familyGroup.folderId,
+          }),
+        })
       );
-      expect(dialog).toHaveAccessibleDescription(
-        '기본 초대장과 하객 그룹 2개(가족용·직장용)가 함께 삭제돼요. 이미 보낸 링크로도 초대장을 열 수 없어요.'
-      );
-      await waitFor(() =>
-        expect(screen.getByRole('button', { name: '취소' })).toHaveFocus()
-      );
-      expect(mockFetch.mock.calls.map(([url]) => url)).toEqual([optionsUrl]);
+      expect(
+        await screen.findByRole('dialog', {
+          name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
+        })
+      ).toBeInTheDocument();
+      expect(screen.queryByText('가족용')).not.toBeInTheDocument();
+      expect(screen.getByText('직장용')).toBeVisible();
+      expect(
+        screen.getByRole('button', { name: weddingInvite.displayTitle })
+      ).toBeInTheDocument();
+
       await user.click(
         screen.getByRole('button', { name: '초대장 전체 삭제' })
       );
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenLastCalledWith(
-        '/api/drive/deleteInvitation',
-        expect.objectContaining({
-          method: 'DELETE',
-          body: JSON.stringify({ folderId: weddingInvite.folderId }),
+      const fullConfirm = await screen.findByRole('dialog', {
+        name: '‘민서·지훈 결혼식’ 전체를 삭제할까요?',
+      });
+      expect(fullConfirm).toHaveAccessibleDescription(
+        '기본 초대장과 하객 그룹 1개(직장용)가 함께 삭제돼요. 이미 보낸 링크로도 초대장을 열 수 없어요.'
+      );
+      await user.keyboard('{Escape}');
+      expect(
+        await screen.findByRole('dialog', {
+          name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
         })
+      ).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(mockFetch.mock.calls.map(([url]) => url)).toEqual([
+        optionsUrl,
+        '/api/drive/invitationAudiences',
+        '/api/drive/loadInvitation',
+      ]);
+    });
+
+    it('그룹 삭제에 실패하면 같은 확인창에서 다시 시도할 수 있다', async () => {
+      let deleteAttempt = 0;
+      mockFetch.mockImplementation(async (url, init) => {
+        if (url === optionsUrl)
+          return { ok: true, json: async () => ({ audiences: [familyGroup] }) };
+        if (
+          url === '/api/drive/invitationAudiences' &&
+          init?.method === 'DELETE'
+        ) {
+          deleteAttempt += 1;
+          return deleteAttempt === 1
+            ? {
+                ok: false,
+                json: async () => ({ message: '하객 그룹 삭제에 실패했어요.' }),
+              }
+            : { ok: true, json: async () => ({ success: true }) };
+        }
+        if (url === '/api/drive/loadInvitation')
+          return { ok: true, json: async () => ({ invites: [weddingInvite] }) };
+        return { ok: true, json: async () => ({}) };
+      });
+      const { user } = await openDeleteDialog();
+      await screen.findByRole('dialog', {
+        name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
+      });
+      await user.click(screen.getByRole('button', { name: '가족용 삭제' }));
+      await user.click(screen.getByRole('button', { name: '그룹 삭제' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        '하객 그룹 삭제에 실패했어요.'
       );
       expect(
-        screen.queryByRole('button', { name: weddingInvite.displayTitle })
-      ).not.toBeInTheDocument();
+        screen.getByRole('dialog', { name: '‘가족용’ 하객 그룹을 삭제할까요?' })
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: '그룹 삭제' }));
       expect(
-        screen.getByRole('button', { name: sourceInvitation.name })
-      ).toBeVisible();
+        await screen.findByRole('dialog', {
+          name: '‘민서·지훈 결혼식’ 삭제 범위 선택',
+        })
+      ).toBeInTheDocument();
+      expect(screen.queryByText('가족용')).not.toBeInTheDocument();
     });
 
     it('기본 초대장 하나면 간결하게 표시하고 취소하면 휴지통으로 포커스를 돌려준다', async () => {
@@ -209,7 +300,9 @@ describe('대시보드 초대장', () => {
       expect(dialog).toHaveAccessibleDescription(
         '이미 보낸 링크로도 초대장을 열 수 없어요.'
       );
-      expect(screen.getByRole('button', { name: '초대장 삭제' })).toBeEnabled();
+      expect(
+        within(dialog).getByRole('button', { name: '초대장 삭제' })
+      ).toBeEnabled();
       await waitFor(() =>
         expect(screen.getByRole('button', { name: '취소' })).toHaveFocus()
       );
@@ -475,8 +568,12 @@ describe('대시보드 초대장', () => {
     expect(groupSwitch('가족용')).toBeChecked();
     expect(groupSwitch('기본 초대장')).not.toBeChecked();
     expect(groupSwitch('직장용')).not.toBeChecked();
-    expect(groupSwitch('가족용').nextElementSibling).toHaveTextContent(/^공개$/);
-    expect(groupSwitch('직장용').nextElementSibling).toHaveTextContent(/^비공개$/);
+    expect(groupSwitch('가족용').nextElementSibling).toHaveTextContent(
+      /^공개$/
+    );
+    expect(groupSwitch('직장용').nextElementSibling).toHaveTextContent(
+      /^비공개$/
+    );
     await user.click(master);
     for (const group of groups) {
       expect(groupSwitch(group.name)).not.toBeChecked();
@@ -694,6 +791,63 @@ describe('대시보드 초대장', () => {
       );
     }
 
+    it('공유 정보를 확인하는 동안 두 버튼에 진행 상태를 표시하고 조회 후 하객 그룹을 선택한다', async () => {
+      const user = userEvent.setup();
+      let resolve!: (
+        // eslint-disable-next-line no-unused-vars
+        response: ReturnType<typeof shareAudienceResponse>
+      ) => void;
+      mockFetch.mockReturnValueOnce(
+        new Promise(res => {
+          resolve = res;
+        })
+      );
+      showCard();
+
+      const link = await screen.findByRole('button', { name: '공유 준비 중…' });
+      const kakao = screen.getByRole('button', { name: '카카오톡 준비 중…' });
+      for (const button of [link, kakao]) {
+        expect(button).toBeDisabled();
+        expect(button).toHaveAttribute('aria-busy', 'true');
+        expect(
+          button.querySelector('[data-share-loading-indicator]')
+        ).toBeVisible();
+      }
+      expect(
+        screen.getByText('공유 정보를 확인하고 있어요.')
+      ).toBeInTheDocument();
+
+      await act(async () => {
+        resolve(shareAudienceResponse([baseGroup, familyGroup]));
+      });
+      const ready = screen.getByRole('button', { name: '링크·QR 공유하기' });
+      expect(ready).toBeEnabled();
+      expect(ready).toHaveAttribute('aria-busy', 'false');
+      expect(ready.querySelector('[data-share-loading-indicator]')).toBeNull();
+      await user.click(ready);
+      expect(
+        screen.getByRole('button', { name: '가족용' })
+      ).toBeInTheDocument();
+    });
+
+    it('공유 정보 조회가 실패하면 진행 표시를 없애고 다시 시도할 수 있다', async () => {
+      const user = userEvent.setup();
+      mockFetch
+        .mockRejectedValueOnce(new Error('offline'))
+        .mockResolvedValueOnce(shareAudienceResponse([baseGroup]));
+      showCard();
+      const retry = await screen.findByRole('button', {
+        name: '공유 다시 준비하기',
+      });
+      expect(retry).toBeEnabled();
+      expect(retry).toHaveAttribute('aria-busy', 'false');
+      expect(retry.querySelector('[data-share-loading-indicator]')).toBeNull();
+      await user.click(retry);
+      expect(
+        await screen.findByRole('button', { name: '링크·QR 공유하기' })
+      ).toBeEnabled();
+    });
+
     it.each([
       ['기본 초대장', 'http://localhost/i/wedding'],
       ['가족용', 'http://localhost/i/wedding?to=family'],
@@ -705,12 +859,17 @@ describe('대시보드 초대장', () => {
         const greeting = '어머니, 결혼식 날 뵈어요!';
         await navigator.clipboard.writeText(greeting);
         const copy = jest.spyOn(navigator.clipboard, 'writeText');
-        mockFetch.mockResolvedValueOnce(
-          shareAudienceResponse([baseGroup, familyGroup, workGroup], {
-            '': 'private',
-            work: 'private',
-          })
-        ).mockResolvedValue({ ok: true, json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }) });
+        mockFetch
+          .mockResolvedValueOnce(
+            shareAudienceResponse([baseGroup, familyGroup, workGroup], {
+              '': 'private',
+              work: 'private',
+            })
+          )
+          .mockResolvedValue({
+            ok: true,
+            json: async () => ({ message: '민서·지훈 결혼식에 초대합니다.' }),
+          });
         showCard();
         const trigger = await screen.findByRole('button', {
           name: '링크·QR 공유하기',
@@ -759,13 +918,24 @@ describe('대시보드 초대장', () => {
           screen.getByRole('link', { name: 'QR 이미지 저장' })
         ).toHaveAttribute('download', `민서·지훈 결혼식 - ${name} QR.png`);
         if (name === '가족용') {
-          const sms = await screen.findByRole('link', { name: '문자로 보내기' });
-          expect(mockFetch).toHaveBeenLastCalledWith('/api/drive/shareUrl?invitationFolderId=family-folder&intent=sms', expect.anything());
-          expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(`민서·지훈 결혼식에 초대합니다.\n${url}`);
-          sms.addEventListener('click', event => event.preventDefault(), { once: true });
+          const sms = await screen.findByRole('link', {
+            name: '문자로 보내기',
+          });
+          expect(mockFetch).toHaveBeenLastCalledWith(
+            '/api/drive/shareUrl?invitationFolderId=family-folder&intent=sms',
+            expect.anything()
+          );
+          expect(decodeURIComponent(sms.getAttribute('href')!)).toContain(
+            `민서·지훈 결혼식에 초대합니다.\n${url}`
+          );
+          sms.addEventListener('click', event => event.preventDefault(), {
+            once: true,
+          });
           await user.click(sms);
         } else {
-          expect(screen.getByRole('button', { name: /문자로 보내기/ })).toBeDisabled();
+          expect(
+            screen.getByRole('button', { name: /문자로 보내기/ })
+          ).toBeDisabled();
         }
         expect(await navigator.clipboard.readText()).toBe(greeting);
         await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
@@ -827,10 +997,9 @@ describe('대시보드 초대장', () => {
       ).toBeVisible();
       expect(toDataURL).toHaveBeenCalledWith('http://localhost/i/wedding');
       await user.click(screen.getByRole('button', { name: '공유하기' }));
-      expect(screen.getByRole('link', { name: 'QR 이미지 저장' })).toHaveAttribute(
-        'download',
-        '민서·지훈 결혼식 QR.png'
-      );
+      expect(
+        screen.getByRole('link', { name: 'QR 이미지 저장' })
+      ).toHaveAttribute('download', '민서·지훈 결혼식 QR.png');
       await user.click(screen.getByRole('button', { name: '링크 복사하기' }));
       expect(copy).toHaveBeenCalledTimes(1);
       expect(copy).toHaveBeenCalledWith('http://localhost/i/wedding');
@@ -881,7 +1050,10 @@ describe('대시보드 초대장', () => {
         const user = userEvent.setup();
         mockFetch
           .mockResolvedValueOnce(shareAudienceResponse([baseGroup, workGroup]))
-          .mockResolvedValueOnce({ ok: true, json: async () => ({ message: '초대합니다.' }) })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ message: '초대합니다.' }),
+          })
           .mockResolvedValueOnce(
             isPublic
               ? {
@@ -1132,9 +1304,21 @@ describe('대시보드 초대장', () => {
       const view = showKakaoCard(true);
       await user.dblClick(await readyKakaoButton());
       expect(mockFetch).toHaveBeenCalledTimes(2);
+      const kakaoBusy = screen.getByRole('button', {
+        name: '카카오톡 여는 중…',
+      });
+      expect(kakaoBusy).toBeDisabled();
+      expect(kakaoBusy).toHaveAttribute('aria-busy', 'true');
       expect(
-        screen.getByRole('button', { name: '카카오톡 여는 중…' })
-      ).toBeDisabled();
+        kakaoBusy.querySelector('[data-share-loading-indicator]')
+      ).toBeVisible();
+      const link = screen.getByRole('button', { name: '링크·QR 공유하기' });
+      expect(link).toBeDisabled();
+      expect(link).toHaveAttribute('aria-busy', 'false');
+      expect(link.querySelector('[data-share-loading-indicator]')).toBeNull();
+      expect(
+        screen.getByText('카카오톡 공유를 준비하고 있어요.')
+      ).toBeInTheDocument();
       view.unmount();
       expect(mockFetch.mock.calls[1][1].signal.aborted).toBe(true);
       await act(async () => finish());

@@ -9,6 +9,7 @@ import homeBackgroundImage from '@/shared/assets/images/home/home-background.png
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 
+import MobileHomeQuickLinks from './MobileHomeQuickLinks';
 import { MobileShowcaseCardStack } from './MobileShowcaseCardStack';
 import { showcaseItems } from './showcaseItems';
 
@@ -162,6 +163,8 @@ function MobileHomeHero() {
           >
             무료로 제작하기
           </button>
+
+          <MobileHomeQuickLinks />
         </div>
       </section>
 

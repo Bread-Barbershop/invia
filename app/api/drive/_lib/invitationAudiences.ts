@@ -12,6 +12,8 @@ import type { GroupShareVisibility } from '@/features/invitation/audiences/visib
 import {
   claimAudienceLink,
   commitAudienceLink,
+  inspectAudienceLink,
+  isAudienceLinkRetired,
   refreshAudienceLink,
   releaseAudienceLink,
   resolveAudienceLink,
@@ -200,14 +202,38 @@ export async function getInvitationAudiences(
       const audience = readAudienceFolder(file);
       if (audience?.rootFolderId !== rootFolderId || !file.ownedByMe)
         return null;
-      if (!(await resolveAudienceLink(dataJsonFileId, audience.group.slug))) {
-        await restoreAudienceLink(
-          dataJsonFileId,
-          audience.group,
-          file.appProperties?.clone_request
+      const link = await inspectAudienceLink(
+        dataJsonFileId,
+        audience.group.slug
+      );
+      if (link.retired && link.retiredFolderId !== audience.group.folderId) {
+        throw new InvitationCloneError(
+          '하객 그룹의 링크 정보를 확인할 수 없습니다.',
+          503
         );
       }
-      return audience.group;
+      let linkRetired = link.retired;
+      if (!linkRetired && !link.dataJsonFileId) {
+        try {
+          await restoreAudienceLink(
+            dataJsonFileId,
+            audience.group,
+            file.appProperties?.clone_request
+          );
+        } catch (error) {
+          // Deletion can retire the slug after this GET inspected the store.
+          // Keep the group row usable for owner retry instead of failing the list.
+          linkRetired = await isAudienceLinkRetired(
+            dataJsonFileId,
+            audience.group.slug,
+            audience.group.folderId
+          );
+          if (!linkRetired) throw error;
+        }
+      }
+      return linkRetired
+        ? { ...audience.group, linkRetired: true }
+        : audience.group;
     }
   );
   groups.push(
@@ -423,6 +449,15 @@ export async function getOwnedAudienceLink(
     allowAudience: false,
   });
   const root = await loadRootInvitation(audience.rootFolderId, publicOrigin);
+  if (
+    await isAudienceLinkRetired(
+      root.dataJsonFileId,
+      audience.group.slug,
+      folderId
+    )
+  ) {
+    throw new InvitationCloneError('이미 삭제된 하객 그룹 링크입니다.', 404);
+  }
   const visibilityFor = await loadGroupVisibility(
     rootFolder.appProperties?.audience_visibility,
     root.dataJsonFileId,
@@ -443,6 +478,15 @@ export async function updateAudienceLinkTarget(
   audience: NonNullable<Awaited<ReturnType<typeof getOwnedAudienceLink>>>,
   suppliedDataId?: string
 ) {
+  if (
+    await isAudienceLinkRetired(
+      audience.rootDataJsonFileId,
+      audience.group.slug,
+      audience.group.folderId
+    )
+  ) {
+    throw new InvitationCloneError('이미 삭제된 하객 그룹 링크입니다.', 404);
+  }
   const files = await listCloneFiles(audience.group.folderId);
   const data = findSavedInvitationDataFile(files);
   if (!data || (suppliedDataId && data.id !== suppliedDataId.trim())) {

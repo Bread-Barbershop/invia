@@ -57,7 +57,15 @@ function DashboardActionButton({
     >
       <Icon className="h-8 w-8" aria-hidden="true" />
       <span className="justify-self-center">{children}</span>
-      <span aria-hidden="true" />
+      {props['aria-busy'] ? (
+        <span
+          aria-hidden="true"
+          data-share-loading-indicator
+          className="h-4 w-4 justify-self-center rounded-full border-2 border-current/25 border-t-current motion-safe:animate-spin"
+        />
+      ) : (
+        <span aria-hidden="true" />
+      )}
     </button>
   );
 }

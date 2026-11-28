@@ -9,6 +9,10 @@ import {
 } from 'react';
 
 import type { InviteListItem } from '@/app/dashboard/types';
+import {
+  type CardActionFailureMessage,
+  resolveCardActionFailureMessage,
+} from '@/app/dashboard/utils/cardActionMessage';
 import { groupQrDownloadNames } from '@/components/molecules/link-share/qrDownloadName';
 import {
   buildAudienceGuestUrl,
@@ -53,15 +57,17 @@ async function loadShareOptions(
   ) {
     throw new Error(LOAD_ERROR);
   }
-  return groups.map(group => ({
-    folderId: group.folderId,
-    visibility: statusLabels[group.visibility] ? group.visibility : 'pending',
-    name: group.slug ? group.name : '기본 초대장',
-    url: new URL(
-      buildAudienceGuestUrl(rootGuestUrl, group.slug),
-      window.location.origin
-    ).href,
-  }));
+  return groups
+    .filter(group => !group.linkRetired)
+    .map(group => ({
+      folderId: group.folderId,
+      visibility: statusLabels[group.visibility] ? group.visibility : 'pending',
+      name: group.slug ? group.name : '기본 초대장',
+      url: new URL(
+        buildAudienceGuestUrl(rootGuestUrl, group.slug),
+        window.location.origin
+      ).href,
+    }));
 }
 
 export function useAudienceShare({
@@ -83,14 +89,23 @@ export function useAudienceShare({
   const folderId = invite?.folderId;
   const published = invite?.published;
   const scope = invite?.audienceVisibility;
+  const optionsRevision = invite?.audienceOptionsRevision;
   const request = useMemo(
-    () => ({ folderId, guestUrl, active, attempt, published, scope }),
-    [folderId, guestUrl, active, attempt, published, scope]
+    () => ({
+      folderId,
+      guestUrl,
+      active,
+      attempt,
+      published,
+      scope,
+      optionsRevision,
+    }),
+    [folderId, guestUrl, active, attempt, published, scope, optionsRevision]
   );
   const [result, setResult] = useState<{
     request: typeof request;
     options?: ShareGroup[];
-    error?: string;
+    failure?: CardActionFailureMessage | null;
   } | null>(null);
   const groups = result?.request === request ? result.options : undefined;
   const eventTitle = invite?.displayTitle || invite?.name || '초대장';
@@ -105,7 +120,7 @@ export function useAudienceShare({
       downloadName: names[index],
     }));
   }, [groups, eventTitle]);
-  const error = result?.request === request ? result.error : undefined;
+  const failure = result?.request === request ? result.failure ?? null : null;
   const dialog = useRef<HTMLDialogElement>(null);
   const [channel, setChannel] = useState<ShareChannel | null>(null);
   const pendingKakao = useRef<AbortController | null>(null);
@@ -121,7 +136,7 @@ export function useAudienceShare({
   const enabled = linkEnabled || canLookUpKakao;
   const kakaoEnabled =
     canLookUpKakao &&
-    Boolean(error || invite?.hasKakaoShareData || (options?.length ?? 0) > 1);
+    Boolean(failure || invite?.hasKakaoShareData || (options?.length ?? 0) > 1);
 
   useEffect(() => {
     if (!enabled || !request.folderId) return;
@@ -134,7 +149,10 @@ export function useAudienceShare({
         if (!controller.signal.aborted)
           setResult({
             request,
-            error: (err instanceof Error && err.message) || LOAD_ERROR,
+            failure: resolveCardActionFailureMessage(
+              'share',
+              (err instanceof Error && err.message.trim()) || LOAD_ERROR
+            ),
           });
       }
     );
@@ -145,6 +163,8 @@ export function useAudienceShare({
     };
   }, [enabled, request]);
 
+  const retry = () => setAttempt(previous => previous + 1);
+
   function closePicker() {
     setChannel(null);
     dialog.current?.close();
@@ -154,7 +174,7 @@ export function useAudienceShare({
     closePicker,
     'outside-dialog'
   );
-  const loading = enabled && !error && !options;
+  const loading = enabled && !failure && !options;
 
   function share(option: ShareOption, via: ShareChannel) {
     if (!invite) return;
@@ -173,15 +193,16 @@ export function useAudienceShare({
   function buttonProps(via: ShareChannel, available: boolean) {
     return {
       disabled: !available || loading || isSharing,
-      'aria-busy': loading || (via === 'kakao' && isSharing),
+      'aria-busy':
+        (loading && (via === 'link' ? linkEnabled : canLookUpKakao)) ||
+        (isSharing && via === 'kakao' && available),
       'aria-haspopup':
         options && (via === 'link' || options.length > 1)
           ? ('dialog' as const)
           : undefined,
-      title: error,
       onClick: (event: MouseEvent<HTMLButtonElement>) => {
-        if (error) {
-          setAttempt(previous => previous + 1);
+        if (failure) {
+          retry();
           return;
         }
         if (!options?.length || !invite) return;
@@ -197,20 +218,29 @@ export function useAudienceShare({
     };
   }
   return {
+    failure,
+    retry,
     linkButtonProps: buttonProps('link', linkEnabled),
     kakaoButtonProps: buttonProps('kakao', kakaoEnabled),
     kakaoLabel:
-      error && canLookUpKakao
+      failure && canLookUpKakao
         ? '카카오톡 공유 다시 준비하기'
-        : isSharing
+        : isSharing && kakaoEnabled
           ? '카카오톡 여는 중…'
-          : '카카오톡 공유하기',
+          : loading && canLookUpKakao
+            ? '카카오톡 준비 중…'
+            : '카카오톡 공유하기',
     linkLabel:
-      error && linkEnabled
+      failure && linkEnabled
         ? '공유 다시 준비하기'
-        : loading
+        : loading && linkEnabled
           ? '공유 준비 중…'
           : '링크·QR 공유하기',
+    statusLabel: loading
+      ? '공유 정보를 확인하고 있어요.'
+      : isSharing
+        ? '카카오톡 공유를 준비하고 있어요.'
+        : '',
     picker: invite && options && options.length > 1 && (
       <dialog
         ref={dialog}

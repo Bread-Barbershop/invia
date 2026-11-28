@@ -7,6 +7,9 @@ import UploadButton from './UploadButton';
 
 const mockConfirm = jest.fn();
 const mockGetObjects = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ replace: jest.fn(), refresh: jest.fn() }),
+}));
 jest.mock('@/shared/hooks/useConfirm', () => ({
   useConfirm: () => ({ confirm: mockConfirm }),
 }));
@@ -19,6 +22,8 @@ const upload = {
   handleUpload: jest.fn(),
   isLoading: false,
   isFail: false,
+  isAuthRequired: false,
+  isDraftPersisted: false,
   isCleaningUp: false,
   pendingInvitation: null,
   loadingMessage: '',
@@ -67,7 +72,7 @@ it('일부만 수정해도 남은 예시를 표시하고 그대로 저장을 허
   mockGetObjects.mockReturnValue([
     { text: '고관우 · 라니' },
     { text: '8TH AUGUST 2026' },
-    { text: 'Speaker by Andrew Jackson', visible: false },
+    { text: 'Speaker — Andrew Jackson', visible: false },
     { text: 'MINSUNG PARK', isOnScreen: () => false },
   ]);
   mockConfirm.mockResolvedValue(true);

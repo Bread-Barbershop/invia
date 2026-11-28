@@ -7,6 +7,7 @@ import type {
   InvitationPreviewTarget,
   InviteListItem,
 } from '@/app/dashboard/types';
+import type { CardActionFailureMessage } from '@/app/dashboard/utils/cardActionMessage';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
 
 import { dashboardCarouselLayout } from './carouselLayout';
@@ -41,7 +42,7 @@ type CarouselBaseProps = {
   isDeleting?: (folderId: string) => boolean;
   isSharing?: (folderId: string) => boolean;
   isVisibilityUpdating?: (folderId: string) => boolean;
-  getVisibilityError?: (folderId: string) => string | null;
+  getVisibilityError?: (folderId: string) => CardActionFailureMessage | null;
 };
 
 function CarouselBase({

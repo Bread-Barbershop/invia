@@ -1,3 +1,5 @@
+import { SHOWCASE_PHOTOS } from './showcaseImages';
+
 import type { ShowcaseInvitation } from './showcaseInvitations';
 
 export const birthdayCollection: ShowcaseInvitation[] = [
@@ -9,7 +11,11 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     heading: '내 생일의 B면을 틀어요',
     date: '2027-02-27',
     time: '18:00',
-    venue: '인비아 리스닝룸 · B사이드',
+    venue: '서울레코드펍',
+    venueAddress: '서울 종로구 삼일대로20길 17 2층',
+    venueLat: 37.5697584,
+    venueLng: 126.98887,
+    venueTel: '010-9332-2858',
     font: 'SUIT',
     sectionStyle: 'outlined',
     id: 'showcase-32',
@@ -51,9 +57,51 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         template: 'calendarType3',
       },
       {
+        component: 'gallery',
+        title: '바늘을 내려놓는 자리',
+        template: 'galleryType2',
+        ratio: '4:3',
+        images: ['/images/showcase/vinyl.webp', SHOWCASE_PHOTOS.clubTurntable],
+      },
+      {
+        component: 'mealMenu',
+        title: 'B면의 음료',
+        subtitle: 'B-side Drinks',
+        style: 'minimal',
+        courses: [
+          {
+            name: '첫 잔',
+            dishes: ['자몽 에이드', '콜드브루'],
+          },
+          {
+            name: '곁들임',
+            dishes: ['소금 팝콘과 견과'],
+          },
+        ],
+      },
+      {
         component: 'place',
         title: '청음실 입구',
-        detail: 'B사이드 방 문에 레코드 재킷을 걸어 둘게요.',
+        detail: '2층 문에 레코드 재킷을 걸어 둘게요. 계단으로 올라와 주세요.',
+      },
+      {
+        component: 'transportation',
+        title: '종로까지 오는 길',
+        subwayLine: '1호선·3호선·5호선',
+        subwayStation: '종로3가역',
+        subwayExit: '15번 출구',
+        subwayWalk: '종로3가역 15번 출구에서 종로를 따라 도보 6분입니다.',
+        busRoutes: '종로3가 정류장에서 내리면 골목 입구가 바로 보여요.',
+        parkingHours:
+          '골목 안은 주차가 어려워요. 종로3가 공영주차장을 이용하시고 5분 걸어오세요.',
+      },
+      {
+        component: 'dressCode',
+        title: '좋아하는 음악의 옷',
+        colors: ['#EDF1FC', '#253F91', '#1F2D51'],
+        guidelines: [
+          'A면보다 B면이 좋은 옷이면 충분해요. 편한 차림으로 와서 마음껏 눕거나 앉아 계세요.',
+        ],
       },
       {
         component: 'notice',
@@ -61,6 +109,22 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         title: '한 곡만 골라 줘',
         heading: '신청곡 적는 법',
         message: '입구의 슬리브에 곡 제목과 이 곡을 고른 이유를 적어 주세요.',
+      },
+      {
+        component: 'faq',
+        title: '청음회 안내',
+        items: [
+          {
+            question: '신청곡은 꼭 가져가야 하나요?',
+            answer:
+              '빈손으로 오셔도 좋아요. 자리에 앉아 떠오르는 곡을 그때 적어 주셔도 됩니다.',
+          },
+          {
+            question: '음악 소리가 클까요?',
+            answer:
+              '대화가 가능한 정도로만 틀어요. 조용히 듣고 싶은 분은 안쪽 소파 자리를 잡아 두었습니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -76,13 +140,17 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     heading: '레몬 타르트가 식기 전에',
     date: '2027-05-22',
     time: '12:00',
-    venue: '인비아 키친 · 테라스',
+    venue: '어반 가든 · 정동',
+    venueAddress: '서울 중구 정동길 12-15',
+    venueLat: 37.5673854,
+    venueLng: 126.9691349,
+    venueTel: '02-777-2254',
     font: '고운 바탕',
     sectionStyle: 'rounded',
     id: 'showcase-33',
     type: 'birthday',
     message: [
-      '생일 아침에 레몬 타르트를 구울 거예요. 테라스에 찬 레모네이드도 준비할 테니 점심 먹으러 와요.',
+      '생일 아침에 레몬 타르트를 구울 거예요. 정원 테라스에 찬 레모네이드도 준비할 테니 점심 먹으러 와요.',
     ],
     sections: [
       {
@@ -112,22 +180,78 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '한 조각 먼저',
         caption: '레몬 껍질을 곱게 갈아 올린 오늘의 생일 케이크예요.',
-        image: '/images/showcase/citrus.webp',
+        image: SHOWCASE_PHOTOS.lemonTart,
       },
       {
         component: 'calendar',
         title: '점심 약속',
+        template: 'calendarType1',
+      },
+      {
+        component: 'gallery',
+        title: '타르트와 테라스',
+        template: 'galleryType2',
+        ratio: '4:3',
+        images: [SHOWCASE_PHOTOS.lemonTart, SHOWCASE_PHOTOS.gardenSetting],
       },
       {
         component: 'place',
         title: '햇볕 드는 테라스',
-        detail: '키친 안쪽 유리문을 지나 오른쪽 긴 테이블이에요.',
+        detail: '정동길에서 정원으로 들어와 오른쪽 긴 테이블로 오세요.',
+      },
+      {
+        component: 'transportation',
+        title: '정동까지 오는 길',
+        subwayLine: '5호선',
+        subwayStation: '서대문역',
+        subwayExit: '5번 출구',
+        subwayWalk: '서대문역 5번 출구에서 새문안로를 따라 도보 8분입니다.',
+        busRoutes: '정동극장 앞 정류장에서 내리면 정원 입구가 보여요.',
+        parkingHours:
+          '정동길은 주차가 어려워요. 근처 공영주차장을 이용하시고 5분 걸어오세요.',
+      },
+      {
+        component: 'timeline',
+        title: '타르트가 나오는 순서',
+        items: [
+          {
+            time: '12:00',
+            title: '테라스에서 인사',
+          },
+          {
+            time: '12:20',
+            title: '레몬 타르트 자르기',
+          },
+          {
+            time: '12:50',
+            title: '햇살 아래 단체 사진',
+          },
+        ],
       },
       {
         component: 'dressCode',
         title: '테라스에서 편하게',
         colors: ['#FFF6C9', '#506521', '#293E30'],
         guidelines: ['햇볕 좋은 자리예요. 얇은 겉옷을 하나 챙겨 와요.'],
+      },
+      {
+        component: 'notice',
+        title: '햇살이 강한 날',
+        heading: '모자 한 개면 충분해요',
+        message:
+          '테라스 자리라 낮 햇살이 들어옵니다. 모자나 선크림을 챙겨 오시면 더 편해요.',
+        preset: 'clothes',
+      },
+      {
+        component: 'faq',
+        title: '점심 안내',
+        items: [
+          {
+            question: '알레르기가 있으면 미리 알려야 하나요?',
+            answer:
+              '견과와 유제품을 쓰는 메뉴가 있어요. 오기 전에 편하게 말씀해 주시면 따로 준비하겠습니다.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -143,7 +267,10 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     heading: '오늘의 주인공은 우리',
     date: '2027-07-17',
     time: '20:00',
-    venue: '인비아 시네마 · 소극장',
+    venue: '아트나인',
+    venueAddress: '서울 동작구 동작대로 89 골든시네마타워 12층',
+    venueLat: 37.4846218,
+    venueLng: 126.9817002,
     font: 'SUIT',
     sectionStyle: 'paper',
     id: 'showcase-34',
@@ -158,18 +285,51 @@ export const birthdayCollection: ShowcaseInvitation[] = [
       {
         component: 'calendar',
         title: '상영 일시',
-        template: 'calendarType5',
+        template: 'calendarType8',
       },
       {
         component: 'picture',
         title: '당신의 좌석',
         caption: '붉은 의자와 방금 튀긴 팝콘이 기다리고 있어요.',
-        image: '/images/showcase/cinema.webp',
+        image: SHOWCASE_PHOTOS.birthdayCinema,
+      },
+      {
+        component: 'gallery',
+        title: '상영관 두 컷',
+        template: 'galleryType7',
+        ratio: '4:3',
+        images: [SHOWCASE_PHOTOS.birthdayCinema, SHOWCASE_PHOTOS.redSeats],
       },
       {
         component: 'place',
         title: '표를 받는 곳',
-        detail: '소극장 매표대에서 민혁의 생일 상영회라고 말해 주세요.',
+        detail: '12층 매표대에서 민혁의 생일 상영회라고 말씀해 주세요.',
+      },
+      {
+        component: 'transportation',
+        title: '이수역에서 극장까지',
+        subwayLine: '4호선·7호선',
+        subwayStation: '이수역',
+        subwayWalk:
+          '이수역에서 동작대로를 따라 도보 4분입니다. 골든시네마타워 12층으로 올라오세요.',
+        parkingHours:
+          '건물 지하 주차장에 두 시간까지 무료로 세울 수 있어요. 매표대에서 도장을 받아 주세요.',
+      },
+      {
+        component: 'mealMenu',
+        title: '상영 전 매점',
+        subtitle: 'Concession',
+        style: 'bistro',
+        courses: [
+          {
+            name: '매점 간식',
+            dishes: ['카라멜 팝콘', '나초와 살사'],
+          },
+          {
+            name: '마실 것',
+            dishes: ['콜라와 탄산수'],
+          },
+        ],
       },
       {
         component: 'timeline',
@@ -197,6 +357,22 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         message: '감상평은 엔딩 뒤에 준비한 엽서에 한 줄씩 남겨 줘요.',
       },
       {
+        component: 'faq',
+        title: '상영 안내',
+        items: [
+          {
+            question: '몇 시에 상영이 시작하나요?',
+            answer:
+              '저녁 8시에 시작합니다. 15분 전까지 오시면 좌석을 편하게 고르실 수 있어요.',
+          },
+          {
+            question: '무슨 영화인가요?',
+            answer:
+              '비밀입니다. 대신 예고편은 미리 보여 드릴게요. 좋아할 거라는 것만 약속할게요.',
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message: '오늘의 엔딩 크레디트에는 여기 온 모두의 이름을 적을게요.',
       },
@@ -210,27 +386,31 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     heading: '생일 꽃다발을 함께 묶어요',
     date: '2027-04-24',
     time: '10:30',
-    venue: '인비아 플라워룸 · 온실',
+    venue: '미니말레 커피뢰스터 · 양재본점',
+    venueAddress: '서울 서초구 강남대로10길 32',
+    venueLat: 37.4688276,
+    venueLng: 127.0412108,
+    venueTel: '02-6104-4239',
     font: 'Noto Serif KR',
     sectionStyle: 'plain',
     id: 'showcase-35',
     type: 'birthday',
     message: [
-      '아침 시장에서 고른 꽃을 한 통 가득 가져올게요. 빵을 나눠 먹고 집에 갈 때는 다 같이 꽃 한 다발씩 안고 가요.',
+      '새벽 꽃시장에서 고른 꽃을 한 통 가득 가져올게요. 빵을 나눠 먹고 집에 갈 때는 다 같이 꽃 한 다발씩 안고 가요.',
     ],
     sections: [
       {
         component: 'picture',
         title: '아침에 골라 온 꽃',
         caption: '오늘은 라넌큘러스와 양귀비를 주인공으로 골랐어요.',
-        image: '/images/showcase/flowers.webp',
+        image: SHOWCASE_PHOTOS.flowerMarket,
       },
       {
         component: 'greeting',
       },
       {
         component: 'mealMenu',
-        title: '온실의 브런치',
+        title: '꽃 옆의 브런치',
         subtitle: 'Morning Table',
         style: 'bistro',
         courses: [
@@ -246,7 +426,8 @@ export const birthdayCollection: ShowcaseInvitation[] = [
       },
       {
         component: 'calendar',
-        title: '온실에서 만날 시간',
+        title: '꽃시장에서 만날 시간',
+        template: 'calendarType1',
       },
       {
         component: 'timeline',
@@ -267,9 +448,62 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'gallery',
+        title: '꽃과 테이블',
+        template: 'galleryType2',
+        ratio: '4:3',
+        images: [
+          SHOWCASE_PHOTOS.flowerMarket,
+          SHOWCASE_PHOTOS.gardenWateringCan,
+        ],
+      },
+      {
+        component: 'notice',
+        title: '꽃과 함께 오세요',
+        heading: '한 송이면 충분해요',
+        message:
+          '오시는 길에 좋아하는 꽃 한 송이를 들고 오시면 테이블에 함께 꽂아 둘게요.',
+        preset: 'party',
+      },
+      {
         component: 'place',
-        title: '온실 테이블',
-        detail: '플라워룸에서 앞치마를 받아 온실로 들어오세요.',
+        title: '카페 자리',
+        detail: '꽃시장에서 도보 5분, 미니말레 안쪽 긴 테이블을 잡아 두었어요.',
+      },
+      {
+        component: 'transportation',
+        title: '양재까지 오는 길',
+        subwayLine: '신분당선',
+        subwayStation: '양재시민의숲역',
+        subwayWalk:
+          '양재시민의숲역에서 강남대로10길로 들어와 도보 12분입니다. 꽃시장을 지나 오면 길이 더 짧아요.',
+        busRoutes: '양재꽃시장 정류장에서 내리면 도보 3분입니다.',
+        parkingHours:
+          '카페 앞 주차는 두 대까지예요. 꽃시장 공영주차장에 세우셔도 가까워요.',
+      },
+      {
+        component: 'dressCode',
+        title: '꽃가루가 묻어도 좋은 옷',
+        colors: ['#FBF0F0', '#7C4355', '#403E38'],
+        guidelines: [
+          '꽃을 다듬다 보면 옷에 물이 튀어요. 밝은 색보다는 편한 옷이 좋아요.',
+        ],
+      },
+      {
+        component: 'faq',
+        title: '브런치 안내',
+        items: [
+          {
+            question: '알레르기가 있으면 미리 알려야 하나요?',
+            answer:
+              '견과와 유제품을 쓰는 메뉴가 있어요. 오기 전에 편하게 말씀해 주시면 따로 준비하겠습니다.',
+          },
+          {
+            question: '아이와 함께 가도 되나요?',
+            answer:
+              '물론이에요. 꽃을 만지작거리는 아이 자리를 따로 만들어 둘게요.',
+          },
+        ],
       },
       {
         component: 'closingComment',
@@ -285,7 +519,11 @@ export const birthdayCollection: ShowcaseInvitation[] = [
     heading: '모닥불 옆 한 자리',
     date: '2027-10-09',
     time: '17:30',
-    venue: '인비아 캠프 · 솔숲 사이트',
+    venue: '자라섬캠핑장',
+    venueAddress: '경기 가평군 가평읍 자라섬로 60',
+    venueLat: 37.8208779,
+    venueLng: 127.5210562,
+    venueTel: '031-8078-8028',
     font: 'LINESeedKR',
     sectionStyle: 'outlined',
     id: 'showcase-36',
@@ -298,9 +536,46 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'greeting',
       },
       {
+        component: 'countdown',
+        title: '캠프까지 남은 날',
+        onDayMessage: '오늘, 모닥불에 불을 붙입니다.',
+        afterMessage: '별까지 함께 봐 줘서 고마워요.',
+      },
+      {
         component: 'place',
         title: '캠프 집결지',
-        detail: '솔숲 입구에서 랜턴이 걸린 텐트를 찾아 주세요.',
+        detail: '자라섬 입구에서 랜턴이 걸린 텐트를 찾아 주세요.',
+      },
+      {
+        component: 'transportation',
+        title: '자라섬까지',
+        subwayLine: '경춘선·ITX',
+        subwayStation: '가평역',
+        subwayExit: '1번 출구',
+        subwayWalk:
+          '가평역에서 자라섬까지 도보 25분입니다. 행사 당일에는 가평역 1번 출구에서 셔틀을 두 번 운행해요.',
+        shuttleStop: '가평역 1번 출구 앞',
+        shuttleInterval: '17:00 · 18:00 두 번',
+        parkingHours:
+          '자라섬 주차장에 차를 세우고 입구 안내판을 따라 걸어오세요. 사이트까지 5분입니다.',
+      },
+      {
+        component: 'timeline',
+        title: '캠프의 저녁',
+        items: [
+          {
+            time: '17:30',
+            title: '랜턴 켜고 자리 잡기',
+          },
+          {
+            time: '18:10',
+            title: '모닥불 앞 저녁',
+          },
+          {
+            time: '19:00',
+            title: '별 보며 케이크',
+          },
+        ],
       },
       {
         component: 'calendar',
@@ -311,7 +586,17 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         component: 'picture',
         title: '밤을 밝힐 자리',
         caption: '랜턴을 켜 둔 상자 옆에 의자를 놓아두었어요.',
-        image: '/images/showcase/camp.webp',
+        image: SHOWCASE_PHOTOS.birthdayCamp,
+      },
+      {
+        component: 'gallery',
+        title: '솔숲의 두 장면',
+        template: 'galleryType1',
+        ratio: '4:3',
+        images: [
+          SHOWCASE_PHOTOS.birthdayCamp,
+          SHOWCASE_PHOTOS.summerWildflowers,
+        ],
       },
       {
         component: 'dressCode',
@@ -338,8 +623,184 @@ export const birthdayCollection: ShowcaseInvitation[] = [
         ],
       },
       {
+        component: 'notice',
+        title: '밤 공기가 차요',
+        heading: '긴 소매 하나 챙겨 주세요',
+        message:
+          '해가 지면 솔숲 바람이 차갑습니다. 따뜻한 겉옷과 편한 신발을 준비해 주세요.',
+        preset: 'clothes',
+      },
+      {
+        component: 'faq',
+        title: '캠프 준비물',
+        items: [
+          {
+            question: '텐트는 챙겨야 하나요?',
+            answer:
+              '큰 텐트와 테이블은 준비해 두었어요. 앉기 편한 담요나 방석 하나만 챙겨 오시면 충분합니다.',
+          },
+          {
+            question: '비가 오면 어떻게 하나요?',
+            answer:
+              '비가 와도 그대로 진행해요. 큰 캐노피 아래에서 저녁을 먹고, 별 대신 랜턴 불빛을 보며 케이크를 자를게요.',
+          },
+        ],
+      },
+      {
         component: 'closingComment',
         message: '별이 뜨면 따뜻한 컵을 들고 같이 올려다봐요.',
+      },
+    ],
+  },
+  {
+    name: '한 해의 마지막 식탁',
+    description: '촛불과 와인, 집에서 차리는 작은 송년 저녁 초대장.',
+    palette: ['#F8F3EA', '#FA7564', '#000000'],
+    eyebrow: 'A YEAR-END DINNER',
+    heading: '한 해의 마지막 식탁',
+    date: '2026-12-20',
+    time: '19:00',
+    venue: '연남동 작은 식탁',
+    venueAddress: '서울특별시 마포구 동교로 233',
+    venueLat: 37.5609199,
+    venueLng: 126.9240616,
+    font: '고운 바탕',
+    bodyFont: 'LINESeedKR',
+    sectionStyle: 'paper',
+    id: 'showcase-49',
+    type: 'birthday',
+    message: [
+      '12월 20일 저녁, 집에서 작은 저녁을 차립니다.',
+      '한 해 동안 각자의 자리에서 애쓴 것들, 잠깐 내려놓고 따뜻한 것 먹으면서 이야기 나누면 좋겠어요.',
+      '화려한 자리는 아니고요. 제가 좋아하는 것들로 천천히 준비해 두겠습니다.',
+      '와인은 제가 고른 걸로 몇 병, 나머지는 편하게 오세요. 사람이 많지 않으니 부담 갖지 마시고, 오실 수 있는 분은 12월 10일까지 알려주세요.',
+    ],
+    sections: [
+      { component: 'greeting' },
+      {
+        component: 'countdown',
+        title: '우리의 마지막 식탁',
+        eventDateTime: '2026-12-20T19:00',
+        onDayMessage: '오늘, 식탁에 앉아 주셔서 고맙습니다.',
+        afterMessage: '함께해 주셔서 고맙습니다. 내년에도 또 봬요.',
+      },
+      {
+        component: 'calendar',
+        title: '일시',
+        subTitle: 'DATE & TIME',
+        template: 'calendarType7',
+      },
+      {
+        component: 'place',
+        title: '오시는 곳',
+        subTitle: 'LOCATION',
+        detail: '초록 문, 2층 (자세한 위치는 개별로 알려드릴게요)',
+        address: '서울특별시 마포구 동교로 233',
+        lat: 37.5609199,
+        lng: 126.9240616,
+      },
+      {
+        component: 'transportation',
+        title: '연남동까지 오는 길',
+        subwayLine: '2호선·경의중앙선·공항철도',
+        subwayStation: '홍대입구역',
+        subwayExit: '3번 출구',
+        subwayWalk:
+          '홍대입구역 3번 출구에서 동교로를 따라 도보 10분입니다. 초록 문이 보이면 2층으로 올라와 주세요.',
+        busRoutes: '동교동삼거리 정류장에서 내리면 골목 입구가 바로 보여요.',
+        parkingHours:
+          '골목 안은 주차가 어려워요. 근처 공영주차장을 이용하시고 3분 걸어오세요.',
+      },
+      {
+        component: 'timeline',
+        title: '저녁의 순서',
+        items: [
+          {
+            time: '18:30',
+            title: '도착',
+            description: '문 열어 둡니다. 와인 한 잔 먼저.',
+          },
+          {
+            time: '19:00',
+            title: '저녁 시작',
+            description: '전채부터 천천히. 따뜻할 때 드세요.',
+          },
+          {
+            time: '20:30',
+            title: '식탁 위 이야기',
+            description: '디저트와 함께, 한 해에 하고 싶었던 말들.',
+          },
+          {
+            time: '22:00',
+            title: '마무리',
+            description: '택시 잡아 드릴게요. 늦게까지 계셔도 괜찮습니다.',
+          },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '저녁 메뉴',
+        subtitle: 'Dinner Menu',
+        style: 'tasting',
+        note: '와인은 집에 있는 걸로 꺼내 놓았어요. 마실 것 하나씩 가져오셔도 좋습니다.',
+        courses: [
+          {
+            name: '앞접시',
+            dishes: [{ name: '밤 크림 수프', description: '군밤과 트러플 오일' }],
+          },
+          {
+            name: '메인',
+            dishes: [
+              { name: '소갈비 스튜', description: '뿌리채소와 함께, 따뜻하게' },
+            ],
+          },
+          {
+            name: '디저트',
+            dishes: [{ name: '귤 크렘 브릴레', description: '제철 귤과 생크림' }],
+          },
+        ],
+      },
+      {
+        component: 'gallery',
+        title: '갤러리',
+        subTitle: 'GALLERY',
+        template: 'galleryType1',
+        ratio: '3:4',
+        images: [
+          'https://lh3.googleusercontent.com/d/1Sl9Kq7q0tTBzQmWPJzBD4-FY2QHPe0M0',
+          'https://lh3.googleusercontent.com/d/1T6pa0rvUk-mCXGPyce2wcOemCQ_HLKDP',
+        ],
+      },
+      {
+        component: 'dressCode',
+        title: '옷차림',
+        colors: ['#F1DED9', '#E5E7EB', '#E1EBDD'],
+        guidelines: [
+          '편한 옷으로 오세요. 바닥에 앉을 수도 있으니 따뜻한 양말 하나 챙겨 주세요.',
+        ],
+      },
+      {
+        component: 'faq',
+        title: '궁금할 만한 것들',
+        items: [
+          {
+            question: '몇 시까지 있으면 되나요?',
+            answer:
+              '편한 시간에 오셔서 편한 시간에 가시면 돼요. 늦게까지 계셔도 괜찮습니다.',
+          },
+          {
+            question: '뭘 가져가면 좋을까요?',
+            answer: '손은 비우고 오셔도 좋아요. 마실 것 하나씩 챙겨 오시면 더 좋고요.',
+          },
+          {
+            question: '주차는 어떻게 하나요?',
+            answer: '골목엔 자리가 잘 없어요. 버스나 택시로 오시는 걸 추천합니다.',
+          },
+        ],
+      },
+      {
+        component: 'closingComment',
+        message: '12월 20일, 식탁에서 기다릴게요.',
       },
     ],
   },

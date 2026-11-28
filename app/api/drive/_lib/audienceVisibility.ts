@@ -2,18 +2,24 @@ import 'server-only';
 
 import { randomUUID } from 'node:crypto';
 
+import { deleteShortCodeMapping } from '@/app/api/short-url/_lib/shortUrlStore';
 import {
+  removeDeletedAudienceFromVisibility,
   visibilityStatus,
   type AudienceVisibility,
 } from '@/features/invitation/audiences/visibility';
 
 import {
+  getRetiredAudienceSlug,
+  retireAudienceLink,
   readAudienceVisibility,
   writeAudienceVisibility,
 } from './audienceLinkStore';
+import { captureDriveError } from './captureDriveError';
 import {
   assertWorkspacePrivate,
   commitCloneFile,
+  deleteCloneFile,
   DRIVE_FOLDER_MIME,
   inCloneBatches,
   InvitationCloneError,
@@ -30,7 +36,11 @@ import { THUMBNAIL_KIND } from './ensureThumbnailFile';
 import { guestPath } from './guestReadiness';
 import { readAudienceFolder } from './invitationAudienceFolders';
 import { readRootInvitationFiles } from './invitationAudiences';
-import { assertInvitationFolderAccess, getDriveFile } from './previewAccess';
+import {
+  assertInvitationFolderAccess,
+  getDriveFile,
+  PreviewAccessError,
+} from './previewAccess';
 import { publishPermissionWithRetry } from './publishPermissionWithRetry';
 import { revokePublicPermissionWithRetry } from './revokePublicPermissionWithRetry';
 
@@ -116,12 +126,23 @@ async function loadScope(folderId: string) {
   const { files, meta, dataFile } = await readRootInvitationFiles(folderId);
   if (!dataFile?.ownedByMe)
     throw new InvitationCloneError('저장된 초대장을 확인할 수 없어요.', 404);
-  const audiences = files.flatMap(file => {
+  const allAudiences = files.flatMap(file => {
     const audience = readAudienceFolder(file);
     return file.ownedByMe && audience?.rootFolderId === folderId
       ? [audience.group]
       : [];
   });
+  const audiences = (
+    await Promise.all(
+      allAudiences.map(async audience =>
+        (await getRetiredAudienceSlug(dataFile.id, audience.folderId))
+          ? null
+          : audience
+      )
+    )
+  ).filter(
+    (audience): audience is (typeof allAudiences)[number] => audience !== null
+  );
   const groups = [
     { slug: '', name: '기본 초대장' },
     ...audiences.map(({ slug, name }) => ({ slug, name })),
@@ -145,7 +166,116 @@ async function loadScope(folderId: string) {
         ? { ...stored, pending: true }
         : stored;
   }
-  return { root, groups, audiences, files, dataFile, meta, visibility };
+  const activeSlugs = new Set(groups.map(group => group.slug));
+  visibility = {
+    ...visibility,
+    publicSlugs: visibility.publicSlugs.filter(slug => activeSlugs.has(slug)),
+  };
+  return {
+    root,
+    groups,
+    audiences,
+    allAudiences,
+    files,
+    dataFile,
+    meta,
+    visibility,
+  };
+}
+
+/** Retire a single owned child while serializing with visibility changes. */
+export async function deleteInvitationAudience(
+  rootFolderId: string,
+  groupFolderId: string
+) {
+  await assertInvitationFolderAccess(rootFolderId, {
+    ownedOnly: true,
+    allowAudience: false,
+  });
+
+  let requestedSlug: string | null = null;
+  try {
+    const target = await assertInvitationFolderAccess(groupFolderId, {
+      ownedOnly: true,
+    });
+    if (!target.audience || target.rootFolderId !== rootFolderId) {
+      throw new InvitationCloneError('하객 그룹을 찾을 수 없습니다.', 404);
+    }
+    requestedSlug = target.audience.slug;
+  } catch (error) {
+    if (!(error instanceof PreviewAccessError) || error.status !== 404)
+      throw error;
+    const { dataFile } = await readRootInvitationFiles(rootFolderId);
+    const retiredSlug = dataFile
+      ? await getRetiredAudienceSlug(dataFile.id, groupFolderId)
+      : null;
+    if (!retiredSlug) throw error;
+    requestedSlug = retiredSlug;
+  }
+
+  return withVisibilityLock(rootFolderId, async () => {
+    const scope = await loadScope(rootFolderId);
+    const group = scope.allAudiences.find(
+      audience => audience.folderId === groupFolderId
+    );
+    const slug = group?.slug ?? requestedSlug;
+    if (!slug) {
+      throw new InvitationCloneError('하객 그룹을 찾을 수 없습니다.', 404);
+    }
+    if (
+      !group &&
+      (await getRetiredAudienceSlug(scope.dataFile.id, groupFolderId)) !== slug
+    ) {
+      throw new InvitationCloneError('하객 그룹을 찾을 수 없습니다.', 404);
+    }
+    if (group && requestedSlug !== group.slug) {
+      throw new InvitationCloneError('하객 그룹 정보를 확인해 주세요.', 404);
+    }
+
+    // Atomically remove the public mapping and reserve the slug before Drive
+    // deletion. Retries can safely finish a partially completed deletion.
+    await retireAudienceLink(scope.dataFile.id, slug, groupFolderId);
+
+    const remainingGroups = scope.groups.filter(item => item.slug !== slug);
+    const visibility = removeDeletedAudienceFromVisibility(
+      scope.visibility,
+      slug,
+      remainingGroups.map(item => item.slug),
+      randomUUID()
+    );
+    if (scope.root.appProperties?.audience_visibility) {
+      await writeAudienceVisibility(scope.dataFile.id, visibility);
+      await upsertInvitationMeta(rootFolderId, {
+        published: visibility.published,
+        guestUrl: scope.meta?.guestUrl || guestPath(scope.dataFile.id),
+        dataJsonFileId: scope.dataFile.id,
+      });
+      await commitCloneFile(rootFolderId, {
+        audience_visibility: visibilityStatus({
+          groups: remainingGroups,
+          visibility,
+        }),
+        audience_public_count: String(visibility.publicSlugs.length),
+        audience_base_public: String(
+          visibility.published && visibility.publicSlugs.includes('')
+        ),
+      });
+    }
+
+    // deleteCloneFile treats Drive 404 as success, so an owner retry after a
+    // lost response can safely complete the same retired group deletion.
+    await deleteCloneFile(groupFolderId);
+    try {
+      await deleteShortCodeMapping(groupFolderId);
+    } catch (error) {
+      captureDriveError({
+        error,
+        operation: 'drive_audience_short_url_delete',
+      });
+    }
+
+    return { success: true };
+  });
 }
 
 export async function getVisibilityOptions(folderId: string) {
@@ -190,27 +320,33 @@ export async function applyAudienceVisibility(
   selection?: { publicSlugs: string[]; revision: string },
   preserveScope = false
 ) {
-  const { root, groups, audiences, dataFile, meta, visibility } =
+  const { root, groups, audiences, allAudiences, dataFile, meta, visibility } =
     await loadScope(folderId);
   const dataId = dataFile.id;
   const guestUrl = meta?.guestUrl || guestPath(dataId);
   if (
     preserveScope ||
-    (!selection && published === visibility.published && !visibility.pending)
+    (!selection &&
+      published === visibility.published &&
+      !visibility.pending &&
+      allAudiences.length === audiences.length)
   ) {
     return { groups, visibility, guestUrl, dataJsonFileId: dataId };
   }
-  const allowed = new Set(selection?.publicSlugs ?? visibility.publicSlugs);
+  const selectedSlugs = selection?.publicSlugs ?? visibility.publicSlugs;
   if (
     selection &&
     (selection.revision !== visibility.revision ||
-      [...allowed].some(slug => !groups.some(group => group.slug === slug)))
+      selectedSlugs.some(slug => !groups.some(group => group.slug === slug)))
   ) {
     throw new InvitationCloneError(
       '공개 범위가 변경됐어요. 최신 설정을 다시 열어 주세요.',
       409
     );
   }
+  // Redis may still contain a retired slug from an older scope snapshot.
+  // It must not count as selected or remain in the saved public scope.
+  const allowed = new Set(selectedSlugs);
   if (published && !groups.some(group => allowed.has(group.slug)))
     throw new InvitationCloneError(
       '공개할 초대장을 하나 이상 선택해 주세요.',
@@ -230,6 +366,9 @@ export async function applyAudienceVisibility(
   await setPublicAccess(folderId, false);
   const files = await listCloneFiles(folderId);
   const basePublic = published && allowed.has('');
+  const activeAudienceFolders = new Set(
+    audiences.map(group => group.folderId)
+  );
   const targets: { id: string; enabled: boolean; mark?: boolean }[] = [
     ...(await legacyMediaTargets(files, dataId, basePublic)),
     ...files
@@ -237,9 +376,12 @@ export async function applyAudienceVisibility(
         file => file.ownedByMe && (file.id === dataId || isBaseAsset(file))
       )
       .map(file => ({ id: file.id, enabled: basePublic })),
-    ...audiences.map(group => ({
+    ...allAudiences.map(group => ({
       id: group.folderId,
-      enabled: published && allowed.has(group.slug),
+      enabled:
+        activeAudienceFolders.has(group.folderId) &&
+        published &&
+        allowed.has(group.slug),
     })),
   ];
   await inCloneBatches(

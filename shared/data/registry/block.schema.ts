@@ -2,11 +2,13 @@ import { accountSchema } from '@/components/organisms/account/Account.schema';
 import { afterPartySchema } from '@/components/organisms/afterParty/AfterParty.schema';
 import { bgmSchema } from '@/components/organisms/bgm/Bgm.schema';
 import { calendarSchema } from '@/components/organisms/calendar/Calendar.schema';
+import { checklistSchema } from '@/components/organisms/checklist/Checklist.schema';
 import { closingCommentSchema } from '@/components/organisms/closingComment/ClosingComment.schema';
 import { countdownSchema } from '@/components/organisms/countdown/Countdown.schema';
 import { coupleIntroductionSchema } from '@/components/organisms/couple-introduction/CoupleIntroduction.schema';
 import { dividerSchema } from '@/components/organisms/divider/Divider.schema';
 import { dressCodeSchema } from '@/components/organisms/dressCode/DressCode.schema';
+import { eventGuideSchema } from '@/components/organisms/eventGuide/EventGuide.schema';
 import { faqSchema } from '@/components/organisms/faq/Faq.schema';
 import { gallerySchema } from '@/components/organisms/gallery/Gallery.schema';
 import { greetingSchema } from '@/components/organisms/greeting/Greeting.schema';
@@ -50,10 +52,12 @@ export const blockSchema = {
   video: videoSchema,
   notice: noticeSchema,
   calendar: calendarSchema,
+  checklist: checklistSchema,
   timeline: timelineSchema,
   mealMenu: mealMenuSchema,
   countdown: countdownSchema,
   dressCode: dressCodeSchema,
+  eventGuide: eventGuideSchema,
   interview: interviewSchema,
   organizerInformation: organizerInformationSchema,
   speakerInformation: speakerInformationSchema,

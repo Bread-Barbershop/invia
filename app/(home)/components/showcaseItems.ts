@@ -6,6 +6,11 @@ import campCover from '@/public/templates/thumbnails/birthday_09.webp';
 import birthdayLetterCover from '@/public/templates/thumbnails/birthday_10.webp';
 import seventiethCover from '@/public/templates/thumbnails/birthday_11.webp';
 import eightiethCover from '@/public/templates/thumbnails/birthday_12.webp';
+import yearEndTableCover from '@/public/templates/thumbnails/birthday_13.webp';
+import gardenBrunchCover from '@/public/templates/thumbnails/bridalShower_01.webp';
+import hotelPajamaCover from '@/public/templates/thumbnails/bridalShower_02.webp';
+import whiteRibbonCover from '@/public/templates/thumbnails/bridalShower_03.webp';
+import brunchShowerCover from '@/public/templates/thumbnails/bridalShower_04.webp';
 import hanbokCover from '@/public/templates/thumbnails/firstBirthday_03.webp';
 import orchardCover from '@/public/templates/thumbnails/firstBirthday_04.webp';
 import seaCover from '@/public/templates/thumbnails/firstBirthday_05.webp';
@@ -13,10 +18,12 @@ import moonCover from '@/public/templates/thumbnails/firstBirthday_06.webp';
 import portraitCover from '@/public/templates/thumbnails/firstBirthday_07.webp';
 import dinoCover from '@/public/templates/thumbnails/firstBirthday_08.webp';
 import postCover from '@/public/templates/thumbnails/firstBirthday_09.webp';
+import winterFirstBirthdayCover from '@/public/templates/thumbnails/firstBirthday_10.webp';
 import clayCover from '@/public/templates/thumbnails/seminar_06.webp';
 import prismCover from '@/public/templates/thumbnails/seminar_07.webp';
 import cityCover from '@/public/templates/thumbnails/seminar_08.webp';
 import coffeeCover from '@/public/templates/thumbnails/seminar_09.webp';
+import exhibitionCover from '@/public/templates/thumbnails/seminar_10.webp';
 import weddingLetterCover from '@/public/templates/thumbnails/wedding_15.webp';
 import showcase0 from '@/shared/assets/images/showcase/showcase-0.webp';
 import showcase1 from '@/shared/assets/images/showcase/showcase-1.webp';
@@ -81,11 +88,13 @@ export const showcaseItems = [
   { id: 'showcase-29', image: portraitCover },
   { id: 'showcase-30', image: dinoCover },
   { id: 'showcase-31', image: postCover },
+  { id: 'showcase-48', image: winterFirstBirthdayCover },
   { id: 'showcase-32', image: vinylCover },
   { id: 'showcase-33', image: citrusCover },
   { id: 'showcase-34', image: cinemaCover },
   { id: 'showcase-35', image: flowersCover },
   { id: 'showcase-36', image: campCover },
+  { id: 'showcase-49', image: yearEndTableCover },
   { id: 'showcase-37', image: clayCover },
   { id: 'showcase-38', image: prismCover },
   { id: 'showcase-39', image: cityCover },
@@ -94,6 +103,11 @@ export const showcaseItems = [
   { id: 'showcase-42', image: seventiethCover },
   { id: 'showcase-43', image: eightiethCover },
   { id: 'showcase-44', image: weddingLetterCover },
+  { id: 'showcase-45', image: gardenBrunchCover },
+  { id: 'showcase-46', image: hotelPajamaCover },
+  { id: 'showcase-47', image: whiteRibbonCover },
+  { id: 'showcase-50', image: brunchShowerCover },
+  { id: 'showcase-51', image: exhibitionCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

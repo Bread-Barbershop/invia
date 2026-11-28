@@ -19,16 +19,11 @@ import { LeftEditorWrapper } from '../wrapper/LeftEditorWrapper';
 import { Group } from './edit/Group';
 import { GroupEdit } from './edit/GroupEdit';
 
+import type { AccountEntry } from './Account.schema';
+
 interface Props {
   blockInfo: EditorBlock<'account'>;
   id: string;
-}
-
-interface AccountType {
-  name: string;
-  bank: string;
-  account: string;
-  kakao: boolean;
 }
 
 export const Account = ({ blockInfo, id }: Props) => {
@@ -48,8 +43,8 @@ export const Account = ({ blockInfo, id }: Props) => {
       | number
       | boolean
       | { name: string }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[]
-      | { name: string; bank: string; account: string; kakao: boolean }[][]
+      | AccountEntry[]
+      | AccountEntry[][]
   ) => {
     const keys = key.split('.');
 
@@ -71,7 +66,7 @@ export const Account = ({ blockInfo, id }: Props) => {
     if (keys.length === 2 && keys[0] === 'accountList') {
       const [, groupIdx] = keys;
       const newAccountList = [...blockInfo.props.accountList];
-      newAccountList[Number(groupIdx)] = value as AccountType[];
+      newAccountList[Number(groupIdx)] = value as AccountEntry[];
       updateBlock(id, { accountList: newAccountList });
       return;
     }
@@ -102,7 +97,7 @@ export const Account = ({ blockInfo, id }: Props) => {
     const nextGroupList = [...blockInfo.props.groupList, { name: '' }];
     const nextAccountList = [
       ...blockInfo.props.accountList,
-      [{ name: '', bank: '', account: '', kakao: false }],
+      [{ name: '', bank: '', account: '' }],
     ];
 
     handleUpdateBlock('groupList', nextGroupList);

@@ -9,6 +9,7 @@ const CATEGORIES = [
   { label: '생일', value: 'birthday' },
   { label: '세미나', value: 'seminar' },
   { label: '돌잔치', value: 'firstBirthday' },
+  { label: '브라이덜샤워', value: 'bridalShower' },
 ] as const;
 
 function GalleryCategoryTabs() {

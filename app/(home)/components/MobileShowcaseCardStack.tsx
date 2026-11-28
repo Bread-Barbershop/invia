@@ -86,8 +86,9 @@ const FLY_OUT_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 const CARD_STACK_STYLE = {
+  // 히어로 카드·CTA 아래 둘러보기 링크(60px)만큼 카드 높이를 덜어, 짧은 화면에서도 잘리지 않게 한다.
   '--mobile-card-height':
-    'clamp(220px, calc(var(--mobile-home-viewport-height, 100vh) - 293px), 397px)',
+    'clamp(220px, calc(var(--mobile-home-viewport-height, 100vh) - 353px), 397px)',
 } as CSSProperties;
 const CARD_IMAGE_SIZES = '196px';
 const SPRING_BACK_TRANSITION: Transition = {

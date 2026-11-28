@@ -47,6 +47,7 @@ function VisibilityToggle({
         type="button"
         aria-label={`공개 범위 설정 · ${label}`}
         aria-haspopup="dialog"
+        aria-busy={isBusy}
         disabled={disabled}
         onClick={event => {
           event.stopPropagation();
@@ -67,6 +68,7 @@ function VisibilityToggle({
         disabled={disabled}
         aria-label={label}
         aria-pressed={isPublished}
+        aria-busy={isBusy}
         aria-haspopup={isPublished ? 'dialog' : undefined}
         onClick={event => {
           event.stopPropagation();

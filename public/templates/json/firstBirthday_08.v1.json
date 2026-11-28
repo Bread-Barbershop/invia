@@ -220,7 +220,7 @@
       "scaleY": 0.375,
       "cropX": 0,
       "cropY": 76,
-      "src": "/images/showcase/dino.webp",
+      "src": "https://lh3.googleusercontent.com/d/1cNWnj7hLNAwT7v1o2JJwzru1x-jQRvwR",
       "crossOrigin": "anonymous",
       "slot": {
         "key": "firstBirthday_08-photo",
@@ -355,7 +355,7 @@
       "left": 24,
       "top": 748,
       "strokeWidth": 0,
-      "text": "인비아 키즈룸 · 초록 전시실",
+      "text": "서대문자연사박물관",
       "width": 327,
       "fontSize": 14,
       "fontFamily": "SUIT",

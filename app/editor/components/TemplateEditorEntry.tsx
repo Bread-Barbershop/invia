@@ -6,6 +6,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ScreenTransitionLoader } from '@/components/molecules/screen-transition-loader';
 import { DEFAULT_SCROLL_ANIMATION } from '@/components/molecules/scroll-fade-in/animationConfig';
+import {
+  loadEditorDraft,
+  type EditorDraftKey,
+  type EditorDraftSnapshot,
+} from '@/features/editor/draft/editorDraft';
+import EditorDraftRecoveryDialog from '@/features/editor/draft/EditorDraftRecoveryDialog';
 import DrivePermissionRequiredModal from '@/features/session/components/DrivePermissionRequiredModal';
 import LoginModal from '@/features/session/components/LoginModal';
 import PrivacyNoticeModal from '@/features/session/components/PrivacyNoticeModal';
@@ -18,6 +24,7 @@ import { createDefaultShareUrlState } from '@/shared/utils/shareUrlDefaults';
 import InvitationTemplatePoster from '@/widgets/editor/preview/components/InvitationTemplatePoster';
 import { FabricProvider } from '@/widgets/mainPoster/context/FabricContext';
 
+import { toEditorDraftSavedData } from './draftSavedData';
 import MainContentsArea from './MainContentsArea';
 
 import type { SavedData } from '../[id]/types/savedata';
@@ -54,6 +61,7 @@ export default function TemplateEditorEntry({
   initialIsLoggedIn: boolean;
 }) {
   const template = INVITATION_TEMPLATES.find(item => item.id === templateId);
+  const draftKey: EditorDraftKey = `template:${templateId}`;
   const router = useRouter();
   const auth = useAuthGate({ initialIsLoggedIn, stayOnSessionExpiry: true });
   const [readyTemplateId, setReadyTemplateId] = useState<string | null>(null);
@@ -68,6 +76,9 @@ export default function TemplateEditorEntry({
     attempt: number;
   } | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [pendingDraft, setPendingDraft] = useState<EditorDraftSnapshot | null>(
+    null
+  );
   const startedTemplateIdRef = useRef<string | null>(null);
   const savedData =
     preparedData?.templateId === templateId ? preparedData.data : null;
@@ -82,9 +93,19 @@ export default function TemplateEditorEntry({
 
     if (!template) return;
 
-    void prepareTemplateEditorData(templateId).then(
+    async function loadInitialData() {
+      const draft = await loadEditorDraft(draftKey);
+      // 초안이 있으면 사용자가 고를 때까지 기다린다.
+      if (draft) {
+        if (isCurrent) setPendingDraft(draft);
+        return null;
+      }
+      return prepareTemplateEditorData(templateId);
+    }
+
+    void loadInitialData().then(
       data => {
-        if (isCurrent) setPreparedData({ templateId, data });
+        if (isCurrent && data) setPreparedData({ templateId, data });
       },
       () => {
         if (isCurrent)
@@ -95,7 +116,27 @@ export default function TemplateEditorEntry({
     return () => {
       isCurrent = false;
     };
-  }, [loadAttempt, template, templateId]);
+  }, [draftKey, loadAttempt, template, templateId]);
+
+  const startFreshTemplate = useCallback(async () => {
+    setPendingDraft(null);
+    try {
+      const data = await prepareTemplateEditorData(templateId);
+      setPreparedData({ templateId, data });
+    } catch {
+      setTemplateLoadError({ templateId, attempt: loadAttempt });
+    }
+  }, [loadAttempt, templateId]);
+
+  const handleResumeDraft = useCallback(() => {
+    if (!pendingDraft) return;
+
+    setPreparedData({
+      templateId,
+      data: toEditorDraftSavedData(pendingDraft),
+    });
+    setPendingDraft(null);
+  }, [pendingDraft, templateId]);
 
   useEffect(() => {
     if (!template || !savedData || startedTemplateIdRef.current === templateId)
@@ -137,11 +178,24 @@ export default function TemplateEditorEntry({
       </section>
     );
 
+  if (pendingDraft)
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#E7E9EB]">
+        <EditorDraftRecoveryDialog
+          draft={pendingDraft}
+          draftKey={draftKey}
+          onResume={handleResumeDraft}
+          onDraftChange={setPendingDraft}
+          onDiscard={() => void startFreshTemplate()}
+        />
+      </div>
+    );
+
   if (readyTemplateId === templateId && savedData)
     return (
       <FabricProvider initialData={savedData.mainPoster}>
         <div className="flex h-full w-full flex-col justify-center overflow-x-auto overflow-y-hidden bg-[#E7E9EB]">
-          <MainContentsArea savedData={savedData} />
+          <MainContentsArea savedData={savedData} draftKey={draftKey} />
         </div>
       </FabricProvider>
     );
@@ -155,13 +209,13 @@ export default function TemplateEditorEntry({
         <ScreenTransitionLoader label="초대장을 준비하는 중" />
       ) : (
         <section
-          className="m-auto flex items-center gap-10 rounded-3xl bg-white p-8 shadow-edit"
+          className="m-auto flex w-full max-w-[880px] items-center gap-16 rounded-3xl bg-white px-14 py-12 shadow-edit"
           aria-label="선택한 템플릿으로 제작하기"
         >
-          <div className="h-[360px] w-[166px] overflow-hidden rounded-lg shadow-lg">
-            <InvitationTemplatePoster template={template} sizes="166px" />
+          <div className="h-[433px] w-[200px] shrink-0 overflow-hidden rounded-lg shadow-lg">
+            <InvitationTemplatePoster template={template} sizes="200px" />
           </div>
-          <div className="max-w-80">
+          <div className="min-w-0 flex-1">
             <p className="text-xs text-text-secondary">선택한 템플릿</p>
             <h1 className="mt-3 text-3xl font-semibold text-text-plain">
               {template.name}
@@ -175,13 +229,13 @@ export default function TemplateEditorEntry({
               type="button"
               disabled={auth.isBusy || auth.isLoginPending}
               onClick={() => auth.runAfterAuth(beginEditing)}
-              className="mt-7 flex h-12 w-full items-center justify-center rounded-full bg-bg-plain px-6 font-semibold text-white hover:bg-[#202020] disabled:opacity-50"
+              className="mt-7 flex h-12 w-full max-w-[320px] items-center justify-center rounded-full bg-bg-plain px-6 font-semibold text-white hover:bg-[#202020] disabled:opacity-50"
             >
               로그인하고 시작하기
             </button>
             <Link
               href="/"
-              className="mt-4 inline-block text-xs text-text-secondary underline underline-offset-4"
+              className="mt-4 block text-xs text-text-secondary underline underline-offset-4"
             >
               다른 디자인 살펴보기
             </Link>

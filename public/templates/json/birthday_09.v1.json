@@ -163,7 +163,7 @@
       "scaleY": 0.375,
       "cropX": 0,
       "cropY": 40,
-      "src": "/images/showcase/camp.webp",
+      "src": "https://lh3.googleusercontent.com/d/1IbJutIqX3VbS6aJ5l7QaXnjTBiMDW7IH",
       "crossOrigin": "anonymous",
       "slot": {
         "key": "birthday_09-photo",
@@ -277,7 +277,7 @@
       "left": 26,
       "top": 761,
       "strokeWidth": 0,
-      "text": "인비아 캠프 · 솔숲 사이트",
+      "text": "자라섬캠핑장",
       "width": 323,
       "fontSize": 13,
       "fontFamily": "SUIT",

@@ -124,6 +124,179 @@ describe('하객별 구분', () => {
     expect(screen.getByText('기본 링크를 복사했어요.')).toBeInTheDocument();
   });
 
+  it('추가 그룹의 삭제 확인을 취소하면 그룹 목록으로 돌아간다', async () => {
+    const user = userEvent.setup();
+    mockList([basicAudience, familyAudience]);
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    const confirmation = screen.getByRole('region', {
+      name: '가족 그룹 삭제 확인',
+    });
+    expect(confirmation).toHaveTextContent('이미 보낸 ‘가족’ 링크');
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    fireEvent(
+      screen.getByRole('dialog'),
+      new Event('cancel', { cancelable: true })
+    );
+    expect(
+      screen.queryByRole('region', { name: '가족 그룹 삭제 확인' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '가족 링크 복사' })
+    ).toBeEnabled();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('현재 편집 중인 그룹을 삭제하면 미저장 변경을 알리고 성공 뒤 기본 편집기로 이동한다', async () => {
+    const user = userEvent.setup();
+    mockList([basicAudience, familyAudience], familyAudience.slug);
+    mockFetch.mockResolvedValueOnce(reply({ success: true }));
+    useEditorStore.setState({ invitationFolderId: familyAudience.folderId });
+    render(<Dialog />);
+    await screen.findByRole('button', { name: '가족 링크 복사' });
+    act(() =>
+      useEditorStore.getState().addBlock('wedding', 'calendar', 'date', {
+        date: '2027-05-15',
+      })
+    );
+
+    await user.click(screen.getByRole('button', { name: '가족 삭제' }));
+    expect(
+      screen.getByText('저장하지 않은 변경 사항도 함께 삭제돼요.')
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+
+    expect(mockFetch.mock.calls[1][0]).toBe('/api/drive/invitationAudiences');
+    expect(mockFetch.mock.calls[1][1]).toMatchObject({
+      method: 'DELETE',
+      body: JSON.stringify({
+        rootFolderId: basicAudience.folderId,
+        groupFolderId: familyAudience.folderId,
+      }),
+    });
+    expect(openEditor).toHaveBeenCalledWith(basicAudience);
+    expect(useEditorStore.getState().isDirty).toBe(false);
+  });
+
+  it('삭제 실패는 같은 확인에서 다시 시도할 수 있고 나머지 그룹은 유지한다', async () => {
+    const user = userEvent.setup();
+    mockList([basicAudience, familyAudience, friendsAudience]);
+    mockFetch
+      .mockResolvedValueOnce(
+        reply({ message: '잠시 후 다시 시도해 주세요.' }, false)
+      )
+      .mockResolvedValueOnce(
+        reply({
+          rootGuestUrl,
+          groups: [basicAudience, familyAudience, friendsAudience],
+          activeSlug: '',
+        })
+      )
+      .mockResolvedValueOnce(reply({ success: true }));
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '잠시 후 다시 시도해 주세요.'
+    );
+    expect(screen.getByRole('button', { name: '삭제' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+
+    expect(
+      await screen.findByRole('button', { name: '친구 링크 복사' })
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole('button', { name: '가족 링크 복사' })
+    ).not.toBeInTheDocument();
+    expect(openEditor).not.toHaveBeenCalled();
+  });
+
+  it('삭제 실패 후 확인을 취소하면 폐기된 링크 상태를 갱신하고 복사를 차단한다', async () => {
+    const user = userEvent.setup();
+    const writeText = jest.spyOn(navigator.clipboard, 'writeText');
+    mockList([basicAudience, familyAudience]);
+    mockFetch
+      .mockResolvedValueOnce(
+        reply(
+          { message: '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.' },
+          false
+        )
+      )
+      .mockResolvedValueOnce(
+        reply({
+          rootGuestUrl,
+          groups: [basicAudience, { ...familyAudience, linkRetired: true }],
+          activeSlug: '',
+        })
+      );
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.'
+    );
+
+    fireEvent(
+      screen.getByRole('dialog'),
+      new Event('cancel', { cancelable: true })
+    );
+
+    expect(
+      screen.queryByRole('region', { name: '가족 그룹 삭제 확인' })
+    ).not.toBeInTheDocument();
+    const retiredCopyButton = screen.getByRole('button', {
+      name: '가족 링크 복사',
+    });
+    expect(retiredCopyButton).toBeDisabled();
+    expect(retiredCopyButton).toHaveTextContent('링크 비활성');
+    await user.click(retiredCopyButton);
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it('삭제와 목록 재조회가 둘 다 실패한 뒤 확인을 취소하면 해당 그룹의 복사 버튼만 잠근다', async () => {
+    const user = userEvent.setup();
+    const writeText = jest.spyOn(navigator.clipboard, 'writeText');
+    mockList([basicAudience, familyAudience]);
+    mockFetch
+      .mockResolvedValueOnce(
+        reply(
+          { message: '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.' },
+          false
+        )
+      )
+      .mockResolvedValueOnce(
+        reply({ message: '하객 그룹을 불러오지 못했어요.' }, false)
+      );
+    render(<Dialog />);
+
+    await user.click(await screen.findByRole('button', { name: '가족 삭제' }));
+    await user.click(screen.getByRole('button', { name: '삭제' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '하객 그룹 삭제에 실패했어요. 다시 시도해 주세요.'
+    );
+
+    await user.click(screen.getByRole('button', { name: '취소' }));
+
+    expect(
+      screen.queryByRole('region', { name: '가족 그룹 삭제 확인' })
+    ).not.toBeInTheDocument();
+    const unverifiedCopyButton = screen.getByRole('button', {
+      name: '가족 링크 복사',
+    });
+    expect(unverifiedCopyButton).toBeDisabled();
+    await user.click(unverifiedCopyButton);
+    expect(writeText).not.toHaveBeenCalled();
+
+    const basicCopyButton = screen.getByRole('button', {
+      name: '기본 링크 복사',
+    });
+    expect(basicCopyButton).not.toBeDisabled();
+  });
+
   it('하객용 편집기에 직접 들어오면 기존 데이터 요청으로 편집 중인 그룹명을 표시한다', async () => {
     mockFetch.mockResolvedValueOnce(
       reply({
@@ -279,9 +452,11 @@ describe('하객별 구분', () => {
     useEditorStore.setState({ invitationFolderId: '', isDirty: true });
     let failSave!: () => void;
     save
-      .mockReturnValueOnce(new Promise(resolve => {
-        failSave = () => resolve(null);
-      }))
+      .mockReturnValueOnce(
+        new Promise(resolve => {
+          failSave = () => resolve(null);
+        })
+      )
       .mockImplementationOnce(async () => {
         useEditorStore.setState({
           invitationFolderId: basicAudience.folderId,

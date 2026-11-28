@@ -51,7 +51,16 @@ export function TimelineBlock({
           onClick={() => setShowPresetConfirm(true)}
           className="rounded-md border border-border-divider px-3 py-2 text-xs text-text-primary hover:bg-[#FAFAFB]"
         >
-          {blockInfo.type === 'wedding' ? '결혼식' : blockInfo.type === 'firstBirthday' ? '돌잔치' : blockInfo.type === 'seminar' ? '세미나' : '기본'} 식순 예시 적용
+          {blockInfo.type === 'wedding'
+            ? '결혼식'
+            : blockInfo.type === 'firstBirthday'
+              ? '돌잔치'
+              : blockInfo.type === 'bridalShower'
+                ? '브라이덜샤워'
+                : blockInfo.type === 'seminar'
+                  ? '세미나'
+                  : '기본'}{' '}
+          식순 예시 적용
         </button>
         {showPresetConfirm && (
           <Confirm
