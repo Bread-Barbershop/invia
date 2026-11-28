@@ -91,6 +91,45 @@ describe('PlacePreview', () => {
     expect(screen.getByText('TEL. 010-1234-5678')).toBeInTheDocument();
   });
 
+  it('하객 화면에서는 전화번호를 tel: 링크로 건다', () => {
+    render(
+      <PlacePreview
+        blockInfo={createBlock({ checkedPlaceTel: true, placeTel: '010-1234-5678' })}
+        className="test-place"
+      />
+    );
+
+    expect(screen.getByRole('link', { name: 'TEL. 010-1234-5678' })).toHaveAttribute(
+      'href',
+      'tel:01012345678'
+    );
+  });
+
+  it('편집기 캔버스에서는 전화번호를 링크로 만들지 않는다', () => {
+    render(
+      <PlacePreview
+        blockInfo={createBlock({ checkedPlaceTel: true, placeTel: '01012345678' })}
+        className="test-place"
+        enablePhoneLink={false}
+      />
+    );
+
+    expect(screen.getByText('TEL. 010-1234-5678')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('전화번호를 숨긴 상태에서는 링크를 만들지 않는다', () => {
+    render(
+      <PlacePreview
+        blockInfo={createBlock({ checkedPlaceTel: true, placeTel: '01012345678' })}
+        className="test-place"
+        hideActions
+      />
+    );
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('does not render TEL when checkedPlaceTel is true but placeTel is empty', () => {
     render(
       <PlacePreview

@@ -262,6 +262,7 @@ function Preview({
                       blockInfo: typeof comp;
                       className: string;
                       titleClassName: string;
+                      enablePhoneLink?: boolean;
                     }>;
                   return (
                     <SortablePreviewBlock
@@ -302,6 +303,8 @@ function Preview({
                             titleClassName={previewTitleVariants({
                               variant: comp.type,
                             })}
+                            // 편집기에서는 전화번호가 걸리지 않고 블록 선택만 되게 한다.
+                            enablePhoneLink={false}
                           />
                         </InvitationChapter>
                       </ScrollFadeIn>

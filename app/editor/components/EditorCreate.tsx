@@ -184,6 +184,7 @@ function EditorCreate({
       key={draftKey}
       draftKey={draftKey}
       sampleId={sampleId}
+      isLoggedIn={initialIsLoggedIn}
     />
   );
 }
@@ -191,9 +192,11 @@ function EditorCreate({
 function SampleEditorCreate({
   draftKey,
   sampleId,
+  isLoggedIn,
 }: {
   draftKey: EditorDraftKey;
   sampleId: string | null;
+  isLoggedIn: boolean;
 }) {
   const [savedData, setSavedData] = useState<SavedData | null>(null);
   const [pendingDraft, setPendingDraft] = useState<EditorDraftSnapshot | null>(
@@ -292,8 +295,10 @@ function SampleEditorCreate({
         <EditorDraftRecoveryDialog
           draft={pendingDraft}
           draftKey={draftKey}
+          isLoggedIn={isLoggedIn}
           onResume={handleResumeDraft}
           onDraftChange={setPendingDraft}
+          onStartFresh={() => void startFreshEditor()}
           onDiscard={() => void startFreshEditor()}
         />
       </div>

@@ -22,8 +22,12 @@ type EditorDraftRecoveryDialogProps = {
   draftKey: EditorDraftKey;
   /** 테스트에서 시각을 고정하기 위해 주입한다. */
   now?: number;
+  /** 지금 로그인한 상태인지. 초안 안내 문구를 상태에 맞게 고른다. */
+  isLoggedIn?: boolean;
   onResume: () => void;
   onDraftChange: (draft: EditorDraftSnapshot) => void;
+  /** 초안은 그대로 두고 새 편집기를 시작한다. */
+  onStartFresh?: () => void;
   /** 삭제가 끝난 뒤 새 편집기를 시작한다. */
   onDiscard: () => void;
 };
@@ -39,8 +43,10 @@ export default function EditorDraftRecoveryDialog({
   draft,
   draftKey,
   now,
+  isLoggedIn = false,
   onResume,
   onDraftChange,
+  onStartFresh,
   onDiscard,
 }: EditorDraftRecoveryDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -164,7 +170,9 @@ export default function EditorDraftRecoveryDialog({
             id={DESCRIPTION_ID}
             className="break-keep text-[13px] leading-5 text-text-secondary"
           >
-            로그인하기 전에 저장하려던 작업이에요. 초안은 일주일 동안 보관돼요.
+            {isLoggedIn
+              ? '로그인 계정과 별개로 이 기기에 남아 있는 초안이에요. 초안은 일주일 동안 보관돼요.'
+              : '로그인하기 전에 저장하려던 작업이에요. 초안은 일주일 동안 보관돼요.'}
           </p>
           {discardNotice === 'changed' && (
             <p
@@ -221,13 +229,22 @@ export default function EditorDraftRecoveryDialog({
             >
               이어서 작성
             </button>
+            {onStartFresh && (
+              <button
+                type="button"
+                onClick={onStartFresh}
+                className="flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-text-plain ring-1 ring-[#E4E4E7] ring-inset transition-colors hover:bg-[#FAFAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] focus-visible:ring-offset-2"
+              >
+                초안 남기고 새로 시작
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
                 setDiscardNotice(null);
                 setIsConfirmingDiscard(true);
               }}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-[15px] font-semibold text-[#A52D32] ring-1 ring-[#E4E4E7] ring-inset transition-colors hover:bg-[#FAFAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A52D32] focus-visible:ring-offset-2"
+              className="flex h-11 w-full items-center justify-center rounded-full px-6 text-[13px] font-semibold text-[#A52D32] transition-colors hover:bg-[#FDF2F1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A52D32] focus-visible:ring-offset-2"
             >
               초안 삭제 후 새로 시작
             </button>

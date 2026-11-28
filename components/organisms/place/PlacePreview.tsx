@@ -7,7 +7,7 @@ import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
 import { resolveSketchPalette } from '@/shared/map/sketch/palettes';
 import { matchesSketchMapSettings } from '@/shared/map/sketch/sketchTypes';
 import type { EditorBlock } from '@/shared/types/block';
-import { formatPhoneNumber } from '@/shared/utils/phoneNumber';
+import { formatPhoneNumber, toTelHref } from '@/shared/utils/phoneNumber';
 import {
   getDefaultPlaceTitle,
   normalizePlaceTitle,
@@ -26,6 +26,11 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
   className: string;
   titleClassName?: string;
   hideActions?: boolean;
+  /**
+   * 전화번호를 `tel:` 링크로 만들지 정한다.
+   * 편집기 캔버스처럼 블록을 고르는 화면에서는 끈다.
+   */
+  enablePhoneLink?: boolean;
 }
 
 export const PlacePreview = ({
@@ -33,6 +38,7 @@ export const PlacePreview = ({
   className,
   titleClassName,
   hideActions,
+  enablePhoneLink = true,
   ...rest
 }: Props) => {
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -62,6 +68,13 @@ export const PlacePreview = ({
       : null;
   const defaultTitle = getDefaultPlaceTitle(blockInfo.type);
   const { fontFamily, fontSize } = useBodyFontInfo();
+  const telHref =
+    checkedPlaceTel && !hideActions && enablePhoneLink
+      ? toTelHref(placeTel)
+      : null;
+  const telLabel = `TEL. ${
+    hideActions ? placeTel : formatPhoneNumber(placeTel ?? '')
+  }`;
   const detailStyle = {
     fontFamily,
     fontSize: `max(1rem, ${fontSize ?? '1rem'})`,
@@ -91,7 +104,16 @@ export const PlacePreview = ({
       </section>
       {checkedPlaceTel && Boolean(placeTel?.trim()) && (
         <p className="font-normal text-text-tertiary" style={detailStyle}>
-          TEL. {hideActions ? placeTel : formatPhoneNumber(placeTel)}
+          {telHref ? (
+            <a
+              href={telHref}
+              className="underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+            >
+              {telLabel}
+            </a>
+          ) : (
+            telLabel
+          )}
         </p>
       )}
 

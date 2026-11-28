@@ -70,25 +70,30 @@ function createDraft(
 function renderDialog(
   overrides: {
     draft?: EditorDraftSnapshot;
+    isLoggedIn?: boolean;
     onResume?: jest.Mock;
+    onStartFresh?: jest.Mock;
     onDiscard?: jest.Mock;
   } = {}
 ) {
   const onResume = overrides.onResume ?? jest.fn();
   const onDiscard = overrides.onDiscard ?? jest.fn();
+  const onStartFresh = overrides.onStartFresh ?? jest.fn();
 
   render(
     <EditorDraftRecoveryDialog
       draft={overrides.draft ?? createDraft()}
       draftKey={BLANK_EDITOR_DRAFT_KEY}
       now={NOW}
+      isLoggedIn={overrides.isLoggedIn}
       onResume={onResume}
       onDraftChange={jest.fn()}
+      onStartFresh={onStartFresh}
       onDiscard={onDiscard}
     />
   );
 
-  return { onResume, onDiscard };
+  return { onResume, onStartFresh, onDiscard };
 }
 
 describe('EditorDraftRecoveryDialog', () => {
@@ -126,12 +131,44 @@ describe('EditorDraftRecoveryDialog', () => {
     expect(onDiscard).not.toHaveBeenCalled();
   });
 
-  it('초안을 이어서 작성하거나 삭제 후 새로 시작할 수 있다', () => {
+  it('초안을 이어서 작성하거나, 초안을 두고 또는 지우고 새로 시작할 수 있다', () => {
     renderDialog();
 
-    expect(screen.getAllByRole('button')).toHaveLength(2);
+    expect(screen.getAllByRole('button')).toHaveLength(3);
     expect(screen.getByRole('button', { name: '이어서 작성' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '초안 남기고 새로 시작' })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '초안 삭제 후 새로 시작' })).toBeInTheDocument();
+  });
+
+  it('로그인 상태면 로그인 전 안내 대신 기기에 남은 초안이라고 알려 준다', () => {
+    renderDialog({ isLoggedIn: true });
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      '로그인 계정과 별개로 이 기기에 남아 있는 초안이에요'
+    );
+    expect(screen.getByRole('dialog')).not.toHaveTextContent(
+      '로그인하기 전에 저장하려던 작업이에요'
+    );
+  });
+
+  it('로그인하지 않았다면 로그인 전에 저장한 작업이라고 알려 준다', () => {
+    renderDialog();
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      '로그인하기 전에 저장하려던 작업이에요'
+    );
+  });
+
+  it('초안을 남기고 새로 시작하면 초안은 지우지 않는다', () => {
+    const { onStartFresh, onDiscard } = renderDialog();
+
+    fireEvent.click(screen.getByRole('button', { name: '초안 남기고 새로 시작' }));
+
+    expect(onStartFresh).toHaveBeenCalledTimes(1);
+    expect(discardEditorDraft).not.toHaveBeenCalled();
+    expect(onDiscard).not.toHaveBeenCalled();
   });
 
   it('초안 삭제는 한 번 더 묻고, 취소하면 아무것도 지우지 않는다', async () => {

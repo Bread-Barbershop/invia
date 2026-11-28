@@ -69,3 +69,27 @@ export function formatPhoneNumber(value: string) {
 export function normalizePhoneNumber(value: string) {
   return value.replace(/\D/g, '').slice(0, 11);
 }
+
+/**
+ * `tel:`·`sms:` 링크에 넣을 번호 문자열을 만듭니다.
+ * 국제번호(`+82 …`)는 `+`를 남기고, 그 밖에는 숫자만 남깁니다.
+ *
+ * @example
+ * toPhoneHrefNumber('010-1234-5678') // '01012345678'
+ * toPhoneHrefNumber('+82 10-1234-5678') // '+821012345678'
+ */
+export function toPhoneHrefNumber(value: string) {
+  const trimmed = value.trim();
+  const digits = trimmed.replace(/\D/g, '');
+  return trimmed.startsWith('+') ? `+${digits}` : digits;
+}
+
+/**
+ * 표시 중인 전화번호를 바로 걸 수 있는 `tel:` 링크로 만듭니다.
+ * 숫자가 하나도 없으면 링크를 만들 수 없으므로 null을 돌려줍니다.
+ */
+export function toTelHref(value: string | null | undefined) {
+  if (!value) return null;
+  const href = toPhoneHrefNumber(value);
+  return href.replace(/\D/g, '').length > 0 ? `tel:${href}` : null;
+}

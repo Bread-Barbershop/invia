@@ -17,10 +17,19 @@ describe('DeleteModal 컴포넌트', () => {
     render(<DeleteModal {...defaultProps} />);
 
     expect(
-      screen.getByText('해당 페이지를 삭제하시겠습니까?')
+      screen.getByText('해당 블록을 삭제하시겠습니까?')
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '예' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '아니오' })).toBeInTheDocument();
+  });
+
+  it('블록 이름을 받으면 어떤 블록을 지우는지 함께 알려 준다', () => {
+    render(<DeleteModal {...defaultProps} blockName="연락처" />);
+
+    expect(
+      screen.getByRole('dialog', { name: '‘연락처’ 블록을 삭제하시겠습니까?' })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/페이지를 삭제/)).not.toBeInTheDocument();
   });
 
   it('"예" 버튼 클릭 시 onDelete가 호출된다', () => {
