@@ -2,6 +2,7 @@
 
 import AutoScroll from 'embla-carousel-auto-scroll';
 import useEmblaCarousel from 'embla-carousel-react';
+import { Pause, Play } from 'lucide-react';
 import { useContext, useEffect, useState } from 'react';
 
 import { dashboardCarouselLayout } from '@/app/dashboard/components/carousel/carouselLayout';
@@ -33,6 +34,7 @@ export default function HomeShowcaseCarousel({
   const [pointerOverCardOrControl, setPointerOverCardOrControl] =
     useState(false);
   const [keyboardFocused, setKeyboardFocused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
   const [plugins] = useState(() => [
     AutoScroll({ speed: 0.45, startDelay: 0, playOnInit: false }),
   ]);
@@ -50,6 +52,7 @@ export default function HomeShowcaseCarousel({
   );
   const paused =
     reducedMotion ||
+    userPaused ||
     pointerOverCardOrControl ||
     keyboardFocused ||
     isPreviewOpen;
@@ -94,11 +97,40 @@ export default function HomeShowcaseCarousel({
       />
       <div className="absolute inset-x-0 bottom-0 z-10">
         <CarouselController
+          previousLabel="이전 초대장 디자인"
+          nextLabel="다음 초대장 디자인"
           onMove={direction => {
             if (direction === 'left') emblaApi?.scrollPrev(reducedMotion);
             else emblaApi?.scrollNext(reducedMotion);
           }}
-        />
+        >
+          {!reducedMotion && (
+            <button
+              type="button"
+              aria-pressed={userPaused}
+              aria-label={
+                userPaused ? '자동 넘김 다시 시작' : '자동 넘김 멈춤'
+              }
+              title={userPaused ? '자동 넘김 다시 시작' : '자동 넘김 멈춤'}
+              onClick={() => setUserPaused(current => !current)}
+              className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#EEEEF2] transition-colors hover:bg-[#E5E7EB]"
+            >
+              {userPaused ? (
+                <Play
+                  size={18}
+                  strokeWidth={3}
+                  className="translate-x-px fill-[#6B7280] text-[#6B7280]"
+                />
+              ) : (
+                <Pause
+                  size={18}
+                  strokeWidth={3}
+                  className="fill-[#6B7280] text-[#6B7280]"
+                />
+              )}
+            </button>
+          )}
+        </CarouselController>
       </div>
     </section>
   );

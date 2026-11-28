@@ -54,6 +54,38 @@ it('쇼케이스는 선택된 카드 없이 흐르고, 카드에서 포인터를
   expect(mockScroll.play).toHaveBeenCalledTimes(2);
 });
 
+it('쇼케이스 좌우 화살표와 자동 넘김 버튼에 읽을 수 있는 이름이 있다', () => {
+  renderShowcase();
+  expect(
+    screen.getByRole('button', { name: '이전 초대장 디자인' })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: '다음 초대장 디자인' })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: '자동 넘김 멈춤' })
+  ).toHaveAttribute('aria-pressed', 'false');
+});
+
+it('자동 넘김을 멈추면 포인터를 떼도 다시 흐르지 않고, 다시 시작하면 이어진다', () => {
+  const card = renderShowcase();
+  const pauseButton = screen.getByRole('button', { name: '자동 넘김 멈춤' });
+  fireEvent.click(pauseButton);
+  expect(pauseButton).toHaveAttribute('aria-pressed', 'true');
+  expect(
+    screen.getByRole('button', { name: '자동 넘김 다시 시작' })
+  ).toBe(pauseButton);
+  expect(mockScroll.stop).toHaveBeenCalled();
+
+  const playCount = mockScroll.play.mock.calls.length;
+  fireEvent.pointerOver(card);
+  fireEvent.pointerOut(card, { relatedTarget: document.body });
+  expect(mockScroll.play).toHaveBeenCalledTimes(playCount);
+
+  fireEvent.click(screen.getByRole('button', { name: '자동 넘김 다시 시작' }));
+  expect(mockScroll.play).toHaveBeenCalledTimes(playCount + 1);
+});
+
 it('첫 카드의 중앙 정렬용 여백 없이 모든 카드 뒤에 같은 순환 간격을 둔다', () => {
   renderShowcase();
   const [options] = jest.mocked(useEmblaCarousel).mock.calls[0];

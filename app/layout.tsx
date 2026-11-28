@@ -53,6 +53,9 @@ const lineSeedKr = localFont({
   ],
   display: 'swap',
   variable: '--line-seed-kr',
+  // 본문(LINESeedKR)은 초대장 일부 블록(font-serif·font-lineseed)에서만 쓰이므로
+  // 전 화면 <link rel=preload>로 1.31MB를 미리 받지 않고, 실제로 쓰는 화면에서만 내려받는다.
+  preload: false,
 });
 
 const defaultOgImage = {
