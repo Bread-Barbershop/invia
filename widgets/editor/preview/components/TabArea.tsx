@@ -34,7 +34,7 @@ function TabArea({
         {orderedCategories.map((items, index) => (
           <li
             key={index}
-            className={`min-w-18 shrink-0 h-11 px-2 cursor-pointer select-none flex-center gap-1 whitespace-nowrap font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
+            className={`min-w-15 shrink-0 h-11 px-1.5 cursor-pointer select-none flex-center gap-1 whitespace-nowrap font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
             onClick={() => tabClick(items.english)}
           >
             {items.korea}
@@ -51,7 +51,7 @@ function TabArea({
         ))}
       </ul>
       <div className="flex shrink-0 items-center">
-        <div className="relative flex w-36 items-center">
+        <div className="relative flex w-32 items-center">
           <Search
             size={14}
             className="pointer-events-none absolute left-2.5 text-neutral-400"
