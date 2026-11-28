@@ -7,6 +7,7 @@ import birthdayLetterCover from '@/public/templates/thumbnails/birthday_10.webp'
 import seventiethCover from '@/public/templates/thumbnails/birthday_11.webp';
 import eightiethCover from '@/public/templates/thumbnails/birthday_12.webp';
 import yearEndTableCover from '@/public/templates/thumbnails/birthday_13.webp';
+import chilsunCover from '@/public/templates/thumbnails/birthday_14.webp';
 import gardenBrunchCover from '@/public/templates/thumbnails/bridalShower_01.webp';
 import hotelPajamaCover from '@/public/templates/thumbnails/bridalShower_02.webp';
 import whiteRibbonCover from '@/public/templates/thumbnails/bridalShower_03.webp';
@@ -24,7 +25,6 @@ import prismCover from '@/public/templates/thumbnails/seminar_07.webp';
 import cityCover from '@/public/templates/thumbnails/seminar_08.webp';
 import coffeeCover from '@/public/templates/thumbnails/seminar_09.webp';
 import exhibitionCover from '@/public/templates/thumbnails/seminar_10.webp';
-import chilsunCover from '@/public/templates/thumbnails/birthday_14.webp';
 import weddingLetterCover from '@/public/templates/thumbnails/wedding_15.webp';
 import showcase0 from '@/shared/assets/images/showcase/showcase-0.webp';
 import showcase1 from '@/shared/assets/images/showcase/showcase-1.webp';
