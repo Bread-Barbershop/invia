@@ -71,6 +71,24 @@ describe('EditorViewportGuard & SaveModal layering', () => {
     expect(mockHideAllCallouts).not.toHaveBeenCalled();
   });
 
+  it('좁은 화면으로 들어오면 편집기를 마운트하지 않아 숨은 초안 다이얼로그가 DOM에 남지 않는다', () => {
+    window.innerWidth = 390;
+
+    render(
+      <EditorViewportGuard>
+        <div data-testid="editor-content">
+          <div role="dialog" aria-label="초안 복원">
+            draft
+          </div>
+        </div>
+      </EditorViewportGuard>
+    );
+
+    expect(screen.getByRole('region', { name: '데스크톱 브라우저 권장 안내' })).toBeInTheDocument();
+    expect(screen.queryByTestId('editor-content')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('renders desktop notice portaled to document.body with z-[40000] when width < 1340px', () => {
     window.innerWidth = 1200;
 
