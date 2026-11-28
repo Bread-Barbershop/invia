@@ -116,4 +116,8 @@ export const SHOWCASE_PHOTOS = {
     'https://lh3.googleusercontent.com/d/1QRp-EDUNrdgtu5AGHHs_lM3J07MVKkEn',
   exhibitionCup:
     'https://lh3.googleusercontent.com/d/1tk19XEpk6nQ94zceBt2027-eq7ZRz3Rl',
+  chilsunYard: '/images/showcase/chilsun-yard.webp',
+  chilsunSetting: '/images/showcase/chilsun-setting.webp',
+  chilsunHanok: '/images/showcase/chilsun-hanok.webp',
+  chilsunHands: '/images/showcase/chilsun-hands.webp',
 } as const;

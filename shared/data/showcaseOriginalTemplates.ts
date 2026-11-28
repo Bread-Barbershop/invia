@@ -229,6 +229,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
   'showcase-42': original('birthday_11', ['고운 바탕', 'SUIT']),
   'showcase-43': original('birthday_12', ['SUIT']),
   'showcase-44': original('wedding_15', ['고운 바탕', 'SUIT']),
+  'showcase-52': original('birthday_14', ['Pretendard', 'Noto Serif KR']),
   'showcase-45': original('bridalShower_01', [
     'Cormorant Garamond',
     '고운 바탕',

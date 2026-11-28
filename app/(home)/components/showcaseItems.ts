@@ -7,6 +7,7 @@ import birthdayLetterCover from '@/public/templates/thumbnails/birthday_10.webp'
 import seventiethCover from '@/public/templates/thumbnails/birthday_11.webp';
 import eightiethCover from '@/public/templates/thumbnails/birthday_12.webp';
 import yearEndTableCover from '@/public/templates/thumbnails/birthday_13.webp';
+import chilsunCover from '@/public/templates/thumbnails/birthday_14.webp';
 import gardenBrunchCover from '@/public/templates/thumbnails/bridalShower_01.webp';
 import hotelPajamaCover from '@/public/templates/thumbnails/bridalShower_02.webp';
 import whiteRibbonCover from '@/public/templates/thumbnails/bridalShower_03.webp';
@@ -103,6 +104,7 @@ export const showcaseItems = [
   { id: 'showcase-42', image: seventiethCover },
   { id: 'showcase-43', image: eightiethCover },
   { id: 'showcase-44', image: weddingLetterCover },
+  { id: 'showcase-52', image: chilsunCover },
   { id: 'showcase-45', image: gardenBrunchCover },
   { id: 'showcase-46', image: hotelPajamaCover },
   { id: 'showcase-47', image: whiteRibbonCover },
