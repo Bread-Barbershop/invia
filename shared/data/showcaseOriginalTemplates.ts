@@ -248,6 +248,7 @@ export const SHOWCASE_ORIGINAL_TEMPLATES: Record<
   ]),
   'showcase-50': original('bridalShower_04', ['Pretendard', '고운 바탕']),
   'showcase-51': original('seminar_10', ['Pretendard', 'Noto Serif KR']),
+  'showcase-52': original('birthday_14', ['Pretendard', 'Noto Serif KR']),
 };
 
 export function getShowcaseOriginalTemplate(id: string) {

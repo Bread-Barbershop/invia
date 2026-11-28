@@ -465,4 +465,133 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
       },
     ],
   },
+  {
+    id: 'showcase-52',
+    type: 'birthday',
+    name: '어머니의 일흔 번째 겨울',
+    description: '겨울 한옥의 긴 식탁에 가족이 모여 어머니의 칠순을 축하해요.',
+    palette: ['#F7F1E7', '#6E3A44', '#2C2623'],
+    font: 'Noto Serif KR',
+    sectionStyle: 'paper',
+    eyebrow: 'A LETTER FOR MOTHER',
+    heading: '어머니의 일흔 번째 겨울',
+    message: [
+      '어머니가 일흔이 되셨습니다.',
+      '젊은 날의 어머니는 늘 남의 식탁부터 챙기셨습니다. 명절이면 손님상부터 차리고, 마지막에 남은 밥을 드시던 분이었지요. 그런 어머니가 어느새 일흔입니다.',
+      '12월 19일 토요일 낮, 삼청동의 조용한 한옥에서 어머니를 모시고 식사 한 끼를 하려 합니다. 말수 적으신 분이라 크게 기대하시지는 않겠지만, 그날만큼은 자리 가득 앉은 얼굴들을 보고 오래 웃으셨으면 합니다.',
+      '바쁘시더라도 오셔서 어머니 옆자리를 함께 지켜 주세요. 오시는 길과 주차 안내는 아래에 적어 두었습니다.',
+      '정은재 · 정은서 올림',
+    ],
+    date: '2026-12-19',
+    time: '12:00',
+    venue: '소담재',
+    venueAddress: '서울특별시 종로구 삼청로 22-5',
+    venueLat: 37.5778861,
+    venueLng: 126.9799995,
+    sections: [
+      {
+        component: 'greeting',
+        title: '초대의 글',
+      },
+      {
+        component: 'myFamily',
+        title: '함께 모이는 사람들',
+        members: [
+          { relation: '어머니', name: '정순희' },
+          { relation: '아들', name: '정은재' },
+          { relation: '딸', name: '정은서' },
+          { relation: '손녀', name: '정서윤' },
+        ],
+        message:
+          '그날 스무 명 남짓이 한 상에 둘러앉습니다. 아이들은 마당에서 잠깐 뛰어도 좋습니다.',
+      },
+      {
+        component: 'gallery',
+        title: '겨울의 마당',
+        subTitle: 'WINTER AT HOME',
+        template: 'galleryType6',
+        ratio: '4:3',
+        images: [
+          SHOWCASE_PHOTOS.chilsunYard,
+          SHOWCASE_PHOTOS.chilsunSetting,
+          SHOWCASE_PHOTOS.chilsunHanok,
+        ],
+      },
+      {
+        component: 'picture',
+        title: '어머니의 손',
+        image: SHOWCASE_PHOTOS.chilsunHands,
+        caption:
+          '평생 남의 밥부터 챙기시던 손입니다. 이제는 저희가 그 손을 잡으려 합니다.',
+      },
+      {
+        component: 'calendar',
+        title: '잔치 일시',
+        template: 'calendarType9',
+      },
+      {
+        component: 'timeline',
+        title: '그날의 순서',
+        items: [
+          { time: '12:00', title: '도착과 인사' },
+          { time: '12:30', title: '식사' },
+          { time: '13:40', title: '가족 사진' },
+          { time: '14:30', title: '차와 이야기' },
+        ],
+      },
+      {
+        component: 'mealMenu',
+        title: '칠순 잔치상',
+        subtitle: 'FAMILY TABLE',
+        style: 'classic',
+        note: '어르신을 위해 순한 간으로 준비했습니다. 못 드시는 음식이 있으면 미리 알려 주세요.',
+        courses: [
+          {
+            name: '첫 접시',
+            dishes: [
+              { name: '전복 죽', description: '겨울 나물 세 가지와 함께' },
+            ],
+          },
+          {
+            name: '식사',
+            dishes: [{ name: '한우 갈비찜', description: '솥밥과 된장국, 김치' }],
+          },
+          {
+            name: '마무리',
+            dishes: [{ name: '유자차와 약과', description: '곶감 한 접시' }],
+          },
+        ],
+      },
+      {
+        component: 'place',
+        title: '오시는 곳',
+        detail: '· 골목 안쪽, 솔문이 있는 집',
+      },
+      {
+        component: 'transportation',
+        title: '오시는 길',
+        subwayLine: '3호선',
+        subwayStation: '안국역',
+        subwayExit: '1번 출구',
+        subwayWalk:
+          '안국역 1번 출구에서 삼청로를 따라 걸어 12분입니다. 어르신과 함께라면 안국역에서 택시를 타시는 편이 편해요.',
+        busRoutes: '간선 109 · 151 · 162 · 1711, 지선 7025 (삼청동 정류장 하차)',
+        parkingHours:
+          '골목 안에는 차를 세울 수 없습니다. 삼청공원 공영주차장(도보 5분)을 이용해 주세요. 주차권은 식당에서 준비해 두겠습니다.',
+      },
+      {
+        component: 'notice',
+        title: '알려 드립니다',
+        heading: '따뜻하게 입고 와 주세요',
+        message:
+          '한옥이라 바닥이 차갑습니다. 방석은 넉넉히 준비해 두지만, 따뜻한 양말이나 슬리퍼를 챙기시면 더 편합니다. 아이들 옷은 여분을 두시면 마당에서 놀다 젖어도 괜찮습니다.',
+        preset: 'clothes',
+        image: SHOWCASE_PHOTOS.chilsunYard,
+      },
+      {
+        component: 'closingComment',
+        message: '그날, 어머니 옆자리에서 함께 웃어 주세요.',
+      },
+    ],
+  },
 ];
