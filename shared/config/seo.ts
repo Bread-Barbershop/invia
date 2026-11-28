@@ -6,7 +6,7 @@ export const SERVICE_NAME = '인비아(Invia)';
 export const DEFAULT_TITLE = '인비아(Invia) | 무료 모바일 청첩장, 초대장의 새로운 기준';
 
 export const DEFAULT_DESCRIPTION =
-  '무료 모바일 청첩장부터 돌잔치·생일·세미나 초대장까지, 인비아(Invia)에서 예쁜 디자인을 골라 링크로 마음을 전하세요.';
+  '무료 모바일 청첩장부터 돌잔치·생일·세미나·브라이덜샤워 초대장까지, 인비아(Invia)에서 예쁜 디자인을 골라 링크로 마음을 전하세요.';
 
 /**
  * 사이트 전역 `WebSite` 구조화 데이터.

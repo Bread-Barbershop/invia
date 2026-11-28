@@ -19,6 +19,12 @@ describe('SEO 메타데이터', () => {
     expect(DEFAULT_DESCRIPTION).toContain('무료 모바일 청첩장');
   });
 
+  it('설명이 현재 열린 초대장 카테고리를 빠짐없이 알린다', () => {
+    ['청첩장', '돌잔치', '생일', '세미나', '브라이덜샤워'].forEach(category => {
+      expect(DEFAULT_DESCRIPTION).toContain(category);
+    });
+  });
+
   it('"개인정보 없이"처럼 오해를 부르는 문구는 쓰지 않는다', () => {
     expect(DEFAULT_DESCRIPTION).not.toContain('개인정보 없이');
     expect(DEFAULT_TITLE).not.toContain('개인정보 없이');

@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import ContactEmailActions from '@/features/contact/components/ContactEmailActions';
 
 import { FAQ_CATEGORIES, FAQ_ITEMS, type FaqCategoryId } from '../data';
+import { filterFaqItems } from '../search';
 
 function FaqContent() {
   const [selectedCategory, setSelectedCategory] =
@@ -15,21 +16,14 @@ function FaqContent() {
     FAQ_ITEMS[0]?.id ?? null
   );
 
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    return FAQ_ITEMS.filter(item => {
-      const matchesCategory =
-        selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        `${item.question} ${item.answer}`
-          .toLowerCase()
-          .includes(normalizedQuery);
-
-      return matchesCategory && matchesQuery;
-    });
-  }, [searchQuery, selectedCategory]);
+  const filteredItems = useMemo(
+    () =>
+      filterFaqItems(FAQ_ITEMS, {
+        category: selectedCategory,
+        query: searchQuery,
+      }),
+    [searchQuery, selectedCategory]
+  );
 
   return (
     <div className="w-full px-5 pb-16 pt-12 text-[#171717] sm:px-8 lg:px-12 lg:pb-20 lg:pt-16">

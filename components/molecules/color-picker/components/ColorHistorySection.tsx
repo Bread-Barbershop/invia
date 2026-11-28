@@ -2,6 +2,8 @@
 
 import { hexToHsva } from '@uiw/color-convert';
 
+import { formatSwatchAriaLabel } from '@/shared/utils/colorName';
+
 import {
   COLOR_HISTORY_COLUMN_COUNT,
   MAX_COLOR_HISTORY_COUNT,
@@ -42,7 +44,7 @@ export function ColorHistorySection({
           onClick={() => {
             onChange(hexToHsva(color) as PickerHsva);
           }}
-          aria-label={`Select color ${color}`}
+          aria-label={formatSwatchAriaLabel(color)}
         />
       ))}
     </div>

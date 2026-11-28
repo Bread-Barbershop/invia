@@ -14,6 +14,11 @@ export type FaqItem = {
   category: FaqItemCategoryId;
   question: string;
   answer: string;
+  /**
+   * 본문에 없는 동의어·별칭 검색어. 예) 본문은 '나의 저장소'로 통일되어 있어도
+   * 사용자는 '드라이브'로 찾는다.
+   */
+  keywords?: string[];
 };
 
 export const FAQ_ITEMS: FaqItem[] = [
@@ -21,6 +26,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'free-service',
     category: 'getting-started',
     question: 'Invia는 무료로 사용할 수 있나요?',
+    keywords: ['무료', '가격', '비용', '유료', '결제'],
     answer:
       '네. 현재 초대장 제작, 저장, 공개, 공유는 모두 무료예요. Google 계정으로 로그인하면 초대장을 만들 수 있어요.',
   },
@@ -28,6 +34,17 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'supported-devices',
     category: 'getting-started',
     question: '모바일에서도 초대장을 만들거나 볼 수 있나요?',
+    keywords: [
+      '모바일',
+      '핸드폰',
+      '휴대폰',
+      '아이폰',
+      '갤럭시',
+      '태블릿',
+      'PC',
+      '컴퓨터',
+      '데스크톱',
+    ],
     answer:
       '초대장 편집은 PC 브라우저 창 너비 1,340px 이상에서 할 수 있어요. 공유받은 초대장을 열거나 홈과 갤러리에서 템플릿을 둘러보는 일은 모바일과 PC에서 모두 가능해요.',
   },
@@ -35,13 +52,15 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'start-with-template',
     category: 'getting-started',
     question: '템플릿으로 어떻게 시작하고 표지는 어떻게 바꾸나요?',
+    keywords: ['템플릿', '표지', '포스터', '디자인', '페이지 구성'],
     answer:
-      '편집기에서 행사 유형을 고르고 ‘템플릿 사용하기’를 열어 포스터와 페이지 구성을 선택하세요. 표지만 바꾸려면 미리보기에서 포스터를 선택해 글과 사진을 수정하세요. 포스터 사진을 선택한 뒤 ‘사진 편집’을 누르면 사진을 자르거나 배경에 적용할 수 있어요.',
+      '편집기를 열면 오른쪽 ‘포스터’ 패널이 먼저 열려요. 위쪽 탭에서 행사 유형을 고르고 마음에 드는 포스터를 누르면 표지만 바뀌고 본문은 그대로 유지돼요. 표지가 비어 있으면 화면 가운데 ‘포스터 선택하기’를 눌러 같은 패널을 열 수 있어요. 페이지 구성까지 새로 시작하려면 ‘+페이지 추가’를 눌러 원하는 행사 유형 옆의 ‘템플릿 사용하기’를 열고, 템플릿을 고른 뒤 ‘이 템플릿으로 시작하기’를 누르세요. 포스터 사진을 선택한 뒤 ‘사진 편집’을 누르면 사진을 자르거나 배경에 적용할 수 있어요.',
   },
   {
     id: 'organize-pages',
     category: 'editing',
     question: '초대장에 항목을 추가하거나 순서를 바꿀 수 있나요?',
+    keywords: ['블록', '항목', '페이지', '순서', '추가', '삭제'],
     answer:
       '‘+페이지 추가’에서 공지사항, 사진, 행사 장소 등 필요한 항목을 검색해 넣으세요. 추가한 항목은 선택해서 내용을 바꾸고, ‘순서’ 목록에서 끌어 옮겨 배치를 바꿀 수 있어요.',
   },
@@ -63,6 +82,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'save-progress',
     category: 'editing',
     question: '작성 중인 초대장은 어떻게 저장하나요?',
+    keywords: ['저장', '드라이브', '구글드라이브', 'GoogleDrive', 'Drive'],
     answer:
       '편집기에서 ‘모두 저장하기’를 누르면 현재 작업이 로그인한 Google 계정에 연결된 나의 저장소에 저장돼요. 마이페이지에서는 마지막으로 저장한 내용을 다시 열 수 있으니, 편집기를 닫기 전에 저장이 완료됐는지 확인해 주세요.',
   },
@@ -84,6 +104,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'share-link',
     category: 'publishing',
     question: '초대장 링크나 QR 코드는 어떻게 공유하나요?',
+    keywords: ['링크', 'QR', '큐알', '카톡', '카카오톡', '문자', '공유'],
     answer:
       '마이페이지에서 ‘링크·QR 공유하기’를 열거나, 저장 완료 화면에서 ‘링크 공유하기’를 누르세요. ‘링크 복사하기’로 주소를 복사할 수 있고, QR 이미지는 PNG 파일로 저장할 수 있어요. 비공개 또는 공개 준비 중에는 카카오톡·문자 전송을 사용할 수 없고, 받은 링크와 QR로도 초대장을 열 수 없어요. 공개 준비가 끝나면 기기와 브라우저에 따라 전송할 수 있어요.',
   },
@@ -112,6 +133,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'google-login',
     category: 'account',
     question: '왜 Google 로그인이 필요한가요?',
+    keywords: ['로그인', '구글', '드라이브', '구글드라이브', 'GoogleDrive', 'Drive'],
     answer:
       'Google 로그인은 나의 저장소에 초대장을 저장하고 마이페이지에서 다시 불러오는 데 필요해요. 나의 저장소는 로그인한 Google 계정에 연결돼 있어요. 공유받은 초대장을 보는 하객은 Google 계정으로 로그인할 필요가 없어요.',
   },
@@ -119,6 +141,15 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'drive-access-range',
     category: 'account',
     question: 'Invia가 나의 저장소에 있는 모든 파일에 접근하나요?',
+    keywords: [
+      '드라이브',
+      '구글드라이브',
+      'GoogleDrive',
+      'Drive',
+      '권한',
+      '접근',
+      '개인정보',
+    ],
     answer:
       'Invia는 나의 저장소 전체에 접근하지 않아요. Invia에서 만든 파일과 폴더 또는 사용자가 Invia에 공유해 접근을 허용한 파일에 한해 제한된 권한을 사용해요.',
   },
@@ -126,6 +157,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'drive-storage',
     category: 'account',
     question: '초대장 데이터는 어디에 저장되나요?',
+    keywords: ['드라이브', '구글드라이브', 'GoogleDrive', 'Drive', '저장', '위치'],
     answer:
       '편집 내용과 업로드한 사진·음원 같은 파일은 저장할 때 로그인한 Google 계정에 연결된 나의 저장소에 저장돼요. 마이페이지에서도 해당 계정으로 로그인해 저장한 초대장을 열 수 있어요.',
   },
@@ -133,6 +165,15 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'drive-data-safety',
     category: 'account',
     question: '나의 저장소에서 Invia가 만든 파일을 직접 수정해도 되나요?',
+    keywords: [
+      '드라이브',
+      '구글드라이브',
+      'GoogleDrive',
+      'Drive',
+      '파일',
+      '폴더',
+      '삭제',
+    ],
     answer:
       'Invia가 나의 저장소에 만든 폴더나 파일을 직접 수정·이동·삭제하면 공유 링크나 편집 기능이 제대로 작동하지 않을 수 있어요. 내용 변경은 편집기에서, 초대장 삭제는 마이페이지에서 해 주세요.',
   },
@@ -140,6 +181,15 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'drive-storage-capacity',
     category: 'account',
     question: '나의 저장소 공간이 부족하면 어떻게 되나요?',
+    keywords: [
+      '드라이브',
+      '구글드라이브',
+      'GoogleDrive',
+      'Drive',
+      '용량',
+      '공간',
+      '저장공간',
+    ],
     answer:
       '나의 저장소 공간이 부족하면 새 초대장이나 사진·음원을 저장하지 못할 수 있어요. 로그인한 Google 계정의 저장 공간을 확보한 뒤 편집기에서 다시 저장해 주세요.',
   },
@@ -147,6 +197,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: 'delete-invitation',
     category: 'account',
     question: '만든 초대장을 삭제할 수 있나요?',
+    keywords: ['삭제', '지우기'],
     answer:
       '마이페이지에서 삭제할 초대장 카드의 삭제 버튼을 누르세요. 기본 초대장과 모든 하객 그룹이 함께 삭제되며, 이미 보낸 링크로도 초대장을 열 수 없어요. 잠시 열람을 막으려면 비공개로 전환하세요.',
   },
