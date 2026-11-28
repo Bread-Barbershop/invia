@@ -18,9 +18,6 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace: jest.fn() }),
 }));
 jest.mock('./SaveLottie', () => ({ SaveLottie: () => null }));
-jest.mock('@/shared/hooks/useConfirm', () => ({
-  useConfirm: () => ({ confirm: async () => true }),
-}));
 jest.mock('@/widgets/mainPoster/context/FabricContext', () => ({
   useFabricViewContext: () => ({ canvas: { getObjects: () => [] } }),
   useFabricContext: () => ({
@@ -32,6 +29,12 @@ jest.mock('@/widgets/mainPoster/context/FabricContext', () => ({
 function EditorSaveButton() {
   return <UploadButton upload={useInvitationUpload()} />;
 }
+
+// 저장 버튼 → 발행 전 체크리스트 → 저장 순서로 실제 저장을 시작한다.
+const startSave = () => {
+  fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+  fireEvent.click(screen.getByRole('button', { name: '그대로 저장하기' }));
+};
 
 const originalFetch = global.fetch;
 const tick = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms));
@@ -80,7 +83,7 @@ describe('모두 저장하기 진행 단계', () => {
 
     try {
       render(<EditorSaveButton />);
-      fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+      startSave();
       await tick(0);
 
       const saveDialog = screen.getByRole('dialog', {
@@ -163,7 +166,7 @@ describe('모두 저장하기 진행 단계', () => {
       });
     render(<EditorSaveButton />);
 
-    fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+    startSave();
     await tick(0);
     expect(screen.getByRole('status')).toHaveTextContent(
       '초대장을 저장할 준비를 하고 있어요.'
@@ -220,7 +223,7 @@ describe('모두 저장하기 진행 단계', () => {
       useBgmStore.setState({ userFile: audio, selectedBgmId });
       render(<EditorSaveButton />);
 
-      fireEvent.click(screen.getByRole('button', { name: '모두 저장하기' }));
+      startSave();
       await tick(0);
 
       expect(screen.getByRole('status')).toHaveTextContent(
