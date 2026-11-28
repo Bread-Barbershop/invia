@@ -15,12 +15,14 @@ import {
 interface DeleteModalProps {
   setIsDeleteModal: (isDeleteModal: boolean) => void;
   onDelete: () => void;
+  /** 삭제할 블록 이름. 있으면 어떤 블록을 지우는지 함께 알려 준다. */
+  blockName?: string;
 }
 
 const emptySubscribe = () => () => {};
 
 const DeleteModal = forwardRef<HTMLDivElement, DeleteModalProps>(
-  ({ setIsDeleteModal, onDelete }: DeleteModalProps, ref) => {
+  ({ setIsDeleteModal, onDelete, blockName }: DeleteModalProps, ref) => {
     const closeModal = () => setIsDeleteModal(false);
     const backdropDismiss = useBackdropDismiss<HTMLDivElement>(closeModal);
     const mounted = useSyncExternalStore(
@@ -85,9 +87,11 @@ const DeleteModal = forwardRef<HTMLDivElement, DeleteModalProps>(
           <div className="pt-5">
             <p
               id="delete-modal-title"
-              className="w-full text-sm font-semibold text-text-primary font-pretendard text-center"
+              className="w-full text-sm font-semibold text-text-primary font-pretendard text-center break-keep"
             >
-              해당 페이지를 삭제하시겠습니까?
+              {blockName
+                ? `‘${blockName}’ 블록을 삭제하시겠습니까?`
+                : '해당 블록을 삭제하시겠습니까?'}
             </p>
           </div>
           <div className="flex items-center justify-center gap-5 mb-3">

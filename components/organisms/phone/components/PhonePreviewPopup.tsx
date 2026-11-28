@@ -9,7 +9,7 @@ import PhoneIcon from '@/shared/assets/icons/phoneIcon.svg';
 import { useBackdropDismiss } from '@/shared/hooks/useBackdropDismiss';
 import { useBodyFontInfo } from '@/shared/hooks/useBodyFontInfo';
 import { useEditorStore } from '@/shared/store/editorStore/useEditorStore';
-import { formatPhoneNumber } from '@/shared/utils/phoneNumber';
+import { formatPhoneNumber, toPhoneHrefNumber } from '@/shared/utils/phoneNumber';
 
 import { PhoneGroup } from '../utils/phone.types';
 
@@ -17,13 +17,6 @@ interface Props {
   groups?: PhoneGroup[];
   hideActions?: boolean;
 }
-
-const getPhoneHrefNumber = (number: string) => {
-  const trimmed = number.trim();
-  const digits = trimmed.replace(/\D/g, '');
-
-  return trimmed.startsWith('+') ? `+${digits}` : digits;
-};
 
 function PhonePreviewPopup({ groups = [], hideActions = false }: Props) {
   const titleColor = useEditorStore(state => state.titleData.color);
@@ -141,14 +134,14 @@ function PhonePreviewPopup({ groups = [], hideActions = false }: Props) {
 
                           {!hideActions && <div className="flex shrink-0 items-center">
                             <a
-                              href={`sms:${getPhoneHrefNumber(contact.number)}`}
+                              href={`sms:${toPhoneHrefNumber(contact.number)}`}
                               aria-label="문자 보내기"
                               className="flex items-center justify-center size-11 rounded-full hover:bg-black/5 active:bg-black/10 transition-colors outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                             >
                               <MessageIcon className="text-text-tertiary" />
                             </a>
                             <a
-                              href={`tel:${getPhoneHrefNumber(contact.number)}`}
+                              href={`tel:${toPhoneHrefNumber(contact.number)}`}
                               aria-label="전화 걸기"
                               className="flex items-center justify-center size-11 rounded-full hover:bg-black/5 active:bg-black/10 transition-colors outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                             >

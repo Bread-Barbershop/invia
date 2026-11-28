@@ -1,6 +1,7 @@
 'use client';
 import { autoUpdate } from '@floating-ui/dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
 import {
   type RefObject,
   useCallback,
@@ -286,6 +287,19 @@ function ComponentsPopup({ open = true, anchorRef, onPopClose }: Props) {
               />
             ) : (
               <>
+                <div className="flex items-center justify-between gap-2 pl-4 pr-2 pt-1">
+                  <p className="select-none text-sm font-semibold text-text-primary">
+                    블록 추가
+                  </p>
+                  <button
+                    type="button"
+                    aria-label="블록 추가 닫기"
+                    onClick={handleClose}
+                    className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
                 <div>
                   <TabArea
                     active={active}

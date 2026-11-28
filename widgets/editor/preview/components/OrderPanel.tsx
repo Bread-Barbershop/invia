@@ -431,6 +431,14 @@ function OrderPanel() {
       <AnimatePresence>
         {deleteTargetId && (
           <DeleteModal
+            blockName={(() => {
+              const target = visibleBlocks.find(
+                item => item.id === deleteTargetId
+              );
+              return target
+                ? getBlockDisplayName(target.component)
+                : undefined;
+            })()}
             onDelete={() => {
               deleteBlock(deleteTargetId);
               setDeleteTargetId(null);

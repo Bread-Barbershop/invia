@@ -184,8 +184,10 @@ export default function TemplateEditorEntry({
         <EditorDraftRecoveryDialog
           draft={pendingDraft}
           draftKey={draftKey}
+          isLoggedIn={auth.isLoggedIn}
           onResume={handleResumeDraft}
           onDraftChange={setPendingDraft}
+          onStartFresh={() => void startFreshTemplate()}
           onDiscard={() => void startFreshTemplate()}
         />
       </div>

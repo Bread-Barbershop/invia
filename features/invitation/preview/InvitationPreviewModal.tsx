@@ -14,8 +14,14 @@ import {
 
 type PreviewLoadError = {
   message: string;
+  description?: string;
   onRetry: () => void;
 };
+
+/** 준비가 늦어질 때 안내 문구를 바꾸는 시점. */
+const SLOW_RENDER_MS = 12_000;
+/** 첫 호출이 콜드 스타트로 늦어지는 경우가 있어 넉넉히 기다린다. */
+const RENDER_TIMEOUT_MS = 45_000;
 
 type InvitationPreviewModalProps = {
   snapshot: PreviewSnapshot | null;
@@ -123,7 +129,12 @@ export default function InvitationPreviewModal({
                 onRetry={restart}
               />
             ) : (
-              <PreviewFeedback error={loadError} />
+              <PreviewFeedback
+                title={loadError?.message ?? '초대장을 준비하고 있어요.'}
+                description={loadError?.description}
+                onRetry={loadError?.onRetry}
+                isError={Boolean(loadError)}
+              />
             )}
           </div>
         </div>
@@ -157,14 +168,21 @@ function InvitationPreviewFrame({
   onRetry: () => void;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(
+  const [status, setStatus] = useState<'loading' | 'slow' | 'ready' | 'error'>(
     'loading'
   );
 
   useLayoutEffect(() => {
     const frameWindow = iframeRef.current?.contentWindow;
     const origin = window.location.origin;
-    const timeout = window.setTimeout(() => setStatus('error'), 15_000);
+    // 처음 여는 화면은 서버·네트워크 때문에 오래 걸릴 수 있다.
+    // 15초에 바로 실패로 끝내지 않고, 느려지면 안내를 바꾸고 끝까지 기다린다.
+    const slowTimer = window.setTimeout(() => {
+      setStatus(current => (current === 'loading' ? 'slow' : current));
+    }, SLOW_RENDER_MS);
+    const timeout = window.setTimeout(() => {
+      setStatus(current => (current === 'ready' ? current : 'error'));
+    }, RENDER_TIMEOUT_MS);
     const receive = (event: MessageEvent) => {
       if (
         !frameWindow ||
@@ -179,6 +197,7 @@ function InvitationPreviewFrame({
           origin
         );
       if (event.data?.type === PREVIEW_MESSAGE.rendered) {
+        window.clearTimeout(slowTimer);
         window.clearTimeout(timeout);
         setStatus('ready');
       }
@@ -186,6 +205,7 @@ function InvitationPreviewFrame({
     };
     window.addEventListener('message', receive);
     return () => {
+      window.clearTimeout(slowTimer);
       window.clearTimeout(timeout);
       window.removeEventListener('message', receive);
     };
@@ -197,35 +217,68 @@ function InvitationPreviewFrame({
         ref={iframeRef}
         src={INVITATION_PREVIEW_PATH}
         title="초대장 미리보기"
-        className="h-full w-full border-0"
+        // 준비 전에는 비워 둔 화면이 겹쳐 보이지 않게 감춘다.
+        className={
+          status === 'ready'
+            ? 'h-full w-full border-0'
+            : 'invisible h-full w-full border-0'
+        }
         aria-hidden={status !== 'ready'}
         tabIndex={status === 'ready' ? undefined : -1}
         allow="autoplay; clipboard-write; fullscreen"
       />
-      {status !== 'ready' && (
-        <PreviewFeedback
-          error={
-            status === 'error'
-              ? { message: '미리보기를 불러오지 못했어요.', onRetry }
-              : undefined
-          }
-        />
-      )}
+      {status !== 'ready' &&
+        (status === 'error' ? (
+          <PreviewFeedback
+            title="미리보기를 불러오지 못했어요."
+            description="네트워크가 느리거나 처음 여는 화면이라 시간이 걸렸어요. 잠시 뒤 다시 불러와 주세요."
+            onRetry={onRetry}
+            isError
+          />
+        ) : (
+          <PreviewFeedback
+            title="초대장을 준비하고 있어요."
+            description={
+              status === 'slow'
+                ? '처음 여는 화면이라 조금 오래 걸리고 있어요. 곧 표시돼요.'
+                : undefined
+            }
+            onRetry={status === 'slow' ? onRetry : undefined}
+          />
+        ))}
     </>
   );
 }
 
-function PreviewFeedback({ error }: { error?: PreviewLoadError }) {
+function PreviewFeedback({
+  title,
+  description,
+  onRetry,
+  isError = false,
+}: {
+  title: string;
+  description?: string;
+  onRetry?: () => void;
+  isError?: boolean;
+}) {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#faf9f6] px-6 text-center text-sm text-text-secondary">
-      <p role={error ? 'alert' : 'status'}>
-        {error?.message ?? '초대장을 준비하고 있어요.'}
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#faf9f6] px-6 text-center">
+      <p
+        role={isError ? 'alert' : 'status'}
+        className="text-sm font-semibold text-text-primary"
+      >
+        {title}
       </p>
-      {error && (
+      {description && (
+        <p className="break-keep text-[13px] leading-5 text-text-secondary">
+          {description}
+        </p>
+      )}
+      {onRetry && (
         <button
           type="button"
-          onClick={error.onRetry}
-          className="rounded-lg border border-neutral-200 bg-white px-5 py-2"
+          onClick={onRetry}
+          className="mt-1 rounded-lg border border-neutral-200 bg-white px-5 py-2 text-sm text-text-primary"
         >
           다시 불러오기
         </button>

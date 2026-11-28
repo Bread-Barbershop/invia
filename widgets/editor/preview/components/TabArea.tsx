@@ -30,11 +30,11 @@ function TabArea({
 
   return (
     <div className="flex min-w-0 items-center gap-2 px-3">
-      <ul className="flex min-w-0 flex-1 overflow-x-auto scrollbar-hide">
+      <ul className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1">
         {orderedCategories.map((items, index) => (
           <li
             key={index}
-            className={`w-18 shrink-0 h-11 cursor-pointer select-none flex-center gap-1 font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
+            className={`min-w-18 shrink-0 h-11 px-2 cursor-pointer select-none flex-center gap-1 whitespace-nowrap font-semibold text-sm ${active === items.english ? 'text-text-primary border-b' : 'text-text-secondary border-0'}`}
             onClick={() => tabClick(items.english)}
           >
             {items.korea}
