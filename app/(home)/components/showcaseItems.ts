@@ -104,12 +104,12 @@ export const showcaseItems = [
   { id: 'showcase-42', image: seventiethCover },
   { id: 'showcase-43', image: eightiethCover },
   { id: 'showcase-44', image: weddingLetterCover },
+  { id: 'showcase-52', image: chilsunCover },
   { id: 'showcase-45', image: gardenBrunchCover },
   { id: 'showcase-46', image: hotelPajamaCover },
   { id: 'showcase-47', image: whiteRibbonCover },
   { id: 'showcase-50', image: brunchShowerCover },
   { id: 'showcase-51', image: exhibitionCover },
-  { id: 'showcase-52', image: chilsunCover },
 ].map(item => {
   const invitation = getShowcaseInvitation(item.id)!;
   return {

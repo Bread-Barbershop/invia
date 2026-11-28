@@ -491,7 +491,6 @@ export const familyCelebrationCollection: ShowcaseInvitation[] = [
     sections: [
       {
         component: 'greeting',
-        title: '초대의 글',
       },
       {
         component: 'myFamily',
