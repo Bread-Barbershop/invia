@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, Home, LayoutGrid, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 
 import FooterPolicyLink from '@/features/session/components/FooterPolicyLink';
@@ -166,12 +166,29 @@ function EditorViewportGuard({ children }: { children: ReactNode }) {
 
   const shouldShowDesktopNotice =
     viewportWidth !== null && viewportWidth < DESKTOP_CONTENT_MIN_WIDTH;
+  const fitsEditorViewport =
+    viewportWidth !== null && viewportWidth >= DESKTOP_CONTENT_MIN_WIDTH;
+  // 휴대폰처럼 좁은 화면으로 처음 들어오면 편집기는 한 번도 마운트하지 않는다.
+  // 화면에 보이지 않는 초안 복원 다이얼로그(role=dialog)가 DOM에 남아
+  // 스크린리더에 읽히는 것을 막고, 필요 없는 편집기 초기화도 아끼기 위해서다.
+  // 데스크톱에서 창을 좁힌 경우에는 이미 쓰던 편집 상태를 잃지 않도록 유지한다.
+  const [hasMountedEditor, setHasMountedEditor] = useState(false);
 
   useEffect(() => {
     if (!shouldShowDesktopNotice) return;
 
     hideAllCallouts();
   }, [hideAllCallouts, shouldShowDesktopNotice]);
+
+  useEffect(() => {
+    if (!fitsEditorViewport) return;
+
+    // 한 번 데스크톱에서 편집기를 연 뒤에는 창을 좁혀도 쓰던 상태를 잃지 않도록 기억한다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasMountedEditor(true);
+  }, [fitsEditorViewport]);
+
+  const shouldMountEditor = fitsEditorViewport || hasMountedEditor;
 
   return (
     <>
@@ -180,7 +197,7 @@ function EditorViewportGuard({ children }: { children: ReactNode }) {
         inert={shouldShowDesktopNotice ? true : undefined}
         aria-hidden={shouldShowDesktopNotice ? true : undefined}
       >
-        {children}
+        {shouldMountEditor ? children : null}
       </div>
       {shouldShowDesktopNotice && (
         <EditorDesktopNotice viewportWidth={viewportWidth} />

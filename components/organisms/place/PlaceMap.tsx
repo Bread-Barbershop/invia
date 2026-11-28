@@ -9,6 +9,27 @@ type NaverMap = naver.maps.Map;
 type Lng = number;
 type Lat = number;
 
+const NAVER_MARKER_AREA_SELECTOR = 'map[name^="nmarker"] area';
+
+/**
+ * 네이버 지도는 마커를 <img usemap>과 <map><area href="#">로 그린다.
+ * 그 area는 경위도만 안내하는 빈 링크라 키보드·스크린리더에 의미 없는
+ * 포커스 대상이 된다. 장소 주소는 이미 본문에 글로 있으므로, 마커 링크는
+ * 탭 순서와 읽기 순서에서 빼 두자.
+ */
+export function removeNaverMarkerAreasFromTabOrder(container: HTMLElement) {
+  container
+    .querySelectorAll<HTMLAreaElement>(NAVER_MARKER_AREA_SELECTOR)
+    .forEach(area => {
+      if (area.getAttribute('tabindex') !== '-1') {
+        area.setAttribute('tabindex', '-1');
+      }
+      if (area.getAttribute('aria-hidden') !== 'true') {
+        area.setAttribute('aria-hidden', 'true');
+      }
+    });
+}
+
 export function PlaceMap({
   lng,
   lat,
@@ -128,6 +149,26 @@ export function PlaceMap({
   }, [lng, lat, showMapError, updateMapStatus]);
 
   useEffect(() => disposeMap, [disposeMap]);
+
+  useEffect(() => {
+    const container = mapRef.current;
+    if (!container) return;
+
+    removeNaverMarkerAreasFromTabOrder(container);
+
+    // 지도는 타일과 마커를 비동기로 다시 그리므로 새로 생긴 마커도 같은 규칙을 적용한다.
+    const observer = new MutationObserver(() => {
+      removeNaverMarkerAreasFromTabOrder(container);
+    });
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['usemap', 'name'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const toggleLock = useCallback(() => {
     setIsLocked(prev => !prev);

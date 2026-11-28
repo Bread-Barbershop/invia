@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { EditorBlock } from '@/shared/types/block';
 
 import { Place } from './Place';
-import { PlaceMap } from './PlaceMap';
+import { PlaceMap, removeNaverMarkerAreasFromTabOrder } from './PlaceMap';
 
 const mockUpdateBlock = jest.fn();
 
@@ -53,6 +53,20 @@ describe('PlaceMap', () => {
   afterEach(() => {
     delete (window as unknown as { naver?: unknown }).naver;
     jest.restoreAllMocks();
+  });
+
+  it('네이버 지도 마커의 빈 링크(area)를 탭·읽기 순서에서 뺀다', () => {
+    const container = document.createElement('div');
+    container.innerHTML =
+      '<img usemap="#nmarker-1"><map name="nmarker-1"><area href="#" alt="마커의 경위도는 126.97,37.55 입니다."></map>';
+
+    removeNaverMarkerAreasFromTabOrder(container);
+
+    expect(container.querySelector('area')).toHaveAttribute('tabindex', '-1');
+    expect(container.querySelector('area')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
   });
 
   it('does not render lock button when locked is false', () => {

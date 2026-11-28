@@ -36,6 +36,7 @@ import { usesDarkInvitationCards } from '@/shared/utils/invitationBackgroundColo
 import { resolveInvitationEffects } from '@/shared/utils/invitationEffects';
 import { MainPosterPreview } from '@/widgets/mainPoster/components/MainPosterPreview';
 
+import EmptyCanvasGuide from './components/EmptyCanvasGuide';
 import { SortablePreviewBlock } from './components/SortablePreviewBlock';
 import styles from './Preview.module.css';
 import { previewTitleVariants } from './previewTitle.style';
@@ -184,21 +185,12 @@ function Preview({
           className="overflow-y-auto h-full w-full box-border scrollbar-hide"
         >
           {block.length === 0 && !selectedId && (
-            <div className="absolute inset-0 z-50 flex-center flex-col gap-4 bg-white px-6 text-center font-pretendard">
-              <p className="text-base font-semibold">
-                포스터를 고른 뒤 페이지를 추가해 초대장을 꾸며보세요.
-              </p>
-              <button
-                type="button"
-                className="min-h-11 cursor-pointer rounded-lg bg-bg-plain px-5 text-sm font-semibold text-white hover:bg-[#202020] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                onClick={() => {
-                  selectedBlock('mainPoster');
-                  setIsEdit(false);
-                }}
-              >
-                포스터 선택하기
-              </button>
-            </div>
+            <EmptyCanvasGuide
+              onChoosePoster={() => {
+                selectedBlock('mainPoster');
+                setIsEdit(false);
+              }}
+            />
           )}
           <div className="relative isolate flex min-h-full flex-col font-lineseed">
             <InvitationBackgroundTexture

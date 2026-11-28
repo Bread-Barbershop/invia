@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
 import NoticeConfirmButton from '@/components/atoms/button/NoticeConfirmButton';
+import DashboardNavigation from '@/features/session/components/DashboardNavigation';
+import HomeButton from '@/features/session/components/HomeButton';
 import { useShowcasePreview } from '@/features/showcase/components/ShowcasePreviewProvider';
 import homeBackgroundImage from '@/shared/assets/images/home/home-background.png';
 import { DESKTOP_CONTENT_MIN_WIDTH } from '@/shared/config/layout';
@@ -120,6 +122,12 @@ function MobileHomeHero() {
           style={{ backgroundImage: `url(${homeBackgroundImage.src})` }}
         />
 
+        {/* 다른 화면과 같은 헤더를 두어 모바일 홈에서도 메뉴로 이동할 수 있게 한다. */}
+        <header className="absolute inset-x-0 top-0 z-20 flex h-14 items-center justify-between pl-4 pr-4">
+          <HomeButton className="px-0" />
+          <DashboardNavigation responsive />
+        </header>
+
         <div className="flex h-full w-full max-w-[335px] flex-col items-center justify-center overflow-visible">
           <section
             className="
@@ -136,12 +144,12 @@ function MobileHomeHero() {
                 Signature Invitation
               </p>
               <h1 className="select-none whitespace-nowrap text-[32px] font-black leading-[1.12] tracking-[-0.01em]">
-                우리들의 이야기
+                우리의 이야기
                 <br />
-                첫시작은 초대장으로
+                첫 시작은 초대장으로
               </h1>
-              <p className="select-none whitespace-nowrap text-[12px] font-medium leading-none tracking-[-0.01em]">
-                폰트·컬러·레이아웃까지, 우리만의 시그니처로
+              <p className="max-w-full select-none break-keep text-[12px] font-medium leading-[1.5] tracking-[-0.01em]">
+                폰트·컬러·레이아웃까지, 우리만의 시그니처로 마무리해요.
               </p>
             </div>
           </section>
