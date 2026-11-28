@@ -246,7 +246,7 @@ describe('갤러리 캐러셀 기능 및 필름 효과 테스트', () => {
       eventHandlers['scroll']?.forEach(cb => cb());
       dispatchPointerEvent(window, 'pointermove', { clientX: 20 });
 
-      const slideButton = screen.getByRole('button', { name: 'slide-0' });
+      const slideButton = screen.getByRole('button', { name: '갤러리 사진 1 / 2 크게 보기' });
       fireEvent.click(slideButton, { detail: 1 });
 
       expect(mockImageClick).toHaveBeenCalledWith(0);
@@ -264,7 +264,7 @@ describe('갤러리 캐러셀 기능 및 필름 효과 테스트', () => {
         />
       );
 
-      const slideButton = screen.getByRole('button', { name: 'slide-0' });
+      const slideButton = screen.getByRole('button', { name: '갤러리 사진 1 / 2 크게 보기' });
       dispatchPointerEvent(slideButton, 'pointerdown', { clientX: 0 });
       dispatchPointerEvent(window, 'pointermove', { clientX: 12 });
       dispatchPointerEvent(window, 'pointerup', { clientX: 12 });
@@ -289,7 +289,7 @@ describe('갤러리 캐러셀 기능 및 필름 효과 테스트', () => {
         />
       );
 
-      const slideButton = screen.getByRole('button', { name: 'slide-0' });
+      const slideButton = screen.getByRole('button', { name: '갤러리 사진 1 / 2 크게 보기' });
       fireEvent.click(slideButton, { detail: 1 });
 
       expect(mockImageClick).toHaveBeenCalledWith(0);

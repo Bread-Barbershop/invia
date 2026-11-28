@@ -9,6 +9,10 @@ import { useGallerySwipeClick } from '../hooks/useGallerySwipeClick';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { GalleryTemplateProps } from '../types/galleryType';
 import { createInfiniteSlides } from '../utils/createInfiniteSlides';
+import {
+  GALLERY_PHOTO_DECORATIVE_ALT,
+  galleryPhotoAriaLabel,
+} from '../utils/galleryPhotoLabel';
 
 import { GalleryImage } from './GalleryImage';
 
@@ -67,6 +71,10 @@ function GalleryType4({
             <div key={i} className="flex-[0_0_50%] shrink-0">
               <div
                 role="button"
+                aria-label={galleryPhotoAriaLabel(
+                  i % preview.length,
+                  preview.length
+                )}
                 data-entrance-side={i % 2 === 0 ? 'left' : 'right'}
                 tabIndex={i < preview.length ? 0 : -1}
                 aria-hidden={i >= preview.length ? true : undefined}
@@ -87,7 +95,7 @@ function GalleryType4({
               >
                 <GalleryImage
                   src={src}
-                  alt={`slide-${i % preview.length}`}
+                  alt={GALLERY_PHOTO_DECORATIVE_ALT}
                   className="object-cover"
                 />
               </div>

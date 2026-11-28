@@ -164,15 +164,30 @@ describe('갤러리 템플릿 이미지 로딩 속성', () => {
   });
 
   it('캐러셀(galleryType1)도 지연 로딩 + 비동기 디코딩을 사용한다', () => {
-    render(
+    const { container } = render(
       <GalleryType1 preview={preview} ratio="1:1" imageClick={jest.fn()} />
     );
 
-    const images = screen.getAllByRole('img');
+    // 사진 카드는 접근성 이름을 버튼이 가지고, 안쪽 이미지는 장식용(alt="")이다.
+    const images = container.querySelectorAll('img');
     expect(images.length).toBeGreaterThanOrEqual(preview.length);
     images.forEach(image => {
       expect(image).toHaveAttribute('loading', 'lazy');
       expect(image).toHaveAttribute('decoding', 'async');
+    });
+  });
+
+  it('캐러셀 사진 버튼은 사진마다 다른 접근성 이름을 가진다', () => {
+    render(
+      <GalleryType1 preview={preview} ratio="1:1" imageClick={jest.fn()} />
+    );
+
+    preview.forEach((_, index) => {
+      expect(
+        screen.getByRole('button', {
+          name: `갤러리 사진 ${index + 1} / ${preview.length} 크게 보기`,
+        })
+      ).toBeInTheDocument();
     });
   });
 });

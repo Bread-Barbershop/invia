@@ -25,7 +25,7 @@ describe('투명도 유지가 켜진 색상 선택기', () => {
       expect(screen.getByText(label)).toBeVisible();
 
       fireEvent.click(
-        screen.getByRole('button', { name: 'Select color #FFFFFF' })
+        screen.getByRole('button', { name: '색상 선택 #FFFFFF (화이트)' })
       );
       expect(onChange).toHaveBeenLastCalledWith({
         hex: '#FFFFFF',
